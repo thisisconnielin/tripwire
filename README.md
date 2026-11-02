@@ -53,9 +53,13 @@ ignore: ["^Join \\d+ teams", "cookie"]   # regexes stripped before diffing
 min_lines: 2                              # skip changes smaller than this
 ```
 
-## Roadmap
+## It maintains itself
 
-See [ROADMAP.md](ROADMAP.md). Stakeout grows a little every day.
+Every night `.github/workflows/daily-dev.yml` runs Claude (via [claude-code-action](https://github.com/anthropics/claude-code-action)) on this repo.
+It fixes broken scans and noisy pages first, then ships the next item from [ROADMAP.md](ROADMAP.md), with tests, following the rules in [CLAUDE.md](CLAUDE.md).
+Want something specific? Actions → *Daily dev (Claude)* → Run workflow → type the task.
+
+Needs a `CLAUDE_CODE_OAUTH_TOKEN` secret (`claude setup-token`). `setup.sh` does the whole one-time setup.
 
 ## License
 

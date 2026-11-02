@@ -1,0 +1,46 @@
+name: Daily dev (Claude)
+
+# Every night, Claude picks one improvement or bug fix, tests it, and pushes to main.
+# Runs 30 min before the nightly scan so the scan uses the new code.
+on:
+  schedule:
+    - cron: "30 4 * * *"   # 04:30 UTC ≈ 8:30pm PT
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Optional: tell Claude what to do today (otherwise it picks from ROADMAP.md)"
+        required: false
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: stakeout
+  cancel-in-progress: false
+
+jobs:
+  dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            You are the maintainer of Stakeout. Follow CLAUDE.md exactly.
+            Today's date (UTC): run `date -u +%F`.
+            Commit author: ${{ vars.COMMIT_AUTHOR || 'Connie Lin <conniew0319@gmail.com>' }}
+            Special request for today (may be empty): ${{ github.event.inputs.task }}
+          claude_args: |
+            --max-turns 60
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebFetch,Bash(python:*),Bash(python3:*),Bash(pip:*),Bash(git:*),Bash(date:*),Bash(ls:*),Bash(cat:*),Bash(curl:*)"

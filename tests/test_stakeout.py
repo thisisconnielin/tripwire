@@ -30,6 +30,16 @@ class TestStakeout(unittest.TestCase):
     def test_moved_lines_ignored(self):
         self.assertEqual(s.diff_lines(["a", "b", "c"], ["c", "a", "b"]), ([], []))
 
+    def test_disabled_pages_skipped(self):
+        import tempfile, os
+        cfg = "competitors:\n  - name: A\n    pages:\n      - { label: x, url: https://a.com }\n      - { label: y, url: https://a.com/y, enabled: false }\n"
+        with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False) as f:
+            f.write(cfg)
+        try:
+            self.assertEqual([t["label"] for t in s.load_targets(f.name)], ["x"])
+        finally:
+            os.unlink(f.name)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -174,6 +174,8 @@ def load_targets(path):
     targets = []
     for comp in cfg.get("competitors", []):
         for page in comp.get("pages", []):
+            if page.get("enabled", True) is False or comp.get("enabled", True) is False:
+                continue
             label = page.get("label", "page")
             targets.append({
                 "competitor": comp["name"],
