@@ -23,28 +23,28 @@
 
 **[business](https://www.microsoft.com/en-us/microsoft-365/copilot/business)** `messaging`
 
-+1 line, −1 line. New: “This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1”
++1 line, −1 line. New: “This is the Trace Id: f39c0eef788def0346e90c2dd3f3fa6c”
 
 ```diff
-+ This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1
++ This is the Trace Id: f39c0eef788def0346e90c2dd3f3fa6c
 ```
 
 ```diff
-- This is the Trace Id: e9cda4134ee1d89ad3bc2a44fdcabb90
+- This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1
 ```
 
 ### Microsoft Teams
 
 **[plans](https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options)** `messaging`
 
-+1 line, −1 line. New: “This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022”
++1 line, −1 line. New: “This is the Trace Id: db940b20a9876724a8263b06cc827ac4”
 
 ```diff
-+ This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022
++ This is the Trace Id: db940b20a9876724a8263b06cc827ac4
 ```
 
 ```diff
-- This is the Trace Id: 8bc7ca0604330b7e36530016e597ec68
+- This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022
 ```
 
 ## Not readable

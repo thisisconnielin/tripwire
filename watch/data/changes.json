@@ -4,22 +4,44 @@
     "tags": [
       "messaging"
     ],
-    "summary": "+1 line, −1 line. New: “This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1”",
+    "summary": "+1 line, −1 line. New: “This is the Trace Id: f39c0eef788def0346e90c2dd3f3fa6c”",
     "added": [
-      "This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1"
+      "This is the Trace Id: f39c0eef788def0346e90c2dd3f3fa6c"
     ],
     "removed": [
-      "This is the Trace Id: e9cda4134ee1d89ad3bc2a44fdcabb90"
+      "This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1"
     ],
     "added_total": 1,
     "removed_total": 1,
     "id": "2026-11-02-microsoft-copilot-business",
-    "date": "2026-11-02T23:23:00+00:00",
+    "date": "2026-11-02T23:23:31+00:00",
     "competitor": "Microsoft Copilot",
     "group": "platform",
     "label": "business",
     "url": "https://www.microsoft.com/en-us/microsoft-365/copilot/business",
     "slug": "microsoft-copilot-business"
+  },
+  {
+    "type": "change",
+    "tags": [
+      "messaging"
+    ],
+    "summary": "+1 line, −1 line. New: “This is the Trace Id: db940b20a9876724a8263b06cc827ac4”",
+    "added": [
+      "This is the Trace Id: db940b20a9876724a8263b06cc827ac4"
+    ],
+    "removed": [
+      "This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022"
+    ],
+    "added_total": 1,
+    "removed_total": 1,
+    "id": "2026-11-02-microsoft-teams-plans",
+    "date": "2026-11-02T23:23:31+00:00",
+    "competitor": "Microsoft Teams",
+    "group": "indirect",
+    "label": "plans",
+    "url": "https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options",
+    "slug": "microsoft-teams-plans"
   },
   {
     "type": "change",
@@ -43,28 +65,6 @@
     "label": "pricing",
     "url": "https://slack.com/pricing",
     "slug": "slack-pricing"
-  },
-  {
-    "type": "change",
-    "tags": [
-      "messaging"
-    ],
-    "summary": "+1 line, −1 line. New: “This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022”",
-    "added": [
-      "This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022"
-    ],
-    "removed": [
-      "This is the Trace Id: 8bc7ca0604330b7e36530016e597ec68"
-    ],
-    "added_total": 1,
-    "removed_total": 1,
-    "id": "2026-11-02-microsoft-teams-plans",
-    "date": "2026-11-02T23:23:00+00:00",
-    "competitor": "Microsoft Teams",
-    "group": "indirect",
-    "label": "plans",
-    "url": "https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options",
-    "slug": "microsoft-teams-plans"
   },
   {
     "type": "baseline",
