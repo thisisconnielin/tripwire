@@ -1,10 +1,10 @@
 name: Daily dev (Claude)
 
-# Every night, Claude picks one improvement or bug fix, tests it, and pushes to main.
+# When ENABLE_DAILY_DEV=true, Claude picks an improvement, tests it, and pushes to main.
 # Runs 30 min before the nightly scan so the scan uses the new code.
 on:
   schedule:
-    - cron: "30 4 * * *"   # 04:30 UTC ≈ 8:30pm PT
+    - cron: "30 4 * * *"   # 04:30 UTC = previous day 8:30pm PST / 9:30pm PDT
   workflow_dispatch:
     inputs:
       task:
@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   dev:
+    if: vars.ENABLE_DAILY_DEV == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -39,7 +40,7 @@ jobs:
           prompt: |
             You are the maintainer of Stakeout. Follow CLAUDE.md exactly.
             Today's date (UTC): run `date -u +%F`.
-            Commit author: ${{ vars.COMMIT_AUTHOR || 'Connie Lin <conniew0319@gmail.com>' }}
+            Commit author: ${{ vars.COMMIT_AUTHOR || 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' }}
             Special request for today (may be empty): ${{ github.event.inputs.task }}
           claude_args: |
             --max-turns 60
