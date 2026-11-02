@@ -1,86 +1,96 @@
-# 🔭 Stakeout
+# Tripwire
 
-**Know what your competitors changed — every day, for free.**
+**A Claude skill that tells you what your competitors changed, and what to do about it.**
 
-Stakeout watches competitor pages (homepage, pricing, changelog, careers…), takes a snapshot every night, diffs it against yesterday, and logs what changed: price moves, new features, rewritten headlines, new roles. It runs on GitHub Actions and can publish a dashboard on GitHub Pages. Scanning needs no AI subscription; optional Claude maintenance uses your authorized Claude plan.
+Ask Claude *"what did our competitors change this week?"* Tripwire snapshots their pages (home,
+pricing, changelog, careers…), diffs them against the last scan, and Claude turns the diff into a
+short GTM readout: top moves, why they matter, what to do next.
 
-Built for startup GTM teams who'd rather not pay $$$/seat for Klue or Visualping just to find out a competitor raised prices.
-
-## How it works
+No dashboard, no API key, no per-seat pricing. Just Markdown reports in your repo.
 
 ```
-targets.yml ──► GitHub Action (nightly) ──► fetch page ──► readable text ──► diff vs. yesterday
-                                                                                  │
-                     docs/ dashboard (GitHub Pages) ◄── docs/data/changes.json ◄──┘
+watch/targets.yml ──► tripwire.py scan ──► readable text ──► diff vs. last scan
+                                                                   │
+            Claude GTM readout ◄── watch/reports/latest.md ◄───────┘
 ```
 
 - Strips scripts, styles, timestamps and © lines so you only see real changes.
 - Ignores lines that merely moved around.
-- Tags each change: `pricing` · `product` · `hiring` · `messaging`.
-- Optional: add an `ANTHROPIC_API_KEY` repo secret and each change gets a one-sentence GTM read ("Raised Pro from $25 to $29/seat and added an Enterprise tier with SSO").
+- Tags each change: `pricing` · `product` · `hiring` · `messaging`, and lists pricing moves first.
+- Optional: set `ANTHROPIC_API_KEY` and each change gets a one-sentence summary in the report.
 
-## Use it
+## Install the skill
 
-1. **Fork** this repo (or use it as a template).
-2. Edit **`targets.yml`**:
-   ```yaml
-   competitors:
-     - name: Acme
-       pages:
-         - { label: pricing,   url: https://acme.com/pricing }
-         - { label: changelog, url: https://acme.com/changelog }
-   ```
-3. For a public dashboard, choose **Settings → Pages → GitHub Actions** and add the repository variable **`ENABLE_PUBLIC_DASHBOARD=true`**. Private repositories default to no dashboard deployment; Pages support for private repositories depends on your GitHub plan. Publishing a dashboard exposes its `docs/` content, including the watch list and scan results.
-4. **Actions** → *Stakeout scan* → **Run workflow**. The first run saves a baseline; changes show up from the next run.
-
-Scans run nightly at 05:00 UTC: 9pm PST / 10pm PDT on the previous calendar day. Change the cron in `.github/workflows/stakeout.yml`.
-
-### One-time setup from a local checkout
-
-Commit your local changes, sign in with `gh auth login`, then run:
+Copy `skills/tripwire/` into your Claude skills folder:
 
 ```bash
-bash setup.sh                         # private repo, scans only
-REPO_VISIBILITY=public bash setup.sh  # public repo and public dashboard
+git clone https://github.com/thisisconnielin/tripwire tripwire-src
+cp -R tripwire-src/skills/tripwire ~/.claude/skills/          # for you, every project
+# or: cp -R tripwire-src/skills/tripwire .claude/skills/       # for one project
+pip install pyyaml
 ```
 
-`REPO=owner/name` selects another repository. Setup never changes an existing repository's visibility. `ENABLE_PUBLIC_DASHBOARD=true|false` explicitly controls dashboard deployment; it defaults to false for private repositories and true for public repositories. The scanner uploads and deploys the dashboard in the same workflow, so new scan data publishes even though its commit uses `GITHUB_TOKEN`.
+Then in Claude Code: *"set up tripwire for Acme and Globex"* → it creates `watch/targets.yml`.
+After that: *"what did competitors change?"*, *"weekly competitor digest"*, *"did Acme change pricing?"*
 
-Setup defaults to no Claude credential provisioning and leaves daily development disabled. It reports a failure if pushing, Pages configuration, or the initial scan dispatch fails. Successful setup means the scan was dispatched; check Actions to confirm the scan and any Pages deployment succeeded.
-
-### Run locally
+## Run it by hand
 
 ```bash
-pip install pyyaml
-python stakeout.py                 # scan everything
-python stakeout.py --only Acme     # one competitor
+python skills/tripwire/scripts/tripwire.py init               # create watch/targets.yml
+python skills/tripwire/scripts/tripwire.py scan               # scan everything → watch/reports/latest.md
+python skills/tripwire/scripts/tripwire.py scan --only Acme   # one competitor
+python skills/tripwire/scripts/tripwire.py report --days 7    # 7-day digest
 python -m unittest discover tests
 ```
 
-## Tuning noise
+The first scan of a page saves a baseline; changes show from the next scan.
 
-Any level of `targets.yml` (global, competitor, page) accepts:
+### Watch list
+
+```yaml
+competitors:
+  - name: Acme
+    group: direct
+    pages:
+      - { label: pricing,   url: https://acme.com/pricing }
+      - { label: changelog, url: https://acme.com/changelog }
+```
+
+Any level (global, competitor, page) accepts:
 
 ```yaml
 ignore: ["^Join \\d+ teams", "cookie"]   # regexes stripped before diffing
 min_lines: 2                              # skip changes smaller than this
+enabled: false                            # pause a page or competitor
 ```
+
+## Automatic scans on GitHub
+
+`.github/workflows/scan.yml` scans `watch/targets.yml` nightly at 05:00 UTC (9pm PST / 10pm PDT the
+previous day), commits `watch/reports/<date>.md`, and on Friday nights adds a 7-day digest
+`watch/reports/week-<date>.md`. It also rescans whenever `watch/targets.yml` changes on `main`.
+
+This repo watches Teamily's competitors: see [`watch/reports/latest.md`](watch/reports/latest.md).
 
 ## It maintains itself
 
-After explicit enablement, `.github/workflows/daily-dev.yml` runs Claude (via [claude-code-action](https://github.com/anthropics/claude-code-action)) on this repo at 04:30 UTC: 8:30pm PST / 9:30pm PDT on the previous calendar day.
-It fixes broken scans and noisy pages first, then ships the next item from [ROADMAP.md](ROADMAP.md), with tests, following the rules in [CLAUDE.md](CLAUDE.md).
-Want something specific? Actions → *Daily dev (Claude)* → Run workflow → type the task.
+With the repository variable `ENABLE_DAILY_DEV=true` and a `CLAUDE_CODE_OAUTH_TOKEN` secret, Claude
+(via [claude-code-action](https://github.com/anthropics/claude-code-action)) works on this repo:
 
-This requires a `CLAUDE_CODE_OAUTH_TOKEN` secret and the repository variable `ENABLE_DAILY_DEV=true`. Both scheduled and manual Claude jobs stay disabled until that variable is true. Company Terminal sign-in alone does not authorize copying the company credential to GitHub.
+| Workflow | When (PST) | What |
+|---|---|---|
+| Daily dev | 8:30am, 2:30pm, 8:30pm | one small tested fix or feature per run |
+| Weekly release | Friday 10am | one bigger feature in 3–6 commits, `VERSION` bump, git tag |
 
-After company approval, run the separate, interactive credential step:
+It fixes broken scans and noisy pages first, then works through [ROADMAP.md](ROADMAP.md), following
+[CLAUDE.md](CLAUDE.md). Want something specific? Actions → *Daily dev (Claude)* → Run workflow → type the task.
 
-```bash
-PROVISION_CLAUDE_SECRET=true ENABLE_DAILY_DEV=true bash setup.sh
-```
+One-time setup from a local checkout: `bash setup.sh` (see `bash setup.sh --help`).
 
-Use the same `REPO_VISIBILITY` and dashboard flags as your initial setup. The script prefers `claude-work` when available, otherwise uses `claude`; it runs `setup-token`, then asks you to paste the resulting token into a GitHub Actions secret. It never copies saved Terminal credentials automatically. Claude maintenance consumes the authorized account's usage. To stop it, set `ENABLE_DAILY_DEV=false` in repository variables. The optional scanner API key is separate and is not needed for scans or subscription-based maintenance.
+## Credits
+
+Built by [Connie](https://github.com/thisisconnielin) and Claude. Every commit is co-authored by
+Claude, from the first version to the daily runs.
 
 ## License
 

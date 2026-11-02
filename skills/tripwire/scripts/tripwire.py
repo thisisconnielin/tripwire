@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Stakeout: watch competitor pages, diff them daily, log what changed.
+"""Tripwire: watch competitor pages, diff them, report what changed.
 
-Run:  python stakeout.py               (scan every target in targets.yml)
-      python stakeout.py --only Acme   (scan one target by name)
+Run:  python tripwire.py scan                  (scan every page in watch/targets.yml)
+      python tripwire.py scan --only Acme      (scan one competitor)
+      python tripwire.py report --days 7       (Markdown digest of the last 7 days)
+      python tripwire.py init                  (create watch/targets.yml from the example)
 
-Outputs:
+Everything lives next to the config file (default watch/targets.yml):
   snapshots/<slug>.txt      latest readable text of each page
-  docs/data/changes.json    feed of change events (newest first)
-  docs/data/status.json     last run + per-target health
+  data/changes.json         feed of change events (newest first)
+  data/status.json          last run + per-page health
+  reports/<date>.md         Markdown report of each scan (reports/latest.md = newest)
 """
 import argparse, datetime as dt, difflib, json, os, re, sys, urllib.request
 from html.parser import HTMLParser
@@ -15,14 +18,13 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent
-SNAP_DIR = ROOT / "snapshots"
-DATA_DIR = ROOT / "docs" / "data"
+SKILL_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_CONFIG = Path("watch") / "targets.yml"
 MAX_EVENTS = 1000
 MAX_LINES_STORED = 40  # per side (added / removed) in the feed
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/126.0 Safari/537.36 Stakeout/0.1")
+      "(KHTML, like Gecko) Chrome/126.0 Safari/537.36 Tripwire/0.2")
 
 # Lines that change on every load and mean nothing.
 DEFAULT_IGNORE = [
@@ -138,7 +140,7 @@ def ai_summary(name, url, added, removed):
         "If it's trivial noise, start with 'Minor:'. No preamble."
     )
     body = json.dumps({
-        "model": os.environ.get("STAKEOUT_MODEL", "claude-haiku-4-5"),
+        "model": os.environ.get("TRIPWIRE_MODEL", "claude-haiku-4-5"),
         "max_tokens": 120,
         "messages": [{"role": "user", "content": prompt}],
     }).encode()
@@ -190,9 +192,10 @@ def load_targets(path):
 
 
 # ---------------------------------------------------------------- main
-def scan(targets, now):
-    changes = load_json(DATA_DIR / "changes.json", [])
-    status = load_json(DATA_DIR / "status.json", {})
+def scan(targets, now, workdir):
+    snap_dir, data_dir = workdir / "snapshots", workdir / "data"
+    changes = load_json(data_dir / "changes.json", [])
+    status = load_json(data_dir / "status.json", {})
     prev_targets = {t["slug"]: t for t in status.get("targets", [])}
     new_events, health = [], []
 
@@ -214,7 +217,7 @@ def scan(targets, now):
             continue
         h.update(ok=True, error=None, title=title, lines=len(lines))
 
-        snap = SNAP_DIR / f"{t['slug']}.txt"
+        snap = snap_dir / f"{t['slug']}.txt"
         if not snap.exists():
             ev = {"type": "baseline", "summary": f"Started watching. {len(lines)} lines captured.",
                   "tags": ["baseline"], "added": [], "removed": []}
@@ -235,31 +238,131 @@ def scan(targets, now):
             print(f"  ✓ {ev['type']}: {ev['summary']}")
         else:
             print("  · no change")
-        SNAP_DIR.mkdir(exist_ok=True)
+        snap_dir.mkdir(parents=True, exist_ok=True)
         snap.write_text("\n".join(lines) + "\n")
         health.append(h)
 
     # Re-running on the same day replaces that day's event for the page.
     ids = {e["id"] for e in new_events}
     changes = (new_events + [e for e in changes if e["id"] not in ids])[:MAX_EVENTS]
-    save_json(DATA_DIR / "changes.json", changes)
-    save_json(DATA_DIR / "status.json", {"last_run": now, "targets": health})
+    save_json(data_dir / "changes.json", changes)
+    save_json(data_dir / "status.json", {"last_run": now, "targets": health})
+    write_report(workdir, render_report(changes, {"last_run": now, "targets": health}, now, days=1),
+                 f"{now[:10]}.md")
     real = [e for e in new_events if e["type"] == "change"]
     print(f"\nDone. {len(real)} change(s), {len(new_events) - len(real)} baseline(s), "
           f"{sum(not h['ok'] for h in health)} error(s).")
     return real
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--config", default=str(ROOT / "targets.yml"))
-    ap.add_argument("--only", help="scan only this competitor name")
-    args = ap.parse_args()
-    targets = load_targets(args.config)
+# ---------------------------------------------------------------- reports
+MAX_REPORT_LINES = 8  # per side, per change
+
+
+def _quote(line):
+    line = line.replace("|", "\\|")
+    return line if len(line) <= 160 else line[:157] + "…"
+
+
+def render_report(changes, status, now, days=1):
+    """Markdown report of changes in the `days` days up to `now`, plus scan health."""
+    end = dt.datetime.fromisoformat(now)
+    start = end - dt.timedelta(days=days)
+    recent = [e for e in changes if start < dt.datetime.fromisoformat(e["date"]) <= end]
+    real = [e for e in recent if e["type"] == "change"]
+    baselines = [e for e in recent if e["type"] == "baseline"]
+    targets = status.get("targets", [])
+    broken = [t for t in targets if not t.get("ok")]
+
+    title = f"Tripwire report: {now[:10]}" if days == 1 else \
+        f"Tripwire digest: {start.date().isoformat()} to {now[:10]}"
+    out = [f"# {title}", "",
+           f"{len(targets)} pages watched · **{len(real)} change{'s' * (len(real) != 1)}** · "
+           f"{len(targets) - len(broken)} OK · {len(broken)} not readable", ""]
+
+    out += ["## What changed", ""]
+    if not real:
+        out += ["No changes." + (" New pages get a baseline first; changes show from the next scan."
+                                 if baselines else ""), ""]
+    by_comp = {}
+    for e in real:
+        by_comp.setdefault(e["competitor"], []).append(e)
+    # Pricing moves first, then the rest, each group by competitor name.
+    order = sorted(by_comp, key=lambda c: (not any("pricing" in e["tags"] for e in by_comp[c]), c.lower()))
+    for comp in order:
+        out += [f"### {comp}", ""]
+        for e in by_comp[comp]:
+            tags = " ".join(f"`{t}`" for t in e["tags"])
+            day = "" if days == 1 else f" ({e['date'][:10]})"
+            out += [f"**[{e['label']}]({e['url']})**{day} {tags}", "", e["summary"], ""]
+            for sign, key in (("+", "added"), ("-", "removed")):
+                lines = e.get(key, [])
+                if not lines:
+                    continue
+                out.append("```diff")
+                out += [f"{sign} {_quote(l)}" for l in lines[:MAX_REPORT_LINES]]
+                more = e.get(f"{key}_total", len(lines)) - min(len(lines), MAX_REPORT_LINES)
+                if more > 0:
+                    out.append(f"{sign} … {more} more")
+                out += ["```", ""]
+
+    if broken:
+        out += ["## Not readable", "", "| Competitor | Page | Problem |", "|---|---|---|"]
+        out += [f"| {t['competitor']} | [{t['label']}]({t['url']}) | {_quote(t.get('error') or 'unknown')} |"
+                for t in broken]
+        out.append("")
+    if baselines:
+        out += ["## Started watching", ""]
+        out += [f"- {e['competitor']} · [{e['label']}]({e['url']})" for e in baselines]
+        out.append("")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def write_report(workdir, text, name):
+    rdir = workdir / "reports"
+    rdir.mkdir(parents=True, exist_ok=True)
+    (rdir / name).write_text(text)
+    (rdir / "latest.md").write_text(text)
+    return rdir / name
+
+
+# ---------------------------------------------------------------- main
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Watch competitor pages and report what changed.")
+    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init"])
+    ap.add_argument("--config", default=os.environ.get("TRIPWIRE_CONFIG", str(DEFAULT_CONFIG)),
+                    help="watch list (default: watch/targets.yml); data is stored next to it")
+    ap.add_argument("--only", help="scan: only this competitor name")
+    ap.add_argument("--days", type=int, default=7, help="report: how many days to cover (default 7)")
+    ap.add_argument("--out", help="report: file name inside reports/ (default: printed only)")
+    args = ap.parse_args(argv)
+    config = Path(args.config)
+    workdir = config.parent
+    now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+
+    if args.command == "init":
+        if config.exists():
+            print(f"{config} already exists; edit it to change what you watch.")
+            return
+        config.parent.mkdir(parents=True, exist_ok=True)
+        config.write_text((SKILL_DIR / "targets.example.yml").read_text())
+        print(f"Created {config}. Add your competitors, then run: python {Path(__file__).name} scan")
+        return
+
+    if args.command == "report":
+        text = render_report(load_json(workdir / "data" / "changes.json", []),
+                             load_json(workdir / "data" / "status.json", {}), now, days=args.days)
+        if args.out:
+            print(f"Wrote {write_report(workdir, text, args.out)}")
+        else:
+            print(text)
+        return
+
+    targets = load_targets(config)
     if args.only:
         targets = [t for t in targets if t["competitor"].lower() == args.only.lower()]
-    now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
-    real = scan(targets, now)
+    real = scan(targets, now, workdir)
+    print(f"Report: {workdir / 'reports' / 'latest.md'}")
     if gh_out := os.environ.get("GITHUB_OUTPUT"):
         with open(gh_out, "a") as f:
             f.write(f"changes={len(real)}\n")

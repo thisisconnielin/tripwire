@@ -1,29 +1,33 @@
 # Roadmap
 
-Stakeout ships one small improvement a day. Each entry is sized so it fits in one day.
-Pick the top unchecked item unless there's a bug or a user request. Move it to the changelog once it ships.
+Daily runs ship the top unchecked `[small]` item (after broken scans, noise and bugs).
+Friday releases ship the top unchecked `[big]` item in several commits.
+Tick an item when it ships and add a line to the changelog.
+
+## Broken scans (fix first)
+- [ ] [small] ChatGPT pricing (`chatgpt.com/pricing`) returns 403: find a readable official alternative or disable with a reason
+- [ ] [small] OpenAI news (`openai.com/news/`) returns 403: try the RSS feed or another official source
+- [ ] [small] Agnes AI home returns no readable text (JS-only): find a static page or feed
+- [ ] [small] Cue home returns no readable text (JS-only): find a static page or feed
+- [ ] [small] Microsoft Copilot / Teams pages: huge diffs from "Trace Id" lines and nav variants; ignore them
 
 ## Next up
-- [ ] Price detector: pair a removed line with an added line that differ only in a price → "Pro: $25 → $29/mo"
-- [ ] Headline watcher: flag when the H1 / hero line changes (the clearest messaging signal)
-- [ ] JS-rendered pages: optional `render: true` per page using Playwright, for SPAs that return empty HTML
-- [ ] Weekly digest: Monday markdown summary committed to `digests/` + shown on the dashboard
-- [ ] Slack / Discord webhook alert when a `pricing` change lands
-- [ ] Email alert via a repo secret (Resend)
-- [ ] Per-competitor page on the dashboard with a change timeline
-- [ ] Dashboard: "copy as Slack message" button on each change
-- [ ] Sitemap watcher: alert on new URLs (new landing pages, new docs, new /vs pages)
-- [ ] Changelog/RSS mode: parse a blog or changelog feed and list new posts
-- [ ] Careers counter: track number of open roles over time + chart
-- [ ] Pricing table extractor → structured plans/prices comparison across competitors
-- [ ] Battlecard generator: one page per competitor from its last 30 days of changes
-- [ ] Product Hunt launch watcher for competitor names
-- [ ] Screenshot of each page on change (Playwright), shown next to the diff
-- [ ] `stakeout add <url>` CLI helper that appends to targets.yml
-- [ ] Noise auto-learning: suggest ignore rules for lines that flip every day
-- [ ] Dark/light toggle + RSS feed of changes for the dashboard
+- [ ] [small] Price detector: pair a removed and an added line that differ only in a price → "Pro: $25 → $29/mo" in the report
+- [ ] [small] Headline watcher: flag when the H1 / hero line changes (the clearest messaging signal)
+- [ ] [small] Report: put a one-line "Top moves" summary at the very top of each report
+- [ ] [small] `tripwire.py add <name> <url> [--label]` appends a page to `watch/targets.yml`
+- [ ] [small] Report: show "first seen / last changed" per page in a coverage table
+- [ ] [small] Noise auto-learning: list lines that flip every scan and suggest `ignore` rules
+- [ ] [big] Battlecard generator: `tripwire.py battlecard <name>` builds a Markdown battlecard from 30 days of changes + current pricing snapshot
+- [ ] [big] Pricing table extractor → structured plans/prices per competitor, compared side by side in the report
+- [ ] [big] JS-rendered pages: optional `render: true` per page using Playwright, for SPAs that return empty HTML
+- [ ] [big] Changelog/RSS mode: parse a blog or changelog feed and report new posts
+- [ ] [big] Sitemap watcher: report new URLs (new landing pages, docs, /vs pages)
+- [ ] [big] Careers counter: track number of open roles over time
+- [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
 - **2026-11-02**: v0.1. Nightly scan, readable-text diff, noise filters, change tags, optional AI summary, Pages dashboard, unit tests.
 - **2026-11-02**: Teamily watch list (13 competitors, 17 pages) + `group` filter (direct / platform / indirect).
 - **2026-11-02**: Self-maintaining. Nightly Claude dev run (`daily-dev.yml` + `CLAUDE.md`), `enabled: false` per page, `setup.sh`.
+- **2026-11-02**: v0.2. Renamed to Tripwire and turned into a Claude skill (`skills/tripwire/`). Dashboard removed; each scan writes a Markdown report to `watch/reports/`, Friday nights add a 7-day digest. `scan` / `report` / `init` commands. Claude runs 3× a day plus a Friday release.

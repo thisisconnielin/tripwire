@@ -1,8 +1,8 @@
-# Stakeout watch list for Teamily.
+# Tripwire watch list for Teamily.
 # Add a competitor, list the pages you care about, push. That's it.
 #
 #   - name: Acme
-#     group: direct            # optional; used as a dashboard filter
+#     group: direct            # optional; groups the report
 #     pages:
 #       - { label: pricing, url: https://acme.com/pricing }
 #

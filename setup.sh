@@ -3,15 +3,10 @@
 set -euo pipefail
 trap 'echo "Setup failed at line $LINENO; review the error above. Setup is incomplete." >&2' ERR
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
-REPO="${REPO:-thisisconnielin/stakeout}"
+REPO="${REPO:-thisisconnielin/tripwire}"
 REPO_VISIBILITY="${REPO_VISIBILITY:-private}"
 ENABLE_DAILY_DEV="${ENABLE_DAILY_DEV:-false}"
 PROVISION_CLAUDE_SECRET="${PROVISION_CLAUDE_SECRET:-false}"
-if [ "$REPO_VISIBILITY" = public ]; then
-  ENABLE_PUBLIC_DASHBOARD="${ENABLE_PUBLIC_DASHBOARD:-true}"
-else
-  ENABLE_PUBLIC_DASHBOARD="${ENABLE_PUBLIC_DASHBOARD:-false}"
-fi
 
 fail() { echo "$*" >&2; exit 1; }
 if [ "${1:-}" = --help ]; then
@@ -20,23 +15,21 @@ Run: bash setup.sh
 Options (environment variables):
   REPO=owner/name                  Repository to create or update
   REPO_VISIBILITY=private|public   Default: private; never changes existing visibility
-  ENABLE_PUBLIC_DASHBOARD=true|false  Default: true for public repos, false for private
   PROVISION_CLAUDE_SECRET=true|false  Default: false; explicit, interactive credential step
   ENABLE_DAILY_DEV=true|false      Default: false; requires an existing Claude OAuth secret
-Private repositories can scan without publishing a dashboard. Enabling the dashboard
-publishes the docs/ content through GitHub Pages and requires a compatible GitHub plan.
+Scan reports are committed to watch/reports/ in the repository.
 HELP
   exit 0
 fi
 [ "$#" -eq 0 ] || fail "Unknown argument. Run bash setup.sh --help."
 case "$REPO_VISIBILITY" in private|public) ;; *) fail "REPO_VISIBILITY must be private or public." ;; esac
-for value in "$ENABLE_PUBLIC_DASHBOARD" "$ENABLE_DAILY_DEV" "$PROVISION_CLAUDE_SECRET"; do
+for value in "$ENABLE_DAILY_DEV" "$PROVISION_CLAUDE_SECRET"; do
   case "$value" in true|false) ;; *) fail "Setup flags must be true or false." ;; esac
 done
 command -v gh >/dev/null || fail "Install GitHub CLI, then run gh auth login before setup."
 gh auth status >/dev/null 2>&1 || fail "Run gh auth login, then retry setup."
 
-echo "1/5  Preparing $REPO ($REPO_VISIBILITY)…"
+echo "1/4  Preparing $REPO ($REPO_VISIBILITY)…"
 if remote="$(git remote get-url origin 2>/dev/null)"; then
   case "$remote" in
     "https://github.com/$REPO.git"|"https://github.com/$REPO"|"git@github.com:$REPO.git") ;;
@@ -50,20 +43,19 @@ if visibility="$(gh repo view "$REPO" --json visibility --jq .visibility 2>/dev/
     || fail "Existing repository visibility differs. Set REPO_VISIBILITY explicitly; setup will not change it."
 else
   gh repo create "$REPO" "--$REPO_VISIBILITY" \
-    --description "Know what your competitors changed — every day, for free."
+    --description "A Claude skill that tells you what your competitors changed, and what to do about it."
 fi
-# Optional Claude maintenance and dashboard publication remain gated during setup.
+# Optional Claude maintenance stays gated during setup.
 gh variable set ENABLE_DAILY_DEV -R "$REPO" --body false
-gh variable set ENABLE_PUBLIC_DASHBOARD -R "$REPO" --body false
 git push -u origin main
 
-echo "2/5  Setting your commit author (so daily commits count on your profile)…"
+echo "2/4  Setting your commit author (so daily commits count on your profile)…"
 EMAIL="$(gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"')"
 NAME="$(gh api user --jq '.name // .login')"
 gh variable set COMMIT_AUTHOR -R "$REPO" --body "$NAME <$EMAIL>"
 echo "     → $NAME <$EMAIL>"
 
-echo "3/5  Claude credential setup…"
+echo "3/4  Claude credential setup…"
 CLAUDE_CLI=claude
 if command -v claude-work >/dev/null; then CLAUDE_CLI=claude-work; fi
 if [ "$PROVISION_CLAUDE_SECRET" = true ]; then
@@ -83,28 +75,13 @@ if [ "$ENABLE_DAILY_DEV" = true ]; then
     || fail "Daily dev requires CLAUDE_CODE_OAUTH_TOKEN. Provision it after company approval first."
 fi
 
-echo "4/5  Dashboard publication…"
-if [ "$ENABLE_PUBLIC_DASHBOARD" = true ]; then
-  if gh api "repos/$REPO/pages" >/dev/null 2>&1; then
-    gh api -X PUT "repos/$REPO/pages" -f build_type=workflow >/dev/null
-  else
-    gh api -X POST "repos/$REPO/pages" -f build_type=workflow >/dev/null
-  fi
-  gh variable set ENABLE_PUBLIC_DASHBOARD -R "$REPO" --body true
-else
-  echo "     Disabled. Scan results stay in the repository."
-fi
-
-echo "5/5  Running the first scan…"
-gh workflow run stakeout.yml -R "$REPO"
+echo "4/4  Running the first scan…"
+gh workflow run scan.yml -R "$REPO"
 gh variable set ENABLE_DAILY_DEV -R "$REPO" --body "$ENABLE_DAILY_DEV"
 
-OWNER="${REPO%%/*}"; NAME_ONLY="${REPO##*/}"
 echo
 echo "Setup complete; the first scan was dispatched. Check Actions for its result."
 echo "  Repo:       https://github.com/$REPO"
-if [ "$ENABLE_PUBLIC_DASHBOARD" = true ]; then
-  echo "  Dashboard:  https://$OWNER.github.io/$NAME_ONLY/   (after successful Pages deployment)"
-fi
+echo "  Reports:    https://github.com/$REPO/blob/main/watch/reports/latest.md"
 echo "  Daily dev enabled: $ENABLE_DAILY_DEV"
-echo "  Schedule: dev 04:30 UTC (8:30pm PST / 9:30pm PDT); scan 05:00 UTC (9pm PST / 10pm PDT)."
+echo "  Schedule (PST): Claude dev 8:30am, 2:30pm, 8:30pm; scan 9pm; release Friday 10am."

@@ -1,0 +1,46 @@
+name: Weekly release (Claude)
+
+# Fridays: Claude ships one bigger roadmap item in several commits, bumps VERSION and tags a release.
+on:
+  schedule:
+    - cron: "0 18 * * 5"   # Friday 10am PST / 11am PDT
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Optional: which feature to ship this week (otherwise the top [big] roadmap item)"
+        required: false
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: tripwire
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: vars.ENABLE_DAILY_DEV == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            You are the maintainer of Tripwire. This is the WEEKLY RELEASE run: follow the "Weekly release" rules in CLAUDE.md exactly.
+            Today's date (UTC): run `date -u +%F`.
+            Commit author: ${{ vars.COMMIT_AUTHOR || 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' }}
+            Special request (may be empty): ${{ github.event.inputs.task }}
+          claude_args: |
+            --max-turns 150
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebFetch,Bash(python:*),Bash(python3:*),Bash(pip:*),Bash(git:*),Bash(date:*),Bash(ls:*),Bash(cat:*),Bash(curl:*)"
