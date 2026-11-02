@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # One-time setup. Defaults to a private repo, without Claude credential setup.
-set -eEuo pipefail
+set -euo pipefail
 trap 'echo "Setup failed at line $LINENO; review the error above. Setup is incomplete." >&2' ERR
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
 REPO="${REPO:-thisisconnielin/stakeout}"
