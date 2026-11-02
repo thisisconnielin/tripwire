@@ -25,3 +25,4 @@ Pick the top unchecked item unless there's a bug or a user request. Move it to t
 
 ## Changelog
 - **2026-11-02**: v0.1. Nightly scan, readable-text diff, noise filters, change tags, optional AI summary, Pages dashboard, unit tests.
+- **2026-11-02**: Teamily watch list (13 competitors, 17 pages) + `group` filter (direct / platform / indirect).

@@ -1,12 +1,10 @@
-# Stakeout watch list.
+# Stakeout watch list for Teamily.
 # Add a competitor, list the pages you care about, push. That's it.
 #
 #   - name: Acme
+#     group: direct            # optional; used as a dashboard filter
 #     pages:
-#       - { label: home,      url: https://acme.com }
-#       - { label: pricing,   url: https://acme.com/pricing }
-#       - { label: changelog, url: https://acme.com/changelog }
-#       - { label: careers,   url: https://acme.com/careers }
+#       - { label: pricing, url: https://acme.com/pricing }
 #
 # Optional, at any level (global / competitor / page):
 #   ignore:    [regex, ...]   lines matching these are stripped before diffing
@@ -16,6 +14,74 @@ min_lines: 1
 ignore: []
 
 competitors:
-  - name: Teamily
+  # ---------- Direct: human + AI group chat / agent teams ----------
+  - name: Agnes AI (CoVibe)
+    group: direct
     pages:
-      - { label: home, url: https://teamily.ai }
+      - { label: home, url: https://agnes-ai.com }
+
+  - name: Bloome
+    group: direct
+    pages:
+      - { label: home, url: https://bloome.im }
+
+  - name: Cue (Manus)
+    group: direct
+    pages:
+      - { label: home, url: https://cue.im }
+
+  - name: Manus
+    group: direct
+    pages:
+      - { label: home,    url: https://manus.im }
+      - { label: pricing, url: https://manus.im/pricing }
+
+  - name: Hivemind
+    group: direct
+    pages:
+      - { label: home, url: https://chat-hivemind.com }
+
+  - name: Lio
+    group: direct
+    pages:
+      - { label: home, url: https://asklio.ai }
+
+  # ---------- Big platforms adding agents + shared workspaces ----------
+  - name: ChatGPT
+    group: platform
+    pages:
+      - { label: pricing, url: https://chatgpt.com/pricing }
+      - { label: news,    url: https://openai.com/news/ }
+
+  - name: Claude
+    group: platform
+    pages:
+      - { label: pricing, url: https://claude.com/pricing }
+      - { label: news,    url: https://www.anthropic.com/news }
+
+  - name: Gemini
+    group: platform
+    pages:
+      - { label: plans, url: https://gemini.google/subscriptions/ }
+
+  - name: Microsoft Copilot
+    group: platform
+    pages:
+      - { label: business, url: https://www.microsoft.com/en-us/microsoft-365/copilot/business }
+
+  # ---------- Indirect: they own the group-chat layer ----------
+  - name: Slack
+    group: indirect
+    pages:
+      - { label: pricing, url: https://slack.com/pricing }
+      - { label: ai,      url: https://slack.com/ai }
+
+  - name: Microsoft Teams
+    group: indirect
+    pages:
+      - { label: plans, url: https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options }
+
+  - name: Discord
+    group: indirect
+    pages:
+      - { label: nitro, url: https://discord.com/nitro }

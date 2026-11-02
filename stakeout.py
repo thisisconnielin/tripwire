@@ -177,6 +177,7 @@ def load_targets(path):
             label = page.get("label", "page")
             targets.append({
                 "competitor": comp["name"],
+                "group": comp.get("group", "other"),
                 "label": label,
                 "url": page["url"],
                 "slug": slugify(f"{comp['name']}-{label}"),
@@ -196,7 +197,7 @@ def scan(targets, now):
     for t in targets:
         print(f"→ {t['competitor']} / {t['label']}  {t['url']}")
         h = dict(prev_targets.get(t["slug"], {}))
-        h.update({k: t[k] for k in ("slug", "competitor", "label", "url")})
+        h.update({k: t[k] for k in ("slug", "competitor", "group", "label", "url")})
         h["last_checked"] = now
         try:
             title, lines = extract_lines(fetch(t["url"]), t["ignore"])
@@ -225,7 +226,7 @@ def scan(targets, now):
                       "added": added[:MAX_LINES_STORED], "removed": removed[:MAX_LINES_STORED],
                       "added_total": len(added), "removed_total": len(removed)}
         if ev:
-            ev.update(id=f"{now[:10]}-{t['slug']}", date=now, competitor=t["competitor"],
+            ev.update(id=f"{now[:10]}-{t['slug']}", date=now, competitor=t["competitor"], group=t["group"],
                       label=t["label"], url=t["url"], slug=t["slug"])
             new_events.append(ev)
             h["last_changed"] = now
