@@ -1,0 +1,38 @@
+name: Stakeout scan
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # 05:00 UTC = 9pm PT (10pm during daylight time)
+  workflow_dispatch:       # "Run workflow" button in the Actions tab
+  push:
+    paths: [targets.yml]   # rescan right after you add a competitor
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stakeout
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Scan targets
+        id: scan
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # optional: AI summaries
+        run: python stakeout.py
+      - name: Commit results
+        run: |
+          git config user.name  "stakeout-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add snapshots docs/data
+          if git diff --cached --quiet; then echo "Nothing to commit"; exit 0; fi
+          git commit -m "scan $(date -u +%F): ${{ steps.scan.outputs.changes }} change(s)"
+          git push
