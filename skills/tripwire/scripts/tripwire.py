@@ -50,8 +50,14 @@ class TextExtractor(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.parts, self.skip_depth, self.title = [], 0, ""
         self._in_title = False
+        self.meta = []
 
     def handle_starttag(self, tag, attrs):
+        if tag == "meta":
+            a = dict(attrs)
+            key = (a.get("name") or a.get("property") or "").lower()
+            if key in ("description", "og:title", "og:description", "twitter:description") and a.get("content"):
+                self.meta.append(a["content"])
         if tag == "title":
             self._in_title = True
         if tag in self.SKIP:
@@ -79,7 +85,11 @@ def extract_lines(html, ignore_patterns):
     p.feed(html)
     ignore = [re.compile(x, re.I) for x in ignore_patterns]
     lines, seen_prev = [], None
-    for raw in "".join(p.parts).split("\n"):
+    body = "".join(p.parts)
+    if not body.strip():
+        # JS-only page: fall back to the meta title/description tags.
+        body = "\n".join(dict.fromkeys(p.meta))
+    for raw in body.split("\n"):
         line = re.sub(r"\s+", " ", raw).strip()
         for rx in ignore:
             line = rx.sub("", line).strip()

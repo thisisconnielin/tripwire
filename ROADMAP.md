@@ -7,8 +7,8 @@ Tick an item when it ships and add a line to the changelog.
 ## Broken scans (fix first)
 - [ ] [small] ChatGPT pricing (`chatgpt.com/pricing`) returns 403: find a readable official alternative or disable with a reason
 - [ ] [small] OpenAI news (`openai.com/news/`) returns 403: try the RSS feed or another official source
-- [ ] [small] Agnes AI home returns no readable text (JS-only): find a static page or feed
-- [ ] [small] Cue home returns no readable text (JS-only): find a static page or feed
+- [x] [small] Agnes AI home returns no readable text (JS-only): fixed by meta-tag fallback
+- [x] [small] Cue home returns no readable text (JS-only): fixed by meta-tag fallback
 - [ ] [small] Microsoft Copilot / Teams pages: huge diffs from "Trace Id" lines and nav variants; ignore them
 
 ## Next up
@@ -21,12 +21,14 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Battlecard generator: `tripwire.py battlecard <name>` builds a Markdown battlecard from 30 days of changes + current pricing snapshot
 - [ ] [big] Pricing table extractor → structured plans/prices per competitor, compared side by side in the report
 - [ ] [big] JS-rendered pages: optional `render: true` per page using Playwright, for SPAs that return empty HTML
+- [ ] [small] Watch `<link rel=alternate>` feeds / sitemap hints for JS-only pages
 - [ ] [big] Changelog/RSS mode: parse a blog or changelog feed and report new posts
 - [ ] [big] Sitemap watcher: report new URLs (new landing pages, docs, /vs pages)
 - [ ] [big] Careers counter: track number of open roles over time
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-02**: JS-only pages (Agnes, Cue) now fall back to meta title/description so they can be watched.
 - **2026-11-02**: v0.1. Nightly scan, readable-text diff, noise filters, change tags, optional AI summary, Pages dashboard, unit tests.
 - **2026-11-02**: Teamily watch list (13 competitors, 17 pages) + `group` filter (direct / platform / indirect).
 - **2026-11-02**: Self-maintaining. Nightly Claude dev run (`daily-dev.yml` + `CLAUDE.md`), `enabled: false` per page, `setup.sh`.

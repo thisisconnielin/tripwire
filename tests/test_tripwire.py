@@ -17,6 +17,13 @@ class TestTripwire(unittest.TestCase):
         self.assertFalse(any("var x" in l for l in lines))     # scripts stripped
         self.assertFalse(any("©" in l for l in lines))         # footer noise stripped
 
+    def test_js_only_page_falls_back_to_meta(self):
+        html = ('<html><head><title>T</title><meta name="description" content="Agents with email">'
+                '<meta property="og:title" content="Cue"></head><body><div id="root"></div>'
+                '<script>x</script></body></html>')
+        self.assertEqual(s.extract_lines(html, [])[1], ["Agents with email", "Cue"])
+        self.assertEqual(s.extract_lines("<html><body></body></html>", [])[1], [])
+
     def test_diff_and_tags(self):
         added, removed = s.diff_lines(self.lines("v1.html"), self.lines("v2.html"))
         self.assertIn("$29/mo per seat", added)
