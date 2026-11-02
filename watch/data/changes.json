@@ -1,5 +1,72 @@
 [
   {
+    "type": "change",
+    "tags": [
+      "messaging"
+    ],
+    "summary": "+1 line, −1 line. New: “This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1”",
+    "added": [
+      "This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1"
+    ],
+    "removed": [
+      "This is the Trace Id: e9cda4134ee1d89ad3bc2a44fdcabb90"
+    ],
+    "added_total": 1,
+    "removed_total": 1,
+    "id": "2026-11-02-microsoft-copilot-business",
+    "date": "2026-11-02T23:23:00+00:00",
+    "competitor": "Microsoft Copilot",
+    "group": "platform",
+    "label": "business",
+    "url": "https://www.microsoft.com/en-us/microsoft-365/copilot/business",
+    "slug": "microsoft-copilot-business"
+  },
+  {
+    "type": "change",
+    "tags": [
+      "pricing"
+    ],
+    "summary": "+1 line, −2 lines. New: “Contact sales for pricing”",
+    "added": [
+      "Contact sales for pricing"
+    ],
+    "removed": [
+      "$45USD",
+      "per user / month, when paying annually"
+    ],
+    "added_total": 1,
+    "removed_total": 2,
+    "id": "2026-11-02-slack-pricing",
+    "date": "2026-11-02T23:23:00+00:00",
+    "competitor": "Slack",
+    "group": "indirect",
+    "label": "pricing",
+    "url": "https://slack.com/pricing",
+    "slug": "slack-pricing"
+  },
+  {
+    "type": "change",
+    "tags": [
+      "messaging"
+    ],
+    "summary": "+1 line, −1 line. New: “This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022”",
+    "added": [
+      "This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022"
+    ],
+    "removed": [
+      "This is the Trace Id: 8bc7ca0604330b7e36530016e597ec68"
+    ],
+    "added_total": 1,
+    "removed_total": 1,
+    "id": "2026-11-02-microsoft-teams-plans",
+    "date": "2026-11-02T23:23:00+00:00",
+    "competitor": "Microsoft Teams",
+    "group": "indirect",
+    "label": "plans",
+    "url": "https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options",
+    "slug": "microsoft-teams-plans"
+  },
+  {
     "type": "baseline",
     "summary": "Started watching. 305 lines captured.",
     "tags": [
@@ -129,38 +196,6 @@
   },
   {
     "type": "baseline",
-    "summary": "Started watching. 710 lines captured.",
-    "tags": [
-      "baseline"
-    ],
-    "added": [],
-    "removed": [],
-    "id": "2026-11-02-microsoft-copilot-business",
-    "date": "2026-11-02T22:44:45+00:00",
-    "competitor": "Microsoft Copilot",
-    "group": "platform",
-    "label": "business",
-    "url": "https://www.microsoft.com/en-us/microsoft-365/copilot/business",
-    "slug": "microsoft-copilot-business"
-  },
-  {
-    "type": "baseline",
-    "summary": "Started watching. 732 lines captured.",
-    "tags": [
-      "baseline"
-    ],
-    "added": [],
-    "removed": [],
-    "id": "2026-11-02-slack-pricing",
-    "date": "2026-11-02T22:44:45+00:00",
-    "competitor": "Slack",
-    "group": "indirect",
-    "label": "pricing",
-    "url": "https://slack.com/pricing",
-    "slug": "slack-pricing"
-  },
-  {
-    "type": "baseline",
     "summary": "Started watching. 343 lines captured.",
     "tags": [
       "baseline"
@@ -174,22 +209,6 @@
     "label": "ai",
     "url": "https://slack.com/ai",
     "slug": "slack-ai"
-  },
-  {
-    "type": "baseline",
-    "summary": "Started watching. 569 lines captured.",
-    "tags": [
-      "baseline"
-    ],
-    "added": [],
-    "removed": [],
-    "id": "2026-11-02-microsoft-teams-plans",
-    "date": "2026-11-02T22:44:45+00:00",
-    "competitor": "Microsoft Teams",
-    "group": "indirect",
-    "label": "plans",
-    "url": "https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options",
-    "slug": "microsoft-teams-plans"
   },
   {
     "type": "baseline",

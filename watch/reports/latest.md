@@ -1,10 +1,51 @@
 # Tripwire report: 2026-11-02
 
-17 pages watched · **0 changes** · 13 OK · 4 not readable
+17 pages watched · **3 changes** · 13 OK · 4 not readable
 
 ## What changed
 
-No changes. New pages get a baseline first; changes show from the next scan.
+### Slack
+
+**[pricing](https://slack.com/pricing)** `pricing`
+
++1 line, −2 lines. New: “Contact sales for pricing”
+
+```diff
++ Contact sales for pricing
+```
+
+```diff
+- $45USD
+- per user / month, when paying annually
+```
+
+### Microsoft Copilot
+
+**[business](https://www.microsoft.com/en-us/microsoft-365/copilot/business)** `messaging`
+
++1 line, −1 line. New: “This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1”
+
+```diff
++ This is the Trace Id: 4983b78a2ae90f20edf227808c02a0a1
+```
+
+```diff
+- This is the Trace Id: e9cda4134ee1d89ad3bc2a44fdcabb90
+```
+
+### Microsoft Teams
+
+**[plans](https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options)** `messaging`
+
++1 line, −1 line. New: “This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022”
+
+```diff
++ This is the Trace Id: 0d08bfca0c96773c3a5affce6f6c6022
+```
+
+```diff
+- This is the Trace Id: 8bc7ca0604330b7e36530016e597ec68
+```
 
 ## Not readable
 
@@ -25,8 +66,5 @@ No changes. New pages get a baseline first; changes show from the next scan.
 - Claude · [pricing](https://claude.com/pricing)
 - Claude · [news](https://www.anthropic.com/news)
 - Gemini · [plans](https://gemini.google/subscriptions/)
-- Microsoft Copilot · [business](https://www.microsoft.com/en-us/microsoft-365/copilot/business)
-- Slack · [pricing](https://slack.com/pricing)
 - Slack · [ai](https://slack.com/ai)
-- Microsoft Teams · [plans](https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options)
 - Discord · [nitro](https://discord.com/nitro)
