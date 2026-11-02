@@ -1,0 +1,343 @@
+Skip to main content
+Product
+COLLABORATE
+ChannelsChat and work together
+Slack ConnectWork with external partners
+Meetings & VideoVideo chat with your team
+CanvasCreate, edit, and share docs
+ListsManage projects in Slack
+WORK WITH AI
+SlackbotMeet your new AI teammate
+Slack CodeNewBuild with people and agents
+Native AISave time with built-in AI
+AgentforceTeam up with Salesforce agents
+CONNECT
+Apps & IntegrationsConnect your favorite tools
+Native CRMGrow customer relationships
+Salesforce in SlackPut customer data to work
+Enterprise SearchFind answers from anywhere
+BUILD
+Agentic PlatformAll your people, apps, and agents
+Workflow BuilderAutomate everyday tasks
+Trust & SecurityKeep work private and secure
+What's newSee latest feature releasesSlack MarketplaceBrowse over 2,600 apps
+Watch demoDownload Slack
+See all features→
+Solutions
+BY DEPARTMENT
+Frontline
+Engineering
+IT
+Customer Service
+Sales
+Project Management
+Marketing
+Human Resources
+Security
+BY INDUSTRY
+Manufacturing, Auto & Energy
+Technology
+Media
+Small Business
+Financial Services
+Retail
+Public Sector
+Education
+Health & Life Sciences
+Template galleryStart work faster with templates
+Watch demoDownload Slack
+See all solutions→
+Enterprise
+Resources
+Discover
+What's New
+Resources Library
+Customer Stories
+Events
+Learn
+Blog
+Product Tour
+Help Center
+Slack vs Teams
+Build
+Developers
+Slack Community
+Partner Program
+Partner Offers
+AI era of workThe future of enterprise growth
+Watch demoDownload Slack
+Pricing
+Search
+Sign inRequest a demoGet started
+Get started
+Back
+Product
+COLLABORATE
+ChannelsChat and work together
+Slack ConnectWork with external partners
+Meetings & VideoVideo chat with your team
+CanvasCreate, edit, and share docs
+ListsManage projects in Slack
+WORK WITH AI
+SlackbotMeet your new AI teammate
+Slack CodeNewBuild with people and agents
+Native AISave time with built-in AI
+AgentforceTeam up with Salesforce agents
+CONNECT
+Apps & IntegrationsConnect your favorite tools
+Native CRMGrow customer relationships
+Salesforce in SlackPut customer data to work
+Enterprise SearchFind answers from anywhere
+BUILD
+Agentic PlatformAll your people, apps, and agents
+Workflow BuilderAutomate everyday tasks
+Trust & SecurityKeep work private and secure
+What's newSee latest feature releasesSlack MarketplaceBrowse over 2,600 apps
+Solutions
+BY DEPARTMENT
+Frontline
+Engineering
+IT
+Customer Service
+Sales
+Project Management
+Marketing
+Human Resources
+Security
+BY INDUSTRY
+Manufacturing, Auto & Energy
+Technology
+Media
+Small Business
+Financial Services
+Retail
+Public Sector
+Education
+Health & Life Sciences
+Template galleryStart work faster with templates
+Enterprise
+Resources
+Discover
+What's New
+Resources Library
+Customer Stories
+Events
+Learn
+Blog
+Product Tour
+Help Center
+Slack vs Teams
+Build
+Developers
+Slack Community
+Partner Program
+Partner Offers
+AI era of workThe future of enterprise growth
+Pricing
+Request a demoGet startedSign in
+AI in Slack works where you do.
+AI shouldn’t make you think, it should help you do. In Slack, it’s a powerfully simple way to be more productive, built with knowledge from your company.
+Get startedTalk to Sales
+Watch video
+Companies Everywhere Trust AI in Slack.
+Pause animationPlay animation
+Early Access
+Start your day grounded with Today.
+Wasting time piecing together what’s important from a wall of unread messages? Today is your new intelligent briefing that signals what needs your attention based on your priorities. Whether following up on an important deal, preparing for a customer meeting, or tackling your to-do list, Today has you covered. Grab a coffee and get started.
+Slackbot
+Your ultimate Teammate.
+Slackbot is your personal AI agent in Slack that understands you and your workspace, helping you prepare for upcoming meetings, analyze reports, and create project briefs. It knows your tone and voice, and adapts to your style, making interactions more personal and relevant.
+Learn more about Slackbot
+Pause animationPlay animation
+Stay Focused
+Get the summary, not the scroll.
+Too much information, too little time? AI in Slack can summarize channels and threads and serve up daily recaps, giving you the information you need to stay organized and in the know.
+97 min
+Average time users can save weekly with AI1
+1Based on an internal analysis during the pilot of Slack AI features (channel recaps, thread summaries, and AI search answers)
+Pause animationPlay animation
+Find What You Need
+Search everything in Slack, and then some.
+Conversations with coworkers, PDFs, images for your social campaign, decks buried in Google Drive, support tickets, customer records from Salesforce; if it’s shared in or integrated into Slack, it’s searchable.
+Learn more about enterprise search
+Pause animationPlay animation
+Get Ahead
+No prompts. Just progress.
+Create time-saving automations in a few clicks, translate conversations into any language, and even use AI to take meeting notes. AI in Slack is smart enough to help, and subtle enough to never get in the way.
+Learn more about workflow builder
+Pause animationPlay animation
+Productivity that fits into your flow of work.
+Customer Service
+Focus on finding solutions while AI takes notes and keeps everyone aligned.
+Engineering
+Solve incidents using solutions from across your org, all without ever leaving Slack.
+Sales
+Get essential customer context and sell smarter by summarizing account channels.
+Marketing
+Translate messages in a click to help global teams launch campaigns faster.
+Customer Service
+Focus on finding solutions while AI takes notes and keeps everyone aligned.
+Engineering
+Solve incidents using solutions from across your org, all without ever leaving Slack.
+Sales
+Get essential customer context and sell smarter by summarizing account channels.
+Marketing
+Translate messages in a click to help global teams launch campaigns faster.
+AI in Slack has something for everyone.
+Our team loves how quickly they can find answers with AI in Slack, which translated to faster decision-making and a greater focus on work that really drives an impact.
+Kate Earle Jensen
+Head of Sales and Partnerships, Anthropic
+AI in Slack has been a win for me, our leaders, and our sales teams. It summarizes the latest notes or a deal's status in seconds so we can focus on action steps.
+Bill Schuh
+Chief Revenue Officer, Anaplan
+I love AI in Slack. I'll use channel recaps and move so rapidly, especially to begin my day. It's a great efficiency play, too, taking out the manual work we need to do on a daily basis.
+Andy Picmann
+Vice President of Engineering, Rocket Companies
+With AI in Slack we can effectively leverage historical knowledge to find answers and make informed decisions. It's essential for maintaining our competitive edge.
+Ariel Sakin
+VP of Corporate Information Systems, Snyk
+Work without worry.
+Your data is your data. Customer data never leaves Slack. We do not train large-language models (LLMs) on customer data. Everything runs on Slack’s secure infrastructure, meeting the same compliance standards as Slack itself.
+Learn more about security
+Get to know AI in Slack.
+Blog
+A Smarter Workday in Slack: How Teams Operate Faster with AI
+Read More
+Ebook
+10 Ways to Transform Your Work in AI in Slack
+Read Now
+Webinar
+The AI-Powered Workplace: Boost Productivity with AI and Enterprise Search in Slack
+Watch Now
+Blog
+Find Everything: Introducing Enterprise Search in Slack
+Read More
+Blog
+A Smarter Workday in Slack: How Teams Operate Faster with AI
+Read More
+Ebook
+10 Ways to Transform Your Work in AI in Slack
+Read Now
+Webinar
+The AI-Powered Workplace: Boost Productivity with AI and Enterprise Search in Slack
+Watch Now
+Blog
+Find Everything: Introducing Enterprise Search in Slack
+Read More
+Frequently Asked Questions
+How is AI in Slack different from other AI tools?
+While Slack isn’t the only AI-powered tool that exists today, there are a few things that make Slack’s approach to AI different from the rest.
+Organizational data is a trusted source of knowledge. Customers have accumulated so much valuable context in their org’s shared conversation history, but are only scratching the surface of what they can learn. AI in Slack helps people find that information immediately, with ease.
+Our conversational interface makes it possible for generative AI to become a seamless part of your team’s workday. Unlike AI that’s confined to browser tabs or standalone assistants, we believe the most effective way to encourage widespread AI adoption is to put it directly where people are already working.
+What is enterprise search software?
+Enterprise search enables you to find the information you need without having to open and search through multiple applications, or ask your coworkers. Learn more about using enterprise search in Slack.
+How does Slack protect the security of our data and support compliance with relevant regulations?
+AI runs in Slack’s trusted boundary, and upholds the security practices and compliance standards that customers expect from Slack itself. The security program at Slack protects customer data at every layer. We enable customers to manage risk and secure data within their Slack environments through our adherence with applicable global and widely recognized industry regulations, security and data privacy frameworks, programs and standards. In addition, Slack can be configured to meet certain industry regulations and international security and data privacy standards.
+Does Slack use customer data to train LLMs?
+Customer data is not used to train large language models (LLMs), and the LLM providers do not have access to customer data. The LLMs are currently hosted directly within Slack’s AWS virtual private cloud, ensuring your data is not sent outside the Slack trust boundary.
+How does Slack integrate with other AI and agentic products and features?
+Slack is the conversational UI for Agentforce. Agents built with Agentforce can run directly in Slack channels, threads, and DMs, allowing users to query data, get contextual responses, and trigger actions—all within the flow of work.
+Through Slack enterprise search, Agentforce can access real-time messages, files, and app data to generate accurate, up-to-date answers with the full context of your work. It also pulls in structured data from Salesforce and other systems, enabling agents to reason over both structured and unstructured information to assist users more effectively.
+In addition to Agentforce, we also have several out-of-the-box agent apps ready for you: Adobe Express, Asana, Box, Cohere, Workday, and Writer, with more on the way. Check out the Marketplace for a full list of supported apps
+Does AI in Slack work globally?
+Yes, you can use AI anywhere Slack is able to be purchased. You can also localize your Slack client into different languages and AI results will respect your chosen language, or you can use AI to translate certain in-line messages into any language.
+How do I start using AI in Slack?
+AI features are available across all paid Slack plans, so your teams can start using AI in Slack right away. To learn more about which plan is right for your team, please reach out to your Slack account executive, or talk to sales.
+1The preceding information is intended for INFORMATIONAL PURPOSES ONLY, and not as a binding commitment. Please do not rely on this information in making your purchasing decisions. The development, release and timing of any products, features or functionality remain at the sole discretion of Slack, and are subject to change.
+Choose a better way to work.
+Get startedTalk to Sales
+Change Region
+Selecting a different region will change the language and content of slack.com.
+Americas
+Latinoamérica (español)Brasil (português)United States (English)
+Europe
+Deutschland (Deutsch)España (español)France (français)Italia (italiano)United Kingdom (English)
+Asia Pacific
+简体中文繁體中文India (English)日本 (日本語)대한민국 (한국어)
+Change Region
+Product
+Watch Demo
+Pricing
+Paid vs. Free
+Accessibility
+Featured Releases
+Changelog
+Status
+Why Slack?
+Slack vs. Email
+Slack vs. Teams
+Enterprise
+Small Business
+Productivity
+Task Management
+Scale
+Trust
+Features
+Channels
+Slack Connect
+Workflow Builder
+Messaging
+Huddles
+Canvas
+Lists
+Clips
+Apps & Integrations
+File Sharing
+Slack AI
+Agentforce
+Enterprise Search
+Security
+Enterprise Key Management
+Slack Atlas
+See all features
+Solutions
+Frontline
+Engineering
+IT
+Customer Service
+Sales
+Project Management
+Marketing
+Security
+Manufacturing, Auto & Energy
+Technology
+Media
+Financial Services
+Retail
+Public Sector
+Education
+Health & Life Sciences
+See all solutions
+Resources
+Help Center
+What’s New
+Resources Library
+Slack Blog
+Community
+Customer Stories
+Events
+Developers
+Partner Program
+Partner Offers
+Slack Marketplace
+Slack Certified
+Run Effective Meetings
+Collaborate Externally
+Manage Projects Efficiently
+Company
+About Us
+News
+Media Kit
+Brand Center
+Careers
+Swag Store
+Engineering Blog
+Design Blog
+Contact Us
+Download Slack
+Privacy
+Terms
+Cookie Preferences
+Your Privacy Choices
+esc
+// Trailing focus-trap sentinel. Mirror image of the leading // one — catches forward Tab that would otherwise escape into // the browser chrome, and warps it back to the first // focusable inside the modal.

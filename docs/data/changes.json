@@ -1,1 +1,210 @@
-[]
+[
+  {
+    "type": "baseline",
+    "summary": "Started watching. 305 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-bloome-home",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Bloome",
+    "group": "direct",
+    "label": "home",
+    "url": "https://bloome.im",
+    "slug": "bloome-home"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 41 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-manus-home",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Manus",
+    "group": "direct",
+    "label": "home",
+    "url": "https://manus.im",
+    "slug": "manus-home"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 28 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-manus-pricing",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Manus",
+    "group": "direct",
+    "label": "pricing",
+    "url": "https://manus.im/pricing",
+    "slug": "manus-pricing"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 138 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-hivemind-home",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Hivemind",
+    "group": "direct",
+    "label": "home",
+    "url": "https://chat-hivemind.com",
+    "slug": "hivemind-home"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 246 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-lio-home",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Lio",
+    "group": "direct",
+    "label": "home",
+    "url": "https://asklio.ai",
+    "slug": "lio-home"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 1039 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-claude-pricing",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Claude",
+    "group": "platform",
+    "label": "pricing",
+    "url": "https://claude.com/pricing",
+    "slug": "claude-pricing"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 263 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-claude-news",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Claude",
+    "group": "platform",
+    "label": "news",
+    "url": "https://www.anthropic.com/news",
+    "slug": "claude-news"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 710 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-gemini-plans",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Gemini",
+    "group": "platform",
+    "label": "plans",
+    "url": "https://gemini.google/subscriptions/",
+    "slug": "gemini-plans"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 710 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-microsoft-copilot-business",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Microsoft Copilot",
+    "group": "platform",
+    "label": "business",
+    "url": "https://www.microsoft.com/en-us/microsoft-365/copilot/business",
+    "slug": "microsoft-copilot-business"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 732 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-slack-pricing",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Slack",
+    "group": "indirect",
+    "label": "pricing",
+    "url": "https://slack.com/pricing",
+    "slug": "slack-pricing"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 343 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-slack-ai",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Slack",
+    "group": "indirect",
+    "label": "ai",
+    "url": "https://slack.com/ai",
+    "slug": "slack-ai"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 569 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-microsoft-teams-plans",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Microsoft Teams",
+    "group": "indirect",
+    "label": "plans",
+    "url": "https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options",
+    "slug": "microsoft-teams-plans"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 254 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-02-discord-nitro",
+    "date": "2026-11-02T22:44:45+00:00",
+    "competitor": "Discord",
+    "group": "indirect",
+    "label": "nitro",
+    "url": "https://discord.com/nitro",
+    "slug": "discord-nitro"
+  }
+]

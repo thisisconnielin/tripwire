@@ -1,0 +1,710 @@
+This is the Trace Id: e9cda4134ee1d89ad3bc2a44fdcabb90
+Skip to main content
+Copilot
+Word
+Excel
+PowerPoint
+Outlook
+OneDrive
+Teams
+Copilot Studio
+Work IQ
+Cowork
+Individuals
+Business
+Enterprise
+Education
+Plans and pricing
+Support
+Customer stories
+Blog
+Copilot vs. competitors
+Tech community
+Frontier program
+AI for Work Roadmap
+Agents
+New user onboarding
+Roll-out and adoption
+Prompts and use cases
+AI knowledge
+Connectors
+Open Copilot
+Download the app
+Business
+Microsoft Copilot for small business
+Achieve more and grow your business with AI built for work.
+See pricing
+OVERVIEW
+Overview
+Features
+Pricing
+Resources
+Agents
+FAQ
+Buy now Try for free
+Overview
+Transform your business with one AI solution
+Copilot helps with everyday work, then goes further by taking on complex, multi-step tasks so you can focus on what matters most.
+Chat
+Cowork
+Agents
+Notebooks
+Autopilot
+Security
+Previous
+Next
+Get everyday work done faster
+Ask questions, draft content, summarize information, and get help with the work that fills your day.
+Find answers when you need them
+Use Copilot to quickly find and understand information so you can spend less time searching and more time moving work forward.
+Create and refine with ease
+Turn ideas into first drafts and refine your work through conversation with Copilot.
+Delegate complex work
+Hand off multi-step work to Copilot so your team can spend more time on the decisions and work that need their attention.
+Turn goals into finished work
+Give Cowork a goal and the context it needs to plan, execute, and deliver work from start to finish.
+Stay focused and in control
+Let Cowork take on more of the execution while you review, refine, and guide the result.
+Put AI to work for specific needs
+Use agents to help with focused tasks and business processes, giving your team support where it matters most.
+Bring expertise into your workflow
+Get specialized AI assistance for different roles, tasks, and areas of your business.
+Extend AI across your business
+Use agents to support repeatable work and help your team get more done across everyday business processes.
+Make teamwork easier across projects​
+Keep all project content in one smart workspace with AI assistance to organize tasks and support collaboration.
+Catch up with audio summaries
+Hear AI-created summaries of your project content in Copilot Notebooks, perfect for staying on track.
+Discover additional content and updates
+Get intelligent suggestions of recommended content and updates to add to your source material—all automatically reflected in Copilot Notebooks.
+Put recurring work in motion
+Give Autopilot a role and a goal to execute ongoing work without starting from a new prompt each time.
+Keep work moving
+Let Autopilot follow up and continue working while your attention is focused elsewhere.
+Stay informed and in control
+Set the objectives and boundaries while Autopilot handles the work and keeps you updated.
+Protect your business while you work
+Use AI with the security and protections your business depends on.
+Keep business information protected
+Help safeguard your business information as your team uses Copilot across its work.
+Adopt AI with confidence
+Bring AI into more of your business while maintaining the protections and controls you need.
+Back to tabs
+FEATURES
+Work seamlessly
+Discover the Microsoft Copilot features that help your business boost productivity and deliver more value every day.
+Previous Slide
+Copilot Chat
+Microsoft 365 apps
+Researcher
+Copilot Dashboard
+Next Slide
+Back to See how you can maximize AI’s impact on your business
+Previous Slide
+Copilot Chat
+Microsoft 365 apps
+Researcher
+Copilot Dashboard
+Next Slide
+Back to feature tab
+Copilot Chat
+Researcher
+Copilot Studio
+Microsoft 365 apps
+Copilot Dashboard
+Copilot in Excel​
+Copilot in PowerPoint​
+Copilot in Word​
+Work more productively​
+Enhance creativity and efficiency with AI assistance in even more Microsoft 365 applications.
+Copilot in Word​
+Write, edit, and summarize your documents.
+Watch the video
+Copilot in PowerPoint​
+Transform your ideas into stunning presentations​.
+Watch the video
+Copilot in Excel​
+Analyze and visualize data expertly​.
+Watch the video
+Copilot in Teams
+Recap meetings, respond to chats, and manage calls.
+Learn more
+Copilot in Outlook
+Catch up on email, draft responses, and manage your calendar.
+Learn more
+Get value from Copilot today—and stay ready for what’s next
+Copilot handles a quick question or a project that runs for hours, right inside the apps your team already uses. It's AI built for work.
+Value from day one
+Built for how you work
+Do more with less
+Grows with you
+Previous
+Next
+Start in familiar apps—no overhaul​
+Copilot is built into Word, Excel, PowerPoint, Outlook, and Teams so your team can begin with the tools they know and keep workflows intact.
+Onboard faster with less training
+Because Copilot feels like Microsoft 365, it’s easy to adopt—helping new hires and existing staff ramp up quickly.
+Work stays connected across your day ​
+Work across files, email, chat, and meetings without bouncing between tools—so information stays connected and work moves forward.
+Turn everyday tasks into finished work—faster
+Craft emails, recap meetings, and create first drafts in seconds—so more time goes toward decisions, refinement, and results.
+Find answers faster​
+Ask Copilot to surface key details from documents, conversations, and data, then turn them into next steps you can act on.
+Protect focus and keep momentum
+Handle quick tasks with a prompt, reduce context switching, and keep momentum on the work that matters most.
+Polish what you create​
+Get suggestions to tighten writing, refine slides, and improve clarity—like having an editor on call.
+Spot gaps and reduce rework​
+Have Copilot check for missing info, inconsistencies, or action items—helping you catch issues before they cost time, and improving confidence before work goes out the door.
+Stretch limited resources further
+Turn raw notes, ideas, and inputs into ready to share content, plans, and insights. Copilot helps your team move faster without sacrificing quality—even as demands increase.
+Start with everyday wins, expand at your pace
+Begin with everyday AI that helps your team create, communicate, find answers, and get more done. As you gain confidence, go further with agentic capabilities that can take on more complex work.
+Take on more complex work
+Go further with agentic AI that can take on multi-step work, helping your team move from individual tasks to completed outcomes.
+Build and automate as your needs evolve
+Create purpose-built solutions and extend AI to ongoing work that can keep moving with less hands-on effort.
+Back to Overview tabs section
+Pricing
+Microsoft Copilot pricing
+AI built for work with pricing that enables everyday AI and advanced AI.
+Plans with Teams
+Plans without Teams
+Previous
+Next
+Yearly
+Monthly
+Microsoft 365 + Copilot and advanced security
+Microsoft 365 Business Premium with Copilot
+An integrated solution for productivity and security, with Copilot built in to elevate how work gets done
+$32.00
+user/month, paid yearly
+Annual subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, Outlook, and Microsoft Teams[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+Chat, call, and catch up with Copilot in Microsoft Teams
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Email and threat protection against phishing, malware, and cyber attacks
+Discovery, classification, and protection of sensitive data​
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+Microsoft Teams: Bring everyone together in one place to meet, chat, call, and collaborate.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Microsoft Entra ID: Protect employee identities and credentials.
+Windows 11: Empower your team to connect faster, get creative, and be more productive.
+Intune: Protect your business and application data and access on devices.
+Microsoft Defender: Defend against malicious cyberthreats.
+Microsoft Purview: Make governing, protecting, and managing your data easier and more efficient.
+Microsoft 365 Business Standard with Copilot
+Powerful apps across devices, with Copilot built in to enhance creativity, collaboration, and efficiency
+$23.50
+user/month, paid yearly
+Annual subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, Outlook, and Microsoft Teams[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Core identity and access management for up to 300 users
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+Chat, call, and catch up with Copilot in Microsoft Teams
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Automatic spam and malware filtering
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+Microsoft Teams: Bring everyone together in one place to meet, chat, call, and collaborate.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Add on to your Microsoft 365 plan
+Microsoft 365 Copilot Business (add-on)
+AI built for work to help drive productivity, clarity and impact across your existing Microsoft 365 experience
+Originally starting from $21.00 now starting from $18.00
+$21.00
+$18.00
+user/month, paid yearly
+Annual subscription—auto renews. Usage-based billing for select advanced AI features.1
+Pay yearly Pay monthly
+Try for free2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, Outlook, and Microsoft Teams[popover:]
+AI chat grounded in your work data
+Large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Analytics to measure adoption, usage, and business impact
+Enterprise Data Protection (EDP), management, compliance, and controls
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Microsoft 365 + Copilot and advanced security
+Microsoft 365 Business Premium with Copilot
+An integrated solution for productivity and security, with Copilot built in to elevate how work gets done
+$38.40
+user/month
+Monthly subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, Outlook, and Microsoft Teams[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Policy-based identity and access management for up to 300 users to help protect user accounts
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+Chat, call, and catch up with Copilot in Microsoft Teams
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Email and threat protection against phishing, malware, and cyber attacks
+Discovery, classification, and protection of sensitive data​
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+Microsoft Teams: Bring everyone together in one place to meet, chat, call, and collaborate.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Microsoft Entra ID: Protect employee identities and credentials.
+Windows 11: Empower your team to connect faster, get creative, and be more productive.
+Intune: Protect your business and application data and access on devices.
+Microsoft Defender: Defend against malicious cyberthreats.
+Microsoft Purview: Make governing, protecting, and managing your data easier and more efficient.
+Microsoft 365 Business Standard with Copilot
+Powerful apps across devices, with Copilot built in to enhance creativity, collaboration, and efficiency
+$28.20
+user/month
+Monthly subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, Outlook, and Microsoft Teams[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Core identity and access management for up to 300 users
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+Chat, call, and catch up with Copilot in Microsoft Teams
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Automatic spam and malware filtering
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+Microsoft Teams: Bring everyone together in one place to meet, chat, call, and collaborate.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Add on to your Microsoft 365 plan
+Microsoft 365 Copilot Business (add-on)
+AI built for work to help drive productivity, clarity and impact across your existing Microsoft 365 experience
+$25.20
+user/month
+Monthly subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, Outlook, and Microsoft Teams[popover:]
+AI chat grounded in your work data
+Large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Analytics to measure adoption, usage, and business impact
+Enterprise Data Protection (EDP), management, compliance, and controls
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Back to tabs
+Yearly
+Monthly
+Microsoft 365 + Copilot and advanced security
+Microsoft 365 Business Premium with Copilot (no Teams)
+An integrated solution for productivity and security, with Copilot built in to elevate how work gets done
+$28.80
+user/month, paid yearly
+Annual subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, and Outlook[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Policy-based identity and access management for up to 300 users to help protect user accounts
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Email and threat protection against phishing, malware, and cyber attacks
+Discovery, classification, and protection of sensitive data​
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Microsoft Entra ID: Protect employee identities and credentials.
+Windows 11: Empower your team to connect faster, get creative, and be more productive.
+Intune: Protect your business and application data and access on devices.
+Microsoft Defender: Defend against malicious cyberthreats.
+Microsoft Purview: Make governing, protecting, and managing your data easier and more efficient.
+Microsoft 365 Business Standard with Copilot (no Teams)
+Powerful apps across devices, with Copilot built in to enhance creativity, collaboration, and efficiency
+$20.30
+user/month, paid yearly
+Annual subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, and Outlook[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Core identity and access management for up to 300 users
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Automatic spam and malware filtering
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Add on to your Microsoft 365 plan
+Microsoft 365 Copilot Business
+AI built for work to help drive productivity, clarity and impact across your existing Microsoft 365 experience
+Originally starting from $21.00 now starting from $18.00
+$21.00
+$18.00
+user/month, paid yearly
+Annual subscription—auto renews. Usage-based billing for select advanced AI features.1
+Pay yearly Pay monthly
+Try for free2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, and Outlook[popover:]
+AI chat grounded in your work data
+Large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Analytics to measure adoption, usage, and business impact
+Enterprise Data Protection (EDP), management, compliance, and controls
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Microsoft 365 + Copilot and advanced security
+Microsoft 365 Business Premium with Copilot (no Teams)
+An integrated solution for productivity and security, with Copilot built in to elevate how work gets done
+$34.56
+user/month
+Monthly subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, and Outlook[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Policy-based identity and access management for up to 300 users to help protect user accounts
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Email and threat protection against phishing, malware, and cyber attacks
+Discovery, classification, and protection of sensitive data​
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Microsoft Entra ID: Protect employee identities and credentials.
+Windows 11: Empower your team to connect faster, get creative, and be more productive.
+Intune: Protect your business and application data and access on devices.
+Microsoft Defender: Defend against malicious cyberthreats.
+Microsoft Purview: Make governing, protecting, and managing your data easier and more efficient.
+Microsoft 365 Business Standard with Copilot (no Teams)
+Powerful apps across devices, with Copilot built in to enhance creativity, collaboration, and efficiency
+$24.36
+user/month
+Monthly subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, and Outlook[popover:]
+AI chat grounded in your work data with large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Core identity and access management for up to 300 users
+Desktop, web, and mobile versions [popover:] of Word, Excel, PowerPoint, Outlook, and other apps
+Custom business email
+10+ additional apps for your business needs (including Microsoft Loop, Clipchamp, Bookings, Planner, and Forms)​
+Automatic spam and malware filtering
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Word: Create impressive documents and improve your writing with built-in intelligent features.
+Excel: Simplify complex data and create easy-to-read spreadsheets.
+PowerPoint: Easily create polished presentations that stand out.
+OneNote: Meet all your note-taking needs with one cross-functional notebook.
+Microsoft Loop: Cocreate with workspaces that bring all the parts of a project together.
+Microsoft Clipchamp: Create and edit professional-looking videos with easy-to-use tools.
+Outlook: Manage your email, calendar, tasks, and contacts together in one place.
+Exchange: Work smarter with business-class email and calendaring.
+OneDrive: Save, access, edit, and share files and photos wherever you are.
+SharePoint: Create team sites to share information, files, and resources.
+Microsoft Editor: Write more clearly and concisely across documents, emails, and the web.
+Add on to your Microsoft 365 plan
+Microsoft 365 Copilot Business
+AI built for work to help drive productivity, clarity and impact across your existing Microsoft 365 experience
+$25.20
+user/month
+Monthly subscription—auto renews. Usage-based billing for select advanced AI features.1
+Buy now Try for free
+See trial terms2
+Plan highlights:
+Microsoft Copilot in apps such as Word, Excel, PowerPoint, and Outlook[popover:]
+AI chat grounded in your work data
+Large language model (LLM) choice
+Pre-built agents for research and data analysis
+Access to Cowork, Autopilot, and advanced AI experiences in apps like SharePoint1
+Analytics to measure adoption, usage, and business impact
+Enterprise Data Protection (EDP), management, compliance, and controls
+Popular apps and services included:
+Microsoft Copilot: Enhance productivity and creativity with a secure AI assistant for work​.
+Back to tabs
+Back to Existing customers and New customers
+Resources
+Getting ready for AI
+Infographic​
+How AI can help grow your business in three steps​
+Discover how AI helps you save time, engage customers, and elevate your brand so your business can grow.​
+Learn more
+Previous Slide
+Next Slide
+Quiz​
+Business Leaders: How ready is your business to get value from AI?​
+Answer a few questions to see where your business stands on the journey to getting real value from AI, and what you can do next.
+Take the quiz
+Quiz​
+Tech Leaders: How technically prepared is your business for AI?​
+Answer a few questions to see how ready your business is for technical AI adoption, and what you can do next.​
+Take the quiz
+Measuring value
+Drive measurable ROI from AI
+Unsure if AI is worth the investment? Learn how small businesses can realize huge returns.
+Get the e-book
+Use case toolkit
+How to bring AI into your business
+Wondering how AI fits into your specific business? Start with these practical AI use cases.
+Get the toolkit
+Technical planning
+Preparing for technical aspects of AI adoption
+Considering the technical features of AI? Learn about data privacy, integration, and scaling securely.
+Get the guide
+Microsoft AI Tour
+Take your organization to the AI frontier
+Join the free Microsoft AI Tour—learn, connect, and lead the future of innovation.
+Learn more
+Back to carousel navigation controls
+AGENTS
+Tailor AI experiences to fit your business needs
+Enhance Copilot with Microsoft-built agents or build your own standalone agents with Copilot Studio.
+Agents for work
+Transform your business by using agents to automate and execute processes for increased efficiency, cost savings, and revenue generation.
+Get started with agents
+Microsoft Copilot Studio
+Create AI experiences for employees and customers across various channels, including websites and apps.
+Learn more
+FAQ
+Frequently asked questions
+Expand all
+Collapse all
+01/
+What is Microsoft Copilot and how is it different from Copilot Chat?
+Microsoft Copilot is an AI-powered assistant that helps you work more efficiently by generating content, answering questions, analyzing information, and automating tasks. It combines large language models with your work data from Microsoft Graph and Microsoft 365 to provide personalized assistance. Copilot Chat is a web-grounded AI assistant included at no additional cost with eligible Microsoft 365 plans. It also includes Copilot in Outlook and the Microsoft Copilot app. Customers can use custom agents built by their organization on a metered basis.
+When you purchase a Microsoft 365 plan with Copilot, or add a Microsoft 365 Copilot license to an existing subscription, you unlock additional capabilities, including Work IQ, Copilot in Teams and Microsoft 365 apps such as Word, Excel, and PowerPoint, access to Microsoft pre-built agents like Researcher, Analyst, and Facilitator, and the ability to use assistive custom agents at no additional cost. Organizations with Microsoft 365 Copilot licenses also gain access to advanced analytics to measure usage, adoption, and business impact.
+02/
+Which apps support Microsoft Copilot and what can it do in each?
+Copilot delivers AI assistance tailored to the Microsoft 365 apps. For example, in Word, it helps draft documents, suggest edits, and summarize text. In Excel, it analyzes data, creates charts, and generates insights. In PowerPoint, it helps design presentations by generating outlines and recommending images or layouts. In Outlook, it drafts emails and summarizes lengthy email threads. In Teams, it recaps meetings and highlights action items from chats.
+03/
+What Microsoft Copilot features are usage-based?
+Everyday AI experiences, like chat and Copilot in your Microsoft 365 apps, are included with your license. More advanced AI experiences are billed based on usage. Today, these include Copilot Cowork, Code, Autopilot, and the Work IQ APIs. More usage-based services may be added over time.
+04/
+How does usage-based billing work?
+Usage-based billing lets you pay for advanced AI capabilities based on how much you use them. These experiences use Copilot Credits, so you pay based on actual usage, while the Copilot capabilities included with your subscription stay included. Learn more about usage-based billing and Copilot Credits.
+Learn more about usage-based billing and Copilot Credits.
+05/
+How do I control what my organization spends?
+Administrators can manage usage-based billing in Cost Management in the Microsoft 365 admin center. You can adjust usage controls and spending policies to fit your organization’s needs. Charges apply only when usage-based experiences are used.
+06/
+Which languages does Microsoft Copilot support?
+See the list of supported languages.
+07/
+How does Microsoft Copilot help support data security and privacy?
+Microsoft Copilot is built with enterprise-grade security and privacy, using the same controls and permissions that help protect your data in Microsoft 365. Copilot follows your organization’s existing Microsoft 365 security settings.
+With enterprise data protection (EDP) in Copilot, prompts and responses stay within the Microsoft 365 service boundary and all associated data handling commitments apply, including support for General Data Protection Regulation (GDPR), International Organization for Standardization (ISO)/IEC 27018, and the Microsoft Data Protection Addendum (DPA). Prompts and responses are logged, subject to your data retention policies, and will be available for eDiscovery and other Microsoft Purview capabilities. The specific controls will vary depending on the underlying subscription plan. Prompts and responses are not used to train the underlying large language models.
+08/
+What are the main benefits of Microsoft Copilot for business?
+Microsoft Copilot enhances business processes by combining large language models (LLMs) with your work context. Key features include:
+Microsoft Graph Grounding and Microsoft Graph connectors: Adds context from emails, chats, documents, and meetings.​
+Enterprise Data Protection (EDP): Ensures data stays within Microsoft 365 boundaries, supporting GDPR and other standards.​
+Copilot Chat: Integrates web, work, and business data into a rich information database.​
+Copilot Pages: Organizes and shares content for easy collaboration and project tracking.​
+Copilot in the flow of your work: Available in Microsoft 365 apps like Word, Excel, PowerPoint, and Outlook.​
+Microsoft Teams collaboration: Streamlines meetings with real-time summaries and insights.​
+Pre-built agents: Connects to business applications, including SharePoint.​
+Copilot Studio: Enables users to create and customize workflow agents using the Copilot Chat or Standard harness.​
+IT controls: Helps manage AI at scale including management controls, measurement, and reporting.
+09/
+What is Work IQ and how does it work?
+Work IQ is the intelligence layer that enriches Microsoft Copilot and agents with an implicit understanding of your work—inside and out. It connects your context, workflows, and relationships to deliver an experience that is built just for you and the flow of your work. Work IQ includes data from multiple sources: Microsoft 365 content and metadata; line of business data ingested through Copilot connectors—and the comprehensive semantic index derived from your Microsoft 365 and line-of-business datasets. Work IQ also includes Copilot Memory to better understand your style, habits, and preferences. The result is a rich experience that is implicitly grounded in the details of your work patterns, relationships, and workflows. It enables Copilot to provide new insights and anticipate future needs and proactively take action to deliver the best results.
+10/
+What are agents and what can they do?
+Agents are AI systems that help individuals and organizations manage tasks and make informed decisions. Using agents within Copilot, you and your business can drive efficiency and get more work done faster. Agents can perform various tasks to assist people and organizations:
+Retrieve information: Query systems like HR, CRM, or financial databases.
+Help with basic tasks: Submit expense reports, update CRM systems, create IT help desk tickets.
+Perform specialized roles: Facilitate meetings, compile research reports, analyze data sets.
+Automate processes: Handle financial planning, sales qualification, and supplier communications.
+11/
+What’s the difference between Copilot Studio in Microsoft Copilot and Copilot Studio licensed separately?
+Copilot Studio that’s included with a Microsoft 365 Copilot license lets the licensed users build and use internal agents within Microsoft 365 using the Copilot Chat and Standard harness at no additional cost.
+The standalone Copilot Studio license offers additional flexibility—you can create agents using the GitHub Copilot harness and publish to external channels (like websites, apps, and social platforms), non-licensed users can use the agent, and you can choose from different pricing options.
+Get started
+Find the right Microsoft Copilot plan for your organization
+Unlock agentic work with pricing that scales as you do.
+See pricing
+More to explore
+Microsoft Copilot for individual use
+Get Copilot in Microsoft 365 applications for individuals with a Microsoft 365 Personal or Family subscription.
+Learn more
+More to explore
+Microsoft Copilot for enterprise
+Add Copilot to your existing Microsoft 365 for enterprise subscription.
+Learn more
+More to explore
+Copilot Chat​
+Experience secure AI chat powered by the latest large language models, with metered pricing for agents and robust IT control, including enterprise data protection and agent management.
+Open Copilot Chat
+[*]
+This discount offer is available between July 1, 2026, and December 31, 2026. The Microsoft 365 Copilot Business add‑on is available only to existing Microsoft 365 customers with an eligible Business plan. Offers and discounts may vary between Microsoft 365 plans with Copilot and add-ons. An annual commitment is required, and promotional pricing applies to the first year only. This subscription automatically renews and is subject to recurring annual billing with a payment method required. This promotion is not available on trial subscriptions. Customers have a 7-day cancellation window to receive a prorated refund. This offer may not be combined with any other offer. Microsoft reserves the right to cancel, change, or suspend this offer at any time without notice in its sole discretion.
+[1]
+Some AI experiences require usage-based billing and may result in charges based on usage, beyond your license fees. Learn more about usage-based billing. Once your paid subscription begins, you have a 7-day cancellation window to receive a prorated refund, only paying for what you use. You may cancel your subscription at any time in the Microsoft 365 admin center. Learn how to cancel your Microsoft 365 subscription. When a subscription is canceled, all associated data will be deleted. Learn more about data retention, deletion, and destruction in Microsoft 365.
+[2]
+After your one-month free trial ends, your subscription will automatically convert to a paid subscription and you’ll be charged the applicable subscription fee based on the subscription term and billing plan you select. Cancel anytime during your free trial to stop future charges. A credit card is required to sign up. Learn more.​
+Follow Microsoft Copilot
+Surface Laptop Ultra
+Surface Pro
+Surface Laptop
+Surface RTX Spark Dev Box
+Explore Copilot
+Explore Microsoft products
+Windows 11 apps
+Account profile
+Download Center
+Microsoft Store support
+Returns
+Order tracking
+Certified Refurbished
+Why buy from Microsoft Store
+Flexible Payments
+Microsoft in education
+Devices for education
+Microsoft Teams for Education
+Microsoft 365 Education
+How to buy for your school
+Educator training and development
+Deals for students and parents
+AI for education
+Microsoft AI
+Microsoft Security
+Dynamics 365
+Microsoft 365
+Microsoft Power Platform
+Microsoft Teams
+Microsoft Copilot
+Small Business
+Azure
+Microsoft Developer
+Microsoft Learn
+Support for AI marketplace apps
+Microsoft Tech Community
+Microsoft Marketplace
+Software companies
+Visual Studio
+Careers
+About Microsoft
+Company news
+Privacy at Microsoft
+Investors
+Diversity and inclusion
+Accessibility
+Sustainability
+English (United States)
+Your Privacy Choices
+Consumer Health Privacy
+Sitemap
+Contact Microsoft
+Privacy
+Manage cookies
+Terms of use
+Trademarks
+Safety & eco
+Recycling
+About our ads
