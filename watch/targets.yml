@@ -46,6 +46,14 @@ competitors:
     pages:
       - { label: home, url: https://asklio.ai }
 
+  - name: Ando
+    group: direct
+    added: 2026-11-03
+    reason: Agent-native team messenger (humans + AI agents as members); emerged from stealth Sep 2026 with $20M seed.
+    pages:
+      - { label: home,    url: https://ando.so }
+      - { label: pricing, url: https://ando.so/pricing }
+
   # ---------- Big platforms adding agents + shared workspaces ----------
   - name: ChatGPT
     group: platform

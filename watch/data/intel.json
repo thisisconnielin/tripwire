@@ -1,0 +1,72 @@
+[
+  {
+    "competitor": "Ando",
+    "type": "competitor_added",
+    "title": "Added Ando: agent-native team messenger, $20M seed",
+    "url": "https://runtimewire.com/article/ando-raises-20m-agent-native-team-messaging",
+    "date": "2026-09-24",
+    "source": "press",
+    "summary": "Slack-alternative where AI agents are workspace members with identities and permissions; direct overlap with Teamily's human+agent group chat for small teams.",
+    "found": "2026-11-03T05:35:51+00:00"
+  },
+  {
+    "competitor": "Ando",
+    "type": "funding",
+    "title": "Ando emerges from stealth with $20M from Accel, Index, Emergence",
+    "url": "https://runtimewire.com/article/ando-20m-agent-messaging-slack",
+    "date": "2026-09-24",
+    "source": "press",
+    "summary": "Well-funded new entrant on the same ICP, currently waitlist-only; expect fast competition for agent-in-chat positioning.",
+    "found": "2026-11-03T05:35:51+00:00"
+  },
+  {
+    "competitor": "Cue (Manus)",
+    "type": "launch",
+    "title": "Manus launches Cue, personal agents with group chats, alongside Manus 2.0",
+    "url": "https://thenextweb.com/news/manus-2-0-cue-ai-agents-email-phone-wallet",
+    "date": "2026-09-28",
+    "source": "press",
+    "summary": "Cue agents get their own email, phone and wallet and can share group chats to split work; early access via invite code, directly overlaps our agents-in-group-chat pitch.",
+    "found": "2026-11-03T05:35:51+00:00"
+  },
+  {
+    "competitor": "Manus",
+    "type": "funding",
+    "title": "Manus reportedly raises $500M+ led by Boyu and IDG",
+    "url": "https://af.net/realtime/singapores-manus-ai-secures-500m-funding-led-by-boyu-capital-and-idg-capital/",
+    "date": "2026-10-12",
+    "source": "press",
+    "summary": "Large round (single outlet, status vs Meta unclear) gives Manus resources to push Cue and team features.",
+    "found": "2026-11-03T05:35:51+00:00"
+  },
+  {
+    "competitor": "Gemini",
+    "type": "launch",
+    "title": "Google previews Gemini agent for work: team agents with own Workspace accounts",
+    "url": "https://www.technobezz.com/news/google-gemini-agent-own-workspace-account",
+    "date": "2026-10-08",
+    "source": "press",
+    "summary": "Team agents with their own Workspace identity can be added to group chats and shared tasks (private preview, no price); platform move into our agent-as-teammate space.",
+    "found": "2026-11-03T05:35:51+00:00"
+  },
+  {
+    "competitor": "Slack",
+    "type": "pricing",
+    "title": "Slack Enterprise+ public price replaced by 'Contact sales'",
+    "url": "https://pricingsaas.com/companies/slack/diffs/2026D286",
+    "date": "2026-10-13",
+    "source": "pricing tracker",
+    "summary": "Tracker shows $45/user/month listing removed on Oct 13; cause unconfirmed, affects enterprise not small teams.",
+    "found": "2026-11-03T05:35:51+00:00"
+  },
+  {
+    "competitor": "Microsoft Copilot",
+    "type": "news",
+    "title": "Copilot Studio enhancements for Copilot Chat agents GA Oct 26",
+    "url": "https://mc.merill.net/message/MC1518233",
+    "date": "2026-10-21",
+    "source": "Microsoft Message Center",
+    "summary": "Connected agents, topics and evaluations arrive in Copilot Chat agents, strengthening multi-agent workflows inside Microsoft 365.",
+    "found": "2026-11-03T05:35:51+00:00"
+  }
+]
