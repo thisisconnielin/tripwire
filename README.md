@@ -1,8 +1,8 @@
 # Tripwire
 
-**A Claude skill that finds your competitors, tracks what they change, launch and post, and tells you what to do about it.**
+**A skill that finds your competitors, tracks what they change, launch and post, and tells you what to do about it.**
 
-Tell Claude your company. Tripwire works out your ICP, finds the companies selling to the same
+Tell AI your company. Tripwire works out your ICP, finds the companies selling to the same
 buyers, and tracks them every time you ask:
 
 - **Website changes**: snapshots of home, pricing, changelog pages, diffed against the last scan.
@@ -91,12 +91,11 @@ enabled: false                            # pause a page or competitor
 
 ## How this repo is maintained
 
-Claude develops Tripwire itself, via [claude-code-action](https://github.com/anthropics/claude-code-action)
+Connie develops Tripwire with Claude, via [claude-code-action](https://github.com/anthropics/claude-code-action)
 (this only touches the skill's code; it never scans anyone's competitors):
 
 | Workflow | When (PST) | What |
 |---|---|---|
-| Daily dev | 8:30am, 2:30pm, 8:30pm | one small tested fix or feature per run |
 | Weekly release | Friday 10am | one bigger feature in 3–6 commits, version bump, git tag |
 
 It follows [CLAUDE.md](CLAUDE.md) and works through [ROADMAP.md](ROADMAP.md).
@@ -104,8 +103,7 @@ Run tests with `python -m unittest discover tests`.
 
 ## Credits
 
-Built by [Connie](https://github.com/thisisconnielin) and Claude. Every commit is co-authored by
-Claude, from the first version to the daily runs.
+Built by [Connie](https://github.com/thisisconnielin) and Claude, sometime Codex.
 
 ## License
 
