@@ -19,7 +19,7 @@ Pick the work in this order:
 3. The **top unchecked `[small]` item in `ROADMAP.md`**. Never start a `[big]` item.
    For fetcher items (403, JS-only pages, noise), reproduce with a temporary watch list:
    write `/tmp/smoke/watch/targets.yml`, run
-   `python skills/tripwire/scripts/tripwire.py scan --config /tmp/smoke/watch/targets.yml`,
+   `python3 skills/tripwire/scripts/tripwire.py scan --config /tmp/smoke/watch/targets.yml`,
    fix the fetcher or extraction, and add a fixture-based test.
 
 Check `git log --since=24.hours` first so you don't redo or conflict with today's earlier runs.
@@ -38,8 +38,8 @@ Every daily run that changes the skill bumps the **patch** version in both `VERS
    new roadmap items, and still release.
 
 ## Definition of done (every run)
-- Every logic change has a test in `tests/`. `python -m unittest discover tests` must pass.
-- `python -c "import sys; sys.path.insert(0,'skills/tripwire/scripts'); import tripwire; tripwire.load_targets('skills/tripwire/targets.example.yml')"` must succeed.
+- Every logic change has a test in `tests/`. `python3 -m unittest discover tests` must pass.
+- `python3 -c "import sys; sys.path.insert(0,'skills/tripwire/scripts'); import tripwire; tripwire.load_targets('skills/tripwire/targets.example.yml')"` must succeed.
 - Reports must still render with empty data (`[]` / `{}`).
 - If you change what the skill can do, update `skills/tripwire/SKILL.md` so Claude knows to use it.
 - Never add a dependency that needs an API key to run. AI features stay optional.
