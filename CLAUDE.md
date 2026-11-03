@@ -24,6 +24,9 @@ Pick the work in this order:
 
 Check `git log --since=24.hours` first so you don't redo or conflict with today's earlier runs.
 
+Every daily run that changes the skill bumps the **patch** version in both `VERSION` and
+`.claude-plugin/plugin.json` (0.3.1 → 0.3.2). Installed plugins only update when the version changes.
+
 ## Weekly release (Fridays): ship ONE bigger feature
 
 1. Special request if not empty, otherwise the **top unchecked `[big]` item in `ROADMAP.md`**.

@@ -236,5 +236,13 @@ class TestIntel(unittest.TestCase):
         self.assertNotIn("Bad date", text)
 
 
+class TestRepo(unittest.TestCase):
+    def test_plugin_version_matches_version_file(self):
+        import json
+        root = Path(__file__).resolve().parents[1]
+        plugin = json.loads((root / ".claude-plugin" / "plugin.json").read_text())
+        self.assertEqual(plugin["version"], (root / "VERSION").read_text().strip())
+
+
 if __name__ == "__main__":
     unittest.main()
