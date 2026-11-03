@@ -66,6 +66,39 @@ class TestTripwire(unittest.TestCase):
             os.unlink(f.name)
 
 
+class TestFetch(unittest.TestCase):
+    def test_308_is_followed(self):
+        import urllib.request
+        req = urllib.request.Request("https://a.example/old")
+        new = s._Redirects().redirect_request(req, None, 308, "Permanent Redirect", {}, "https://a.example/new")
+        self.assertEqual(new.full_url, "https://a.example/new")
+
+    def test_retries_transient_errors_once(self):
+        import io, urllib.error
+        from unittest import mock
+
+        class Resp(io.BytesIO):
+            headers = mock.Mock(get_content_charset=lambda: "utf-8")
+
+        calls = [urllib.error.URLError("timed out"), Resp(b"<p>ok</p>")]
+        def open_(req, timeout):
+            r = calls.pop(0)
+            if isinstance(r, Exception):
+                raise r
+            return r
+        with mock.patch.object(s._OPENER, "open", side_effect=open_), mock.patch.object(s, "RETRY_DELAY", 0):
+            self.assertEqual(s.fetch("https://a.example"), "<p>ok</p>")
+
+    def test_403_is_not_retried(self):
+        import urllib.error
+        from unittest import mock
+        err = urllib.error.HTTPError("https://a.example", 403, "Forbidden", {}, None)
+        with mock.patch.object(s._OPENER, "open", side_effect=err) as o, mock.patch.object(s, "RETRY_DELAY", 0):
+            with self.assertRaises(urllib.error.HTTPError):
+                s.fetch("https://a.example")
+            self.assertEqual(o.call_count, 1)
+
+
 class TestScan(unittest.TestCase):
     def test_only_keeps_other_pages_health(self):
         import tempfile

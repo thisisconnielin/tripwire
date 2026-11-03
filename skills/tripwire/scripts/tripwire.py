@@ -15,7 +15,7 @@ Everything lives next to the config file (default watch/targets.yml):
 
       python tripwire.py intel < items.json    (log web findings; duplicates are skipped)
 """
-import argparse, datetime as dt, difflib, json, os, re, sys, urllib.request
+import argparse, datetime as dt, difflib, json, os, re, sys, time, urllib.error, urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -31,7 +31,10 @@ WATCHLIST_TYPES = {"competitor_added", "competitor_dropped"}
 MAX_LINES_STORED = 40  # per side (added / removed) in the feed
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/126.0 Safari/537.36 Tripwire/0.2")
+      "(KHTML, like Gecko) Chrome/126.0 Safari/537.36 Tripwire")
+HEADERS = {"User-Agent": UA, "Accept-Language": "en-US,en;q=0.9",
+           "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
+RETRY_DELAY = 3  # seconds before the single retry of a transient failure
 
 # Lines that change on every load and mean nothing.
 DEFAULT_IGNORE = [
@@ -107,11 +110,34 @@ def extract_lines(html, ignore_patterns):
     return p.title.strip(), lines
 
 
+class _Redirects(urllib.request.HTTPRedirectHandler):
+    """Follow 308 Permanent Redirect too (urllib only learned it in Python 3.11)."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return super().redirect_request(req, fp, 307 if code == 308 else code, msg, headers, newurl)
+
+    http_error_308 = urllib.request.HTTPRedirectHandler.http_error_302
+
+
+_OPENER = urllib.request.build_opener(_Redirects)
+
+
+def _transient(err):
+    if isinstance(err, urllib.error.HTTPError):
+        return err.code == 429 or err.code >= 500
+    return isinstance(err, (urllib.error.URLError, TimeoutError, ConnectionError))
+
+
 def fetch(url, timeout=30):
-    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "en-US,en;q=0.9"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        charset = r.headers.get_content_charset() or "utf-8"
-        return r.read().decode(charset, errors="replace")
+    """GET a page as text. Retries once on timeouts, connection errors, 429 and 5xx."""
+    for attempt in (1, 2):
+        try:
+            with _OPENER.open(urllib.request.Request(url, headers=HEADERS), timeout=timeout) as r:
+                charset = r.headers.get_content_charset() or "utf-8"
+                return r.read().decode(charset, errors="replace")
+        except Exception as e:
+            if attempt == 2 or not _transient(e):
+                raise
+            time.sleep(RETRY_DELAY)
 
 
 # ---------------------------------------------------------------- diffing
