@@ -209,7 +209,9 @@ def load_targets(path):
 
 
 # ---------------------------------------------------------------- main
-def scan(targets, now, workdir):
+def scan(targets, now, workdir, only=None):
+    """Scan `targets` (the whole watch list). With `only`, fetch just that competitor and keep the
+    last known health of every other page, so a partial scan doesn't shrink the report."""
     snap_dir, data_dir = workdir / "snapshots", workdir / "data"
     changes = load_json(data_dir / "changes.json", [])
     status = load_json(data_dir / "status.json", {})
@@ -217,6 +219,10 @@ def scan(targets, now, workdir):
     new_events, health = [], []
 
     for t in targets:
+        if only and t["competitor"].lower() != only.lower():
+            if t["slug"] in prev_targets:
+                health.append(prev_targets[t["slug"]])
+            continue
         print(f"→ {t['competitor']} / {t['label']}  {t['url']}")
         h = dict(prev_targets.get(t["slug"], {}))
         h.update({k: t[k] for k in ("slug", "competitor", "group", "label", "url")})
@@ -495,9 +501,9 @@ def main(argv=None):
         return
 
     targets = load_targets(config)
-    if args.only:
-        targets = [t for t in targets if t["competitor"].lower() == args.only.lower()]
-    real = scan(targets, now, workdir)
+    if args.only and not any(t["competitor"].lower() == args.only.lower() for t in targets):
+        ap.error(f"no enabled competitor named {args.only!r} in {config}")
+    real = scan(targets, now, workdir, only=args.only)
     print(f"Report: {workdir / 'reports' / 'latest.md'}")
     if gh_out := os.environ.get("GITHUB_OUTPUT"):
         with open(gh_out, "a") as f:

@@ -66,6 +66,23 @@ class TestTripwire(unittest.TestCase):
             os.unlink(f.name)
 
 
+class TestScan(unittest.TestCase):
+    def test_only_keeps_other_pages_health(self):
+        import tempfile
+        from unittest import mock
+        targets = [{"competitor": c, "group": "direct", "label": "home", "url": f"https://{c}.example",
+                    "slug": f"{c}-home", "ignore": s.DEFAULT_IGNORE, "min_lines": 1} for c in ("a", "b")]
+        html = (FX / "v1.html").read_text()
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(s, "fetch", return_value=html) as f:
+            wd = Path(d)
+            s.scan(targets, "2026-11-03T05:00:00+00:00", wd)
+            s.scan(targets, "2026-11-04T05:00:00+00:00", wd, only="A")
+            self.assertEqual(f.call_count, 3)                       # 2 pages, then only a
+            status = s.load_json(wd / "data" / "status.json", {})
+            self.assertEqual([t["slug"] for t in status["targets"]], ["a-home", "b-home"])
+            self.assertEqual(status["targets"][1]["last_checked"], "2026-11-03T05:00:00+00:00")
+
+
 class TestReport(unittest.TestCase):
     NOW = "2026-11-03T05:00:00+00:00"
 
