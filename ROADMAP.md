@@ -15,10 +15,13 @@ Tick an item when it ships and add a line to the changelog.
 
 ## Fetcher fixes (reproduce with a temporary watch list, see CLAUDE.md)
 - [ ] [small] ChatGPT pricing (`chatgpt.com/pricing`) returns 403: find a readable official alternative or disable with a reason
-- [ ] [small] OpenAI news (`openai.com/news/`) returns 403: try the RSS feed or another official source
+- [x] [small] OpenAI news (`openai.com/news/`) returns 403: `openai.com/news/rss.xml` is readable; use that
 - [x] [small] Agnes AI home returns no readable text (JS-only): fixed by meta-tag fallback
 - [x] [small] Cue home returns no readable text (JS-only): fixed by meta-tag fallback
-- [ ] [small] Microsoft Copilot / Teams pages: huge diffs from "Trace Id" lines and nav variants; ignore them
+- [x] [small] Microsoft Copilot / Teams pages: fake diffs from "Trace Id" lines; ignored by default
+- [x] [small] 308 redirects (e.g. asklio.ai) failed on Python < 3.11; transient errors weren't retried
+- [ ] [small] Footnote markers glued to words ("plan6" → "plan7" on gemini.google) cause fake diffs; detect and normalise them safely
+- [ ] [small] Sitemap / feed hint: when a page is 403 or JS-only, look for `<link rel=alternate>` RSS or `/rss.xml` and suggest it in the report
 
 ## Next up
 - [ ] [small] Price detector: pair a removed and an added line that differ only in a price → "Pro: $25 → $29/mo" in the report
@@ -37,6 +40,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-03**: Bug fixes. `scan --only` no longer wipes other pages from the report; fetcher follows 308 redirects and retries timeouts / 5xx; report tolerates hand-edited intel and bad dates; `add` inserts into the competitor list instead of breaking files where other keys follow it; trace / request ids and hashes are ignored by default.
 - **2026-11-03**: `tripwire.py add "Name" --url ... [--pricing --group --reason]` appends a competitor to the watch list without losing comments.
 - **2026-11-03**: v0.3. Skill-only: installable as a Claude Code plugin (`.claude-plugin/`), runs locally in the user's folder. Removed the GitHub scan and intel workflows and the committed Teamily data; GitHub only runs Claude's dev and release work.
 - **2026-11-02**: Competitive intelligence. `watch/company.yml` (who we are + ICP), Claude web-search refresh that adds new competitors with the same ICP, drops dead ones, and logs launches / news / social via `tripwire.py intel`. Reports get "Watch list changes" and "Launches, news & social" sections. SKILL.md gains Discover and Daily refresh.
