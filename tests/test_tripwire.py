@@ -42,6 +42,10 @@ class TestTripwire(unittest.TestCase):
         s.add_competitor(f, "D", "https://d.com")
         self.assertEqual(len(s.load_targets(f)), 1)
 
+    def test_request_ids_are_noise(self):
+        html = "<p>Plans</p><p>This is the Trace Id: b365d2b2606f17ec4096ea94267a5f26</p><p>ref d1cc886fca5d8043f2759b80b6a411d8</p>"
+        self.assertEqual(s.extract_lines(html, s.DEFAULT_IGNORE)[1], ["Plans", "ref"])
+
     def test_diff_and_tags(self):
         added, removed = s.diff_lines(self.lines("v1.html"), self.lines("v2.html"))
         self.assertIn("$29/mo per seat", added)

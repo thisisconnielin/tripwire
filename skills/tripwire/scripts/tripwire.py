@@ -40,6 +40,8 @@ RETRY_DELAY = 3  # seconds before the single retry of a transient failure
 DEFAULT_IGNORE = [
     r"^©.*$", r"^copyright\b.*$", r"\b\d{1,2}:\d{2}(:\d{2})?\s?(am|pm)?\b",
     r"^\d+\s+(seconds?|minutes?|hours?)\s+ago$", r"^loading\.*$",
+    r"^.*\b(trace|request|correlation|session)[ -]?id\b.*$",  # "This is the Trace Id: 3f2a…"
+    r"\b[0-9a-f]{32,}\b",                                      # per-request hashes
 ]
 
 TAG_RULES = [
