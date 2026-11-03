@@ -71,7 +71,7 @@ class TestReport(unittest.TestCase):
         status = {"targets": [{"competitor": "Acme", "label": "pricing", "url": "u", "ok": True},
                               {"competitor": "Blocked", "label": "news", "url": "u", "ok": False, "error": "HTTP Error 403"}]}
         text = s.render_report(changes, status, self.NOW, days=1)
-        self.assertIn("**2 changes**", text)
+        self.assertIn("**2 page changes**", text)
         self.assertNotIn("Old", text)                                  # outside the window
         self.assertLess(text.index("### Acme"), text.index("### Zed"))  # pricing first
         self.assertIn("+ $29/mo", text)
@@ -94,6 +94,38 @@ class TestReport(unittest.TestCase):
             s.main(["report", "--config", str(cfg), "--days", "7", "--out", "week.md"])
             self.assertTrue((cfg.parent / "reports" / "week.md").exists())
             self.assertTrue((cfg.parent / "reports" / "latest.md").exists())
+
+
+class TestIntel(unittest.TestCase):
+    NOW = "2026-11-03T04:00:00+00:00"
+
+    def test_add_dedupes_and_validates(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            items = [{"competitor": "Acme", "type": "launch", "title": "Acme Agents", "url": "https://acme.com/blog/agents/"},
+                     {"competitor": "Newco", "type": "competitor_added", "title": "Newco", "summary": "Same ICP"}]
+            self.assertEqual(s.add_intel(wd, items, self.NOW), (2, 0))
+            again = [{"competitor": "Acme", "type": "social", "title": "Repost", "url": "https://ACME.com/blog/agents"}]
+            self.assertEqual(s.add_intel(wd, items + again, self.NOW), (0, 3))
+            with self.assertRaises(ValueError):
+                s.add_intel(wd, [{"competitor": "A", "type": "rumor", "title": "x", "url": "u"}], self.NOW)
+            with self.assertRaises(ValueError):
+                s.add_intel(wd, [{"competitor": "A", "type": "news", "title": "no url"}], self.NOW)
+
+    def test_report_sections(self):
+        intel = [{"competitor": "Acme", "type": "launch", "title": "Acme Agents", "url": "https://a", "date": "2026-11-02",
+                  "source": "X", "summary": "Agents in group chat", "found": self.NOW},
+                 {"competitor": "Newco", "type": "competitor_added", "title": "Newco", "summary": "Same ICP",
+                  "found": self.NOW},
+                 {"competitor": "Old", "type": "news", "title": "Old news", "url": "https://o", "date": "2026-10-01",
+                  "found": "2026-10-01T04:00:00+00:00"}]
+        text = s.render_report([], {}, self.NOW, days=1, intel=intel)
+        self.assertIn("**1 launch / news / social item**", text)
+        self.assertIn("**New competitor: Newco**: Same ICP", text)
+        self.assertIn("- `launch` [Acme Agents](https://a) (2026-11-02, X): Agents in group chat", text)
+        self.assertNotIn("Old news", text)
+        self.assertLess(text.index("## Launches"), text.index("## Website changes"))
 
 
 if __name__ == "__main__":

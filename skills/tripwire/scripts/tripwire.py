@@ -10,7 +10,10 @@ Everything lives next to the config file (default watch/targets.yml):
   snapshots/<slug>.txt      latest readable text of each page
   data/changes.json         feed of change events (newest first)
   data/status.json          last run + per-page health
+  data/intel.json           launches, news, social posts and watch-list changes found on the web
   reports/<date>.md         Markdown report of each scan (reports/latest.md = newest)
+
+      python tripwire.py intel < items.json    (log web findings; duplicates are skipped)
 """
 import argparse, datetime as dt, difflib, json, os, re, sys, urllib.request
 from html.parser import HTMLParser
@@ -21,6 +24,10 @@ import yaml
 SKILL_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = Path("watch") / "targets.yml"
 MAX_EVENTS = 1000
+MAX_INTEL = 2000
+INTEL_TYPES = ["competitor_added", "competitor_dropped", "launch", "pricing", "funding",
+               "partnership", "hiring", "social", "news"]
+WATCHLIST_TYPES = {"competitor_added", "competitor_dropped"}
 MAX_LINES_STORED = 40  # per side (added / removed) in the feed
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 "
@@ -257,12 +264,51 @@ def scan(targets, now, workdir):
     changes = (new_events + [e for e in changes if e["id"] not in ids])[:MAX_EVENTS]
     save_json(data_dir / "changes.json", changes)
     save_json(data_dir / "status.json", {"last_run": now, "targets": health})
-    write_report(workdir, render_report(changes, {"last_run": now, "targets": health}, now, days=1),
+    write_report(workdir, render_report(changes, {"last_run": now, "targets": health}, now, days=1,
+                                        intel=load_json(data_dir / "intel.json", [])),
                  f"{now[:10]}.md")
     real = [e for e in new_events if e["type"] == "change"]
     print(f"\nDone. {len(real)} change(s), {len(new_events) - len(real)} baseline(s), "
           f"{sum(not h['ok'] for h in health)} error(s).")
     return real
+
+
+# ---------------------------------------------------------------- intel
+def _intel_key(item):
+    url = (item.get("url") or "").strip().lower().rstrip("/")
+    if url and item["type"] not in WATCHLIST_TYPES:
+        return url
+    return f"{item['type']}|{item['competitor'].lower()}|{item.get('title', '').strip().lower()}"
+
+
+def add_intel(workdir, items, now):
+    """Append web findings to data/intel.json, newest first. Returns (added, skipped) counts.
+
+    Each item: {competitor, type, title, url, summary?, source?, date?}. `date` is when it was
+    published (defaults to today); `found` is set to `now` and decides which report shows it.
+    """
+    path = workdir / "data" / "intel.json"
+    existing = load_json(path, [])
+    seen = {_intel_key(e) for e in existing}
+    fresh, skipped = [], 0
+    for raw in items:
+        item = {k: (v.strip() if isinstance(v, str) else v) for k, v in raw.items()}
+        if not item.get("competitor") or not item.get("title"):
+            raise ValueError(f"intel item needs competitor and title: {raw}")
+        if item.get("type") not in INTEL_TYPES:
+            raise ValueError(f"intel type must be one of {INTEL_TYPES}: {raw}")
+        if item["type"] not in WATCHLIST_TYPES and not item.get("url"):
+            raise ValueError(f"intel item needs a source url: {raw}")
+        key = _intel_key(item)
+        if key in seen:
+            skipped += 1
+            continue
+        seen.add(key)
+        item.setdefault("date", now[:10])
+        item["found"] = now
+        fresh.append(item)
+    save_json(path, (fresh + existing)[:MAX_INTEL])
+    return len(fresh), skipped
 
 
 # ---------------------------------------------------------------- reports
@@ -274,11 +320,15 @@ def _quote(line):
     return line if len(line) <= 160 else line[:157] + "…"
 
 
-def render_report(changes, status, now, days=1):
-    """Markdown report of changes in the `days` days up to `now`, plus scan health."""
+def render_report(changes, status, now, days=1, intel=None):
+    """Markdown report of what was found in the `days` days up to `now`, plus scan health."""
     end = dt.datetime.fromisoformat(now)
     start = end - dt.timedelta(days=days)
-    recent = [e for e in changes if start < dt.datetime.fromisoformat(e["date"]) <= end]
+    within = lambda d: start < dt.datetime.fromisoformat(d) <= end
+    recent = [e for e in changes if within(e["date"])]
+    found = [i for i in (intel or []) if within(i["found"])]
+    watchlist = [i for i in found if i["type"] in WATCHLIST_TYPES]
+    news = [i for i in found if i["type"] not in WATCHLIST_TYPES]
     real = [e for e in recent if e["type"] == "change"]
     baselines = [e for e in recent if e["type"] == "baseline"]
     targets = status.get("targets", [])
@@ -287,10 +337,34 @@ def render_report(changes, status, now, days=1):
     title = f"Tripwire report: {now[:10]}" if days == 1 else \
         f"Tripwire digest: {start.date().isoformat()} to {now[:10]}"
     out = [f"# {title}", "",
-           f"{len(targets)} pages watched · **{len(real)} change{'s' * (len(real) != 1)}** · "
+           f"{len(targets)} pages watched · **{len(real)} page change{'s' * (len(real) != 1)}** · "
+           f"**{len(news)} launch / news / social item{'s' * (len(news) != 1)}** · "
            f"{len(targets) - len(broken)} OK · {len(broken)} not readable", ""]
 
-    out += ["## What changed", ""]
+    if watchlist:
+        out += ["## Watch list changes", ""]
+        for i in watchlist:
+            verb = "New competitor" if i["type"] == "competitor_added" else "Dropped"
+            src = f" ([source]({i['url']}))" if i.get("url") else ""
+            out.append(f"- **{verb}: {i['competitor']}**: {_quote(i.get('summary') or i['title'])}{src}")
+        out.append("")
+
+    if news:
+        out += ["## Launches, news & social", ""]
+        by_comp = {}
+        for i in news:
+            by_comp.setdefault(i["competitor"], []).append(i)
+        for comp in sorted(by_comp, key=str.lower):
+            out += [f"### {comp}", ""]
+            for i in sorted(by_comp[comp], key=lambda i: INTEL_TYPES.index(i["type"])):
+                src = f", {i['source']}" if i.get("source") else ""
+                line = f"- `{i['type']}` [{_quote(i['title'])}]({i['url']}) ({i['date']}{src})"
+                if i.get("summary"):
+                    line += f": {_quote(i['summary'])}"
+                out.append(line)
+            out.append("")
+
+    out += ["## Website changes", ""]
     if not real:
         out += ["No changes." + (" New pages get a baseline first; changes show from the next scan."
                                  if baselines else ""), ""]
@@ -339,12 +413,13 @@ def write_report(workdir, text, name):
 # ---------------------------------------------------------------- main
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Watch competitor pages and report what changed.")
-    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init"])
+    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init", "intel"])
     ap.add_argument("--config", default=os.environ.get("TRIPWIRE_CONFIG", str(DEFAULT_CONFIG)),
                     help="watch list (default: watch/targets.yml); data is stored next to it")
     ap.add_argument("--only", help="scan: only this competitor name")
     ap.add_argument("--days", type=int, default=7, help="report: how many days to cover (default 7)")
     ap.add_argument("--out", help="report: file name inside reports/ (default: printed only)")
+    ap.add_argument("--file", help="intel: JSON file with a list of items (default: stdin)")
     args = ap.parse_args(argv)
     config = Path(args.config)
     workdir = config.parent
@@ -359,9 +434,17 @@ def main(argv=None):
         print(f"Created {config}. Add your competitors, then run: python {Path(__file__).name} scan")
         return
 
+    if args.command == "intel":
+        raw = Path(args.file).read_text() if args.file else sys.stdin.read()
+        items = json.loads(raw)
+        added, skipped = add_intel(workdir, items if isinstance(items, list) else [items], now)
+        print(f"Logged {added} new item(s), skipped {skipped} already known.")
+        return
+
     if args.command == "report":
         text = render_report(load_json(workdir / "data" / "changes.json", []),
-                             load_json(workdir / "data" / "status.json", {}), now, days=args.days)
+                             load_json(workdir / "data" / "status.json", {}), now, days=args.days,
+                             intel=load_json(workdir / "data" / "intel.json", []))
         if args.out:
             print(f"Wrote {write_report(workdir, text, args.out)}")
         else:

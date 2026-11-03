@@ -84,4 +84,4 @@ echo "Setup complete; the first scan was dispatched. Check Actions for its resul
 echo "  Repo:       https://github.com/$REPO"
 echo "  Reports:    https://github.com/$REPO/blob/main/watch/reports/latest.md"
 echo "  Daily dev enabled: $ENABLE_DAILY_DEV"
-echo "  Schedule (PST): Claude dev 8:30am, 2:30pm, 8:30pm; scan 9pm; release Friday 10am."
+echo "  Schedule (PST): Claude dev 8:30am, 2:30pm, 8:30pm; intel 7:30pm; scan 9pm; release Friday 10am."

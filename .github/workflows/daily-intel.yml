@@ -1,0 +1,55 @@
+name: Daily intel (Claude)
+
+# Claude searches the web: new competitors with our ICP, drop-outs, and each competitor's
+# launches / news / social posts. Logged to watch/data/intel.json; the 9pm scan puts it in the report.
+on:
+  schedule:
+    - cron: "30 3 * * *"   # 03:30 UTC = previous day 7:30pm PST / 8:30pm PDT
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Optional: extra instructions (e.g. 'look hard for new agent-team apps')"
+        required: false
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: tripwire
+  cancel-in-progress: false
+
+jobs:
+  intel:
+    if: vars.ENABLE_DAILY_DEV == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            You run Tripwire's daily refresh for this repo. SKILL_DIR is skills/tripwire.
+            Follow section "3. Daily refresh" of skills/tripwire/SKILL.md exactly, for watch/company.yml and watch/targets.yml.
+            Do not change code, tests or docs in this run; only watch/targets.yml and watch/data/intel.json (via the intel command).
+            Today's date (UTC): run `date -u +%F`.
+            Extra instructions (may be empty): ${{ github.event.inputs.task }}
+
+            When done, if anything changed:
+              python -m unittest discover tests   (must pass)
+              git add watch/targets.yml watch/data/intel.json
+              git commit --author="${{ vars.COMMIT_AUTHOR || 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' }}" -m "intel $(date -u +%F): <N> item(s), <short list of top items>" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+              git pull --rebase origin main && git push origin HEAD:main
+            End with a short summary: items logged, competitors added/dropped, candidates you didn't add.
+          claude_args: |
+            --max-turns 80
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash(python:*),Bash(python3:*),Bash(git:*),Bash(date:*),Bash(ls:*),Bash(cat:*),Bash(curl:*)"

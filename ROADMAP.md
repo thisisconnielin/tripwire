@@ -4,6 +4,15 @@ Daily runs ship the top unchecked `[small]` item (after broken scans, noise and 
 Friday releases ship the top unchecked `[big]` item in several commits.
 Tick an item when it ships and add a line to the changelog.
 
+## Core: find and track competitors (highest priority after broken scans)
+- [ ] [small] `tripwire.py add <name> --url <home> [--pricing URL] [--group G] [--reason R]` appends a competitor to `watch/targets.yml` without losing comments, so discovery doesn't hand-edit YAML
+- [ ] [small] Report: "Top moves" line at the very top, mixing page changes and intel by importance (pricing > launch > funding > social)
+- [ ] [small] Report: watch-list table (competitor, group, added date, reason, pages OK / broken)
+- [ ] [small] `tripwire.py candidates`: keep a `data/candidates.json` of possible competitors seen but not added, with how often they show up, so strong ones get promoted
+- [ ] [big] Free feeds without AI: for each competitor, auto-detect blog / changelog RSS and log new posts as `launch` / `news` intel
+- [ ] [big] Hacker News (Algolia API) + Product Hunt + GitHub releases: log competitor mentions and launches as intel, no API key
+- [ ] [big] Competitor profile pages: `watch/competitors/<slug>.md` with positioning, pricing, latest launches, 30-day timeline
+
 ## Broken scans (fix first)
 - [ ] [small] ChatGPT pricing (`chatgpt.com/pricing`) returns 403: find a readable official alternative or disable with a reason
 - [ ] [small] OpenAI news (`openai.com/news/`) returns 403: try the RSS feed or another official source
@@ -28,6 +37,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-02**: Competitive intelligence. `watch/company.yml` (who we are + ICP), daily Claude web-search run (`daily-intel.yml`) that adds new competitors with the same ICP, drops dead ones, and logs launches / news / social via `tripwire.py intel`. Reports get "Watch list changes" and "Launches, news & social" sections. SKILL.md gains Discover and Daily refresh.
 - **2026-11-02**: JS-only pages (Agnes, Cue) now fall back to meta title/description so they can be watched.
 - **2026-11-02**: v0.1. Nightly scan, readable-text diff, noise filters, change tags, optional AI summary, Pages dashboard, unit tests.
 - **2026-11-02**: Teamily watch list (13 competitors, 17 pages) + `group` filter (direct / platform / indirect).

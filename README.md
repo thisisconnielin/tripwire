@@ -1,17 +1,26 @@
 # Tripwire
 
-**A Claude skill that tells you what your competitors changed, and what to do about it.**
+**A Claude skill that finds your competitors, tracks what they change, launch and post, and tells you what to do about it.**
 
-Ask Claude *"what did our competitors change this week?"* Tripwire snapshots their pages (home,
-pricing, changelog, careers…), diffs them against the last scan, and Claude turns the diff into a
-short GTM readout: top moves, why they matter, what to do next.
+Tell Claude your company. Tripwire works out your ICP, finds the companies selling to the same
+buyers, and tracks them every day:
+
+- **Website changes**: snapshots of home, pricing, changelog pages, diffed against the last scan.
+- **Launches, news, social**: Claude searches the web for each competitor's new features, funding,
+  pricing moves and posts (X, LinkedIn, Product Hunt, Hacker News, press).
+- **The competitor list itself**: new entrants with your ICP are added; companies that shut down,
+  pivot or get acquired are dropped, each with a reason.
+
+Then Claude turns it into a short GTM readout: top moves, why they matter, what to do next.
 
 No dashboard, no API key, no per-seat pricing. Just Markdown reports in your repo.
 
 ```
-watch/targets.yml ──► tripwire.py scan ──► readable text ──► diff vs. last scan
-                                                                   │
-            Claude GTM readout ◄── watch/reports/latest.md ◄───────┘
+watch/company.yml ──► Claude + web search ──► new / dropped competitors ──► watch/targets.yml
+                              │                                                │
+                              └─► launches, news, social ──► data/intel.json   │
+                                                                   │           ▼
+          Claude GTM readout ◄── watch/reports/latest.md ◄── tripwire.py scan (page diffs)
 ```
 
 - Strips scripts, styles, timestamps and © lines so you only see real changes.
@@ -30,8 +39,9 @@ cp -R tripwire-src/skills/tripwire ~/.claude/skills/          # for you, every p
 pip install pyyaml
 ```
 
-Then in Claude Code: *"set up tripwire for Acme and Globex"* → it creates `watch/targets.yml`.
-After that: *"what did competitors change?"*, *"weekly competitor digest"*, *"did Acme change pricing?"*
+Then in Claude Code: *"set up tripwire for acme.com"* → it writes `watch/company.yml`, finds your
+competitors, and (after you approve the list) creates `watch/targets.yml`.
+After that: *"what did competitors launch this week?"*, *"weekly competitor digest"*, *"did Globex change pricing?"*
 
 ## Run it by hand
 
@@ -40,6 +50,7 @@ python skills/tripwire/scripts/tripwire.py init               # create watch/tar
 python skills/tripwire/scripts/tripwire.py scan               # scan everything → watch/reports/latest.md
 python skills/tripwire/scripts/tripwire.py scan --only Acme   # one competitor
 python skills/tripwire/scripts/tripwire.py report --days 7    # 7-day digest
+python skills/tripwire/scripts/tripwire.py intel < items.json # log launches / news / social found on the web
 python -m unittest discover tests
 ```
 
@@ -70,7 +81,7 @@ enabled: false                            # pause a page or competitor
 previous day), commits `watch/reports/<date>.md`, and on Friday nights adds a 7-day digest
 `watch/reports/week-<date>.md`. It also rescans whenever `watch/targets.yml` changes on `main`.
 
-This repo watches Teamily's competitors: see [`watch/reports/latest.md`](watch/reports/latest.md).
+The scan runs after the daily intel run, so each report includes both. This repo watches Teamily's competitors: see [`watch/reports/latest.md`](watch/reports/latest.md).
 
 ## It maintains itself
 
@@ -79,6 +90,7 @@ With the repository variable `ENABLE_DAILY_DEV=true` and a `CLAUDE_CODE_OAUTH_TO
 
 | Workflow | When (PST) | What |
 |---|---|---|
+| Daily intel | 7:30pm | web search: new / dropped competitors, launches, news, social |
 | Daily dev | 8:30am, 2:30pm, 8:30pm | one small tested fix or feature per run |
 | Weekly release | Friday 10am | one bigger feature in 3–6 commits, `VERSION` bump, git tag |
 

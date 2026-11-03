@@ -1,9 +1,13 @@
 # Tripwire: maintainer rules for the scheduled Claude runs
 
-Tripwire is a Claude skill that watches competitor pages, diffs them nightly and writes a GTM report.
+Tripwire is a Claude skill for competitive intelligence: from a company profile it finds competitors
+with the same ICP, tracks their website changes, launches, news and social posts daily, and writes a
+GTM report.
 - Skill: `skills/tripwire/SKILL.md` (what Claude does when a user asks) and
   `skills/tripwire/scripts/tripwire.py` (scanner + reports; stdlib + pyyaml only).
-- This repo's own watch list and data: `watch/` (`targets.yml`, `snapshots/`, `data/`, `reports/`).
+- This repo's own data: `watch/` (`company.yml`, `targets.yml`, `snapshots/`, `data/`, `reports/`).
+- The **Daily intel** workflow (Claude + web search) owns competitor discovery and
+  `watch/data/intel.json`. Dev runs improve the code; they don't log intel.
 - Tests: `tests/`. Version: `VERSION`. Plans: `ROADMAP.md`.
 
 There is no website. Output is Markdown in `watch/reports/`.
