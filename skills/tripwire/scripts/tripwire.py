@@ -14,6 +14,7 @@ Everything lives next to the config file (default watch/targets.yml):
   reports/<date>.md         Markdown report of each scan (reports/latest.md = newest)
 
       python tripwire.py intel < items.json    (log web findings; duplicates are skipped)
+      python tripwire.py check                 (what each competitor's own homepage says it is)
 """
 import argparse, datetime as dt, difflib, json, os, re, sys, time, urllib.error, urllib.request
 from html.parser import HTMLParser
@@ -61,25 +62,34 @@ class TextExtractor(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.parts, self.skip_depth, self.title = [], 0, ""
-        self._in_title = False
+        self._in_title = self._title_done = False
         self.meta = []
+        self.svg_depth = 0
 
     def handle_starttag(self, tag, attrs):
+        if tag == "svg":
+            self.svg_depth += 1
         if tag == "meta":
             a = dict(attrs)
             key = (a.get("name") or a.get("property") or "").lower()
             if key in ("description", "og:title", "og:description", "twitter:description") and a.get("content"):
                 self.meta.append(a["content"])
-        if tag == "title":
+        if tag == "title" and not self._title_done and not self._in_svg():
             self._in_title = True
         if tag in self.SKIP:
             self.skip_depth += 1
         elif tag in self.BLOCK:
             self.parts.append("\n")
 
+    def _in_svg(self):
+        # <title> inside an inline <svg> icon is a tooltip, not the page title.
+        return self.svg_depth > 0
+
     def handle_endtag(self, tag):
-        if tag == "title":
-            self._in_title = False
+        if tag == "svg" and self.svg_depth:
+            self.svg_depth -= 1
+        if tag == "title" and self._in_title:
+            self._in_title, self._title_done = False, True
         if tag in self.SKIP and self.skip_depth:
             self.skip_depth -= 1
         elif tag in self.BLOCK:
@@ -109,7 +119,20 @@ def extract_lines(html, ignore_patterns):
             continue
         lines.append(line)
         seen_prev = line
-    return p.title.strip(), lines
+    return re.sub(r"\s+", " ", p.title).strip(), lines
+
+
+# Bot-protection and error pages that come back as 200 / 403 with HTML instead of the real page.
+BLOCK_PAGE = re.compile(
+    r"request has been blocked|access denied|attention required|just a moment|verify you are human"
+    r"|are you a robot|enable javascript and cookies|captcha|pardon our interruption", re.I)
+
+
+def blocked_reason(title, lines):
+    """Return why this looks like a bot-protection page rather than the real one, else None."""
+    head = " ".join([title] + lines[:5])
+    m = BLOCK_PAGE.search(head)
+    return f"Bot protection page instead of content (\"{m.group(0)}\")" if m else None
 
 
 class _Redirects(urllib.request.HTTPRedirectHandler):
@@ -131,11 +154,16 @@ def _transient(err):
 
 def fetch(url, timeout=30):
     """GET a page as text. Retries once on timeouts, connection errors, 429 and 5xx."""
+    return fetch_page(url, timeout)[0]
+
+
+def fetch_page(url, timeout=30):
+    """Like fetch, but returns (text, final URL after redirects)."""
     for attempt in (1, 2):
         try:
             with _OPENER.open(urllib.request.Request(url, headers=HEADERS), timeout=timeout) as r:
                 charset = r.headers.get_content_charset() or "utf-8"
-                return r.read().decode(charset, errors="replace")
+                return r.read().decode(charset, errors="replace"), r.geturl()
         except Exception as e:
             if attempt == 2 or not _transient(e):
                 raise
@@ -264,6 +292,12 @@ def scan(targets, now, workdir, only=None):
             continue
         if not lines:
             h.update(ok=False, error="Page returned no readable text (JS-only page?)")
+            health.append(h)
+            continue
+        if reason := blocked_reason(title, lines):
+            # Never diff a block page against the real snapshot: it would look like a rewrite.
+            h.update(ok=False, error=reason)
+            print(f"  ! {reason}")
             health.append(h)
             continue
         h.update(ok=True, error=None, title=title, lines=len(lines))
@@ -457,7 +491,65 @@ def write_report(workdir, text, name):
     return rdir / name
 
 
-def add_competitor(config, name, url, pricing=None, group=None, reason=None):
+# ---------------------------------------------------------------- identity check
+def _host(url):
+    from urllib.parse import urlparse
+    h = (urlparse(url).hostname or "").lower()
+    return h[4:] if h.startswith("www.") else h
+
+
+def check_competitors(config, only=None, lines=6):
+    """Fetch each competitor's home page (its first page) and report what the site says it is.
+
+    Discovery picks competitors from search results, where names collide ("Lio" the procurement
+    AI vs. another Lio). This is the evidence for confirming identity and ICP fit."""
+    cfg = yaml.safe_load(Path(config).read_text()) or {}
+    out = []
+    for comp in cfg.get("competitors") or []:
+        if comp.get("enabled", True) is False or not comp.get("pages"):
+            continue
+        if only and comp["name"].lower() != only.lower():
+            continue
+        page = next((p for p in comp["pages"] if p.get("label") == "home"), comp["pages"][0])
+        row = {"competitor": comp["name"], "group": comp.get("group"), "url": page["url"],
+               "fit": comp.get("fit") or comp.get("reason")}
+        try:
+            html, final = fetch_page(page["url"])
+            ex = TextExtractor()
+            ex.feed(html)
+            title, text = extract_lines(html, DEFAULT_IGNORE)
+            if reason := blocked_reason(title, text):
+                raise RuntimeError(reason)
+            row.update(ok=True, title=title, description=next(iter(ex.meta), None),
+                       opening=text[:lines], final_url=final,
+                       redirected_to_other_site=_host(final) != _host(page["url"]))
+        except Exception as e:
+            row.update(ok=False, error=f"{type(e).__name__}: {e}"[:200])
+        out.append(row)
+    return out
+
+
+def render_check(rows):
+    out = []
+    for r in rows:
+        out.append(f"## {r['competitor']} ({r.get('group') or 'no group'})  {r['url']}")
+        if r.get("fit"):
+            out.append(f"- why it's on the list: {r['fit']}")
+        if not r["ok"]:
+            out += [f"- NOT REACHABLE: {r['error']}", ""]
+            continue
+        if r["redirected_to_other_site"]:
+            out.append(f"- REDIRECTS TO ANOTHER SITE: {r['final_url']} (acquired? renamed? wrong domain?)")
+        out.append(f"- title: {r['title'] or '(none)'}")
+        if r.get("description"):
+            out.append(f"- description: {r['description']}")
+        if r["opening"]:
+            out.append("- opening lines: " + " | ".join(r["opening"]))
+        out.append("")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def add_competitor(config, name, url, pricing=None, group=None, reason=None, fit=None):
     """Insert a competitor at the end of the `competitors:` list, keeping comments and the rest of
     the file. Returns False if already present. Never writes a file that doesn't parse."""
     config = Path(config)
@@ -492,6 +584,8 @@ def add_competitor(config, name, url, pricing=None, group=None, reason=None):
         block.append(f"{pad}  group: {q(group)}")
     if reason:
         block.append(f"{pad}  reason: {q(reason)}")
+    if fit:
+        block.append(f"{pad}  fit: {q(fit)}")
     block.append(f"{pad}  added: {dt.date.today().isoformat()}")
     block.append(f"{pad}  pages:")
     block.append(f"{pad}    - {{ label: home, url: {q(url)} }}")
@@ -513,7 +607,7 @@ def add_competitor(config, name, url, pricing=None, group=None, reason=None):
 # ---------------------------------------------------------------- main
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Watch competitor pages and report what changed.")
-    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init", "intel", "add"])
+    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init", "intel", "add", "check"])
     ap.add_argument("--config", default=os.environ.get("TRIPWIRE_CONFIG", str(DEFAULT_CONFIG)),
                     help="watch list (default: watch/targets.yml); data is stored next to it")
     ap.add_argument("name", nargs="?", help="add: competitor name")
@@ -521,7 +615,8 @@ def main(argv=None):
     ap.add_argument("--pricing", help="add: pricing page URL")
     ap.add_argument("--group", help="add: label such as direct / platform / indirect")
     ap.add_argument("--reason", help="add: why this competitor is on the list")
-    ap.add_argument("--only", help="scan: only this competitor name")
+    ap.add_argument("--fit", help="add: their own homepage words that show the ICP overlap")
+    ap.add_argument("--only", help="scan / check: only this competitor name")
     ap.add_argument("--days", type=int, default=7, help="report: how many days to cover (default 7)")
     ap.add_argument("--out", help="report: file name inside reports/ (default: printed only)")
     ap.add_argument("--file", help="intel: JSON file with a list of items (default: stdin)")
@@ -542,10 +637,14 @@ def main(argv=None):
     if args.command == "add":
         if not args.name or not args.url:
             ap.error("add needs a name and --url")
-        if add_competitor(config, args.name, args.url, args.pricing, args.group, args.reason):
+        if add_competitor(config, args.name, args.url, args.pricing, args.group, args.reason, args.fit):
             print(f"Added {args.name} to {config}.")
         else:
             print(f"{args.name} is already in {config}; nothing changed.")
+        return
+
+    if args.command == "check":
+        print(render_check(check_competitors(config, only=args.only)))
         return
 
     if args.command == "intel":

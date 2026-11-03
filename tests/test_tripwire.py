@@ -46,6 +46,16 @@ class TestTripwire(unittest.TestCase):
         html = "<p>Plans</p><p>This is the Trace Id: b365d2b2606f17ec4096ea94267a5f26</p><p>ref d1cc886fca5d8043f2759b80b6a411d8</p>"
         self.assertEqual(s.extract_lines(html, s.DEFAULT_IGNORE)[1], ["Plans", "ref"])
 
+    def test_title_ignores_svg_titles_and_whitespace(self):
+        html = ("<html><head><title>Slack Pricing\n   Plans</title></head><body>"
+                "<svg><title>Included</title></svg><p>Pro</p><svg><title>Included</title></svg></body></html>")
+        self.assertEqual(s.extract_lines(html, [])[0], "Slack Pricing Plans")
+
+    def test_block_pages_are_detected(self):
+        self.assertIn("blocked", s.blocked_reason("Your request has been blocked. This could be", ["Skip"]))
+        self.assertIsNotNone(s.blocked_reason("Just a moment...", []))
+        self.assertIsNone(s.blocked_reason("Slack Pricing Plans", ["Pro", "Business+"]))
+
     def test_diff_and_tags(self):
         added, removed = s.diff_lines(self.lines("v1.html"), self.lines("v2.html"))
         self.assertIn("$29/mo per seat", added)
@@ -83,6 +93,7 @@ class TestFetch(unittest.TestCase):
 
         class Resp(io.BytesIO):
             headers = mock.Mock(get_content_charset=lambda: "utf-8")
+            geturl = lambda self: "https://a.example"
 
         calls = [urllib.error.URLError("timed out"), Resp(b"<p>ok</p>")]
         def open_(req, timeout):
@@ -119,6 +130,22 @@ class TestScan(unittest.TestCase):
             self.assertEqual([t["slug"] for t in status["targets"]], ["a-home", "b-home"])
             self.assertEqual(status["targets"][1]["last_checked"], "2026-11-03T05:00:00+00:00")
 
+    def test_block_page_is_an_error_not_a_change(self):
+        import tempfile
+        from unittest import mock
+        t = [{"competitor": "M", "group": "platform", "label": "home", "url": "https://m.example",
+              "slug": "m-home", "ignore": s.DEFAULT_IGNORE, "min_lines": 1}]
+        blocked = "<title>Your request has been blocked</title><p>Skip</p>"
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            with mock.patch.object(s, "fetch", return_value=(FX / "v1.html").read_text()):
+                s.scan(t, "2026-11-03T05:00:00+00:00", wd)
+            snap = (wd / "snapshots" / "m-home.txt").read_text()
+            with mock.patch.object(s, "fetch", return_value=blocked):
+                self.assertEqual(s.scan(t, "2026-11-04T05:00:00+00:00", wd), [])
+            self.assertEqual((wd / "snapshots" / "m-home.txt").read_text(), snap)   # snapshot kept
+            self.assertFalse(s.load_json(wd / "data" / "status.json", {})["targets"][0]["ok"])
+
 
 class TestAddCompetitor(unittest.TestCase):
     def add(self, text, **kw):
@@ -143,6 +170,37 @@ class TestAddCompetitor(unittest.TestCase):
     def test_empty_flow_list_and_missing_key(self):
         self.assertEqual(self.add("min_lines: 1\ncompetitors: []\n")[1], ["B"])
         self.assertEqual(self.add("min_lines: 1\n")[1], ["B"])
+
+
+class TestCheck(unittest.TestCase):
+    def test_reports_identity_and_redirects(self):
+        import tempfile
+        from unittest import mock
+        cfg_text = ("competitors:\n"
+                    "  - name: Lio\n    fit: AI teammates in group chat\n    pages:\n"
+                    "      - { label: pricing, url: https://lio.example/pricing }\n"
+                    "      - { label: home, url: https://lio.example }\n"
+                    "  - name: Gone\n    pages:\n      - { label: home, url: https://gone.example }\n"
+                    "  - name: Off\n    enabled: false\n    pages:\n      - { label: home, url: https://off.example }\n")
+        html = ('<html><head><title>Lio | AI Procurement</title>'
+                '<meta name="description" content="Procurement agents for enterprises"></head>'
+                '<body><h1>Buy smarter</h1><p>Spend less</p></body></html>')
+        pages = {"https://lio.example": (html, "https://lio.example/"),
+                 "https://gone.example": (html, "https://acquirer.example/welcome")}
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(s, "fetch_page", side_effect=lambda u: pages[u]):
+            cfg = Path(d) / "targets.yml"
+            cfg.write_text(cfg_text)
+            rows = s.check_competitors(cfg)
+        self.assertEqual([r["competitor"] for r in rows], ["Lio", "Gone"])      # disabled skipped
+        lio, gone = rows
+        self.assertEqual(lio["url"], "https://lio.example")                     # home page preferred
+        self.assertEqual(lio["description"], "Procurement agents for enterprises")
+        self.assertEqual(lio["opening"][:2], ["Buy smarter", "Spend less"])
+        self.assertFalse(lio["redirected_to_other_site"])
+        self.assertTrue(gone["redirected_to_other_site"])
+        text = s.render_check(rows)
+        self.assertIn("why it's on the list: AI teammates in group chat", text)
+        self.assertIn("REDIRECTS TO ANOTHER SITE: https://acquirer.example/welcome", text)
 
 
 class TestReport(unittest.TestCase):
