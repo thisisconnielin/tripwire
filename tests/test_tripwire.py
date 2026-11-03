@@ -195,6 +195,17 @@ class TestIntel(unittest.TestCase):
         self.assertNotIn("Old news", text)
         self.assertLess(text.index("## Launches"), text.index("## Website changes"))
 
+    def test_report_tolerates_hand_edited_items(self):
+        intel = [{"competitor": "Acme", "type": "news", "title": "Date only", "url": "https://a", "date": "2026-11-03"},
+                 {"competitor": "Acme", "type": "social", "title": "No url", "found": self.NOW},
+                 {"competitor": "Acme", "type": "rumor", "title": "Bad type", "found": self.NOW},
+                 {"competitor": "Acme", "type": "news", "title": "Bad date", "url": "https://b", "found": "yesterday"}]
+        text = s.render_report([{"type": "change", "date": "garbage"}], {}, self.NOW, days=1, intel=intel)
+        self.assertIn("[Date only](https://a)", text)
+        self.assertIn("`social` No url", text)
+        self.assertNotIn("Bad type", text)
+        self.assertNotIn("Bad date", text)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -352,13 +352,24 @@ def _quote(line):
     return line if len(line) <= 160 else line[:157] + "…"
 
 
+def _ts(value):
+    """Parse an ISO date or datetime; date-only and naive values count as UTC. None if unparseable."""
+    try:
+        d = dt.datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
+    return d if d.tzinfo else d.replace(tzinfo=dt.timezone.utc)
+
+
 def render_report(changes, status, now, days=1, intel=None):
     """Markdown report of what was found in the `days` days up to `now`, plus scan health."""
-    end = dt.datetime.fromisoformat(now)
+    end = _ts(now)
     start = end - dt.timedelta(days=days)
-    within = lambda d: start < dt.datetime.fromisoformat(d) <= end
-    recent = [e for e in changes if within(e["date"])]
-    found = [i for i in (intel or []) if within(i["found"])]
+    within = lambda d: (t := _ts(d)) is not None and start < t <= end
+    recent = [e for e in changes if within(e.get("date"))]
+    # Hand-edited items may lack `found`; fall back to the publish date. Skip malformed items.
+    found = [i for i in (intel or []) if i.get("competitor") and i.get("type") in INTEL_TYPES
+             and within(i.get("found") or i.get("date"))]
     watchlist = [i for i in found if i["type"] in WATCHLIST_TYPES]
     news = [i for i in found if i["type"] not in WATCHLIST_TYPES]
     real = [e for e in recent if e["type"] == "change"]
@@ -390,7 +401,9 @@ def render_report(changes, status, now, days=1, intel=None):
             out += [f"### {comp}", ""]
             for i in sorted(by_comp[comp], key=lambda i: INTEL_TYPES.index(i["type"])):
                 src = f", {i['source']}" if i.get("source") else ""
-                line = f"- `{i['type']}` [{_quote(i['title'])}]({i['url']}) ({i['date']}{src})"
+                title = _quote(i.get("title") or "(untitled)")
+                link = f"[{title}]({i['url']})" if i.get("url") else title
+                line = f"- `{i['type']}` {link} ({i.get('date') or '?'}{src})"
                 if i.get("summary"):
                     line += f": {_quote(i['summary'])}"
                 out.append(line)
