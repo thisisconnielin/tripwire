@@ -456,31 +456,55 @@ def write_report(workdir, text, name):
 
 
 def add_competitor(config, name, url, pricing=None, group=None, reason=None):
-    """Append a competitor to the watch list text, keeping comments. Returns False if already present."""
+    """Insert a competitor at the end of the `competitors:` list, keeping comments and the rest of
+    the file. Returns False if already present. Never writes a file that doesn't parse."""
     config = Path(config)
     text = config.read_text() if config.exists() else ""
     cfg = yaml.safe_load(text) or {}
     comps = cfg.get("competitors") or []
     if any(str(c.get("name", "")).lower() == name.lower() for c in comps):
         return False
+
+    lines = text.splitlines()
+    head = next((i for i, l in enumerate(lines) if re.match(r"^competitors:\s*(\[\s*\])?\s*(#.*)?$", l)), None)
+    if head is None:
+        lines += ([""] if text.strip() else []) + ["competitors:"]
+        head = len(lines) - 1
+    lines[head] = "competitors:"
+    # The list runs until the next top-level key; match the indent of its existing items.
+    end, indent = head + 1, None
+    for j in range(head + 1, len(lines)):
+        line = lines[j]
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if not line.startswith((" ", "\t", "-")):
+            break
+        if indent is None and line.lstrip().startswith("- "):
+            indent = line[:len(line) - len(line.lstrip())]
+        end = j + 1
+    pad = "  " if indent is None else indent
+
     q = lambda v: json.dumps(v, ensure_ascii=False)  # JSON strings are valid YAML
-    block = [f"  - name: {q(name)}"]
+    block = [f"{pad}- name: {q(name)}"]
     if group:
-        block.append(f"    group: {q(group)}")
+        block.append(f"{pad}  group: {q(group)}")
     if reason:
-        block.append(f"    reason: {q(reason)}")
-    block.append(f"    added: {dt.date.today().isoformat()}")
-    block.append("    pages:")
-    block.append(f"      - {{ label: home, url: {q(url)} }}")
+        block.append(f"{pad}  reason: {q(reason)}")
+    block.append(f"{pad}  added: {dt.date.today().isoformat()}")
+    block.append(f"{pad}  pages:")
+    block.append(f"{pad}    - {{ label: home, url: {q(url)} }}")
     if pricing:
-        block.append(f"      - {{ label: pricing, url: {q(pricing)} }}")
-    if "competitors" not in cfg or not comps and re.search(r"^competitors:\s*\[\s*\]", text, re.M):
-        text = re.sub(r"^competitors:\s*\[\s*\]\s*$", "", text, flags=re.M)
-        text = text.rstrip("\n") + ("\n\n" if text.strip() else "") + "competitors:\n"
-    elif not text.endswith("\n"):
-        text += "\n"
+        block.append(f"{pad}    - {{ label: pricing, url: {q(pricing)} }}")
+    new_text = "\n".join(lines[:end] + block + lines[end:]) + "\n"
+
+    try:
+        names = [c.get("name") for c in (yaml.safe_load(new_text) or {}).get("competitors") or []]
+    except yaml.YAMLError as e:
+        raise ValueError(f"could not add {name} to {config} without breaking it: {e}")
+    if name not in names:
+        raise ValueError(f"could not add {name} to {config}; edit it by hand")
     config.parent.mkdir(parents=True, exist_ok=True)
-    config.write_text(text + "\n".join(block) + "\n")
+    config.write_text(new_text)
     return True
 
 

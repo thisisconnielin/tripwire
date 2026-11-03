@@ -116,6 +116,31 @@ class TestScan(unittest.TestCase):
             self.assertEqual(status["targets"][1]["last_checked"], "2026-11-03T05:00:00+00:00")
 
 
+class TestAddCompetitor(unittest.TestCase):
+    def add(self, text, **kw):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            cfg = Path(d) / "targets.yml"
+            cfg.write_text(text)
+            s.add_competitor(cfg, "B", "https://b.com", **kw)
+            out = cfg.read_text()
+            return out, [c["name"] for c in s.yaml.safe_load(out)["competitors"]]
+
+    def test_keys_after_the_list_stay_put(self):
+        out, names = self.add("competitors:\n  - name: A\n    pages:\n      - { label: home, url: https://a.com }\n"
+                              "\nignore: [cookie]  # keep\n")
+        self.assertEqual(names, ["A", "B"])
+        self.assertTrue(out.rstrip().endswith("ignore: [cookie]  # keep"))
+
+    def test_indentless_list(self):
+        _, names = self.add("competitors:\n- name: A\n  pages:\n  - { label: home, url: https://a.com }\n")
+        self.assertEqual(names, ["A", "B"])
+
+    def test_empty_flow_list_and_missing_key(self):
+        self.assertEqual(self.add("min_lines: 1\ncompetitors: []\n")[1], ["B"])
+        self.assertEqual(self.add("min_lines: 1\n")[1], ["B"])
+
+
 class TestReport(unittest.TestCase):
     NOW = "2026-11-03T05:00:00+00:00"
 
