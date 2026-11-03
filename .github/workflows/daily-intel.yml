@@ -41,6 +41,7 @@ jobs:
           prompt: |
             You run Tripwire's daily refresh for this repo. SKILL_DIR is skills/tripwire.
             Follow section "3. Daily refresh" of skills/tripwire/SKILL.md exactly, for watch/company.yml and watch/targets.yml.
+            Budget: about 25-40 web searches. Search every enabled competitor in watch/targets.yml, not a sample.
             Do not change code, tests or docs in this run; only watch/targets.yml and watch/data/intel.json (via the intel command).
             Today's date (UTC): run `date -u +%F`.
             Extra instructions (may be empty): ${{ github.event.inputs.task }}

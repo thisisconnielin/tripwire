@@ -71,13 +71,16 @@ Read `watch/company.yml`, `watch/targets.yml` and the last 14 days of `watch/dat
 **a. Competitor list.** Run a few WebSearch queries for new entrants with the same ICP (launches,
 funding announcements, "alternative to <competitor>", Product Hunt). Then:
 - A new company that clearly shares the ICP → add it to `watch/targets.yml` (with `added`,
-  `reason`, home + pricing pages that load) and log a `competitor_added` item. Max 2 per day; list
+  `reason`, home + pricing pages that load) and log a `competitor_added` item. Max 2 per day. Before
+  adding, open the candidate's site and confirm it sells the same job to the same buyer. List
   weaker candidates in your final message instead.
 - A watched competitor that shut down, was acquired, pivoted away from the ICP, or whose site is
   dead → set `enabled: false` on it with a dated comment saying why, and log `competitor_dropped`.
   Never drop on one failed fetch; need evidence (news, redirect to acquirer, shutdown notice).
 
-**b. Activity.** For every enabled competitor, search for what it did in the last ~2 days:
+**b. Activity.** Cover **every** enabled competitor: at least one WebSearch each, more for direct
+competitors (news + X / LinkedIn + their blog or changelog). Partial coverage is a failed run.
+Look back 7 days (30 days if `watch/data/intel.json` doesn't exist yet: first run backfill). Queries:
 `"<name>" launch OR announces OR introduces`, `"<name>" site:x.com`, `site:linkedin.com "<name>"`,
 `"<name>" site:producthunt.com`, `"<name>" site:news.ycombinator.com`, its blog / changelog, press.
 Big platforms (ChatGPT, Claude, Gemini, Slack…): only log items relevant to the ICP (shared
@@ -95,7 +98,8 @@ and delete the inbox file:
 
 `type` is one of `launch`, `pricing`, `funding`, `partnership`, `hiring`, `social`, `news`,
 `competitor_added`, `competitor_dropped`. Every item except watch-list changes needs a real source
-URL you actually saw. `date` = when it was published; only log things from the last ~7 days. The
+URL you actually saw. `date` = when it was published; only log things inside the look-back window above. If you only
+know the month, use the 1st of that month and say so in the summary. The
 `summary` says what happened and why it matters to us, in one sentence. Nothing found is fine; log
 nothing rather than padding.
 
