@@ -37,6 +37,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
           prompt: |
             You run Tripwire's daily refresh for this repo. SKILL_DIR is skills/tripwire.
             Follow section "3. Daily refresh" of skills/tripwire/SKILL.md exactly, for watch/company.yml and watch/targets.yml.
@@ -52,4 +53,4 @@ jobs:
             End with a short summary: items logged, competitors added/dropped, candidates you didn't add.
           claude_args: |
             --max-turns 80
-            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash(python:*),Bash(python3:*),Bash(git:*),Bash(date:*),Bash(ls:*),Bash(cat:*),Bash(curl:*)"
+            --allowedTools "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash(python:*),Bash(python3:*),Bash(git:*),Bash(date:*),Bash(ls:*),Bash(cat:*),Bash(curl:*),Bash(rm:*)"

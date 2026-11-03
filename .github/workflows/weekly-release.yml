@@ -36,6 +36,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
           prompt: |
             You are the maintainer of Tripwire. This is the WEEKLY RELEASE run: follow the "Weekly release" rules in CLAUDE.md exactly.
             Today's date (UTC): run `date -u +%F`.

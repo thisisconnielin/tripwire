@@ -83,8 +83,9 @@ funding announcements, "alternative to <competitor>", Product Hunt). Then:
 Big platforms (ChatGPT, Claude, Gemini, Slack…): only log items relevant to the ICP (shared
 workspaces, group chat, agents, team plans, pricing), not every announcement.
 
-**c. Log findings** as a JSON list, one object per item, then pipe it in:
-`python SKILL_DIR/scripts/tripwire.py intel < /tmp/intel.json`
+**c. Log findings.** Write them as a JSON list (one object per item) to `watch/intel-inbox.json`
+with the Write tool, then run `python SKILL_DIR/scripts/tripwire.py intel --file watch/intel-inbox.json`
+and delete the inbox file:
 
 ```json
 [{"competitor": "Manus", "type": "launch", "title": "Manus launches team workspaces",
