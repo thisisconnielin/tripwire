@@ -1,5 +1,8 @@
 # Tripwire: maintainer rules for the scheduled Claude dev runs
 
+The runs are headless Claude Code sessions started on Connie's Mac (launchd → `~/.tripwire-dev/run.sh`,
+working in its own clone `~/code/tripwire`): daily at 8:30, 14:30, 20:30 and Fridays 10:00 local time.
+
 This repo is the source of **Tripwire**, a Claude skill (and plugin) for competitive intelligence:
 from a company profile it finds competitors with the same ICP, tracks their website changes,
 launches, news and social posts, and writes a GTM readout. Users install it and run it in their own
@@ -50,7 +53,7 @@ Every daily run that changes the skill bumps the **patch** version in both `VERS
 
 ## Commit and push
 - Message like `feat: price change detector` / `fix: openai news blocked` / `chore: ignore trace ids on microsoft`.
-- Use the commit author given in the prompt, and credit Claude as co-author with a trailer:
-  `git commit --author="<author>" -m "feat: ..." -m "Co-Authored-By: Claude <noreply@anthropic.com>"`.
+- The clone's git config already sets Connie's author identity; don't pass `--author`. Credit Claude:
+  `git commit -m "feat: ..." -m "Co-Authored-By: Claude <noreply@anthropic.com>"`.
 - `git pull --rebase origin main` then `git push origin HEAD:main`.
 - If tests fail and you can't fix them, push nothing and explain why in your final message.

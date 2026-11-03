@@ -94,7 +94,7 @@ enabled: false                            # pause a page or competitor
 
 ## How this repo is maintained
 
-Connie develops Tripwire with Claude, via [claude-code-action](https://github.com/anthropics/claude-code-action)
+Connie develops Tripwire with Claude Code, which runs on her machine on a schedule
 (this only touches the skill's code; it never scans anyone's competitors):
 
 | Workflow | When (PST) | What |
