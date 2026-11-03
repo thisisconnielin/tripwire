@@ -13,7 +13,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Hacker News (Algolia API) + Product Hunt + GitHub releases: log competitor mentions and launches as intel, no API key
 - [ ] [big] Competitor profile pages: `watch/competitors/<slug>.md` with positioning, pricing, latest launches, 30-day timeline
 
-## Broken scans (fix first)
+## Fetcher fixes (reproduce with a temporary watch list, see CLAUDE.md)
 - [ ] [small] ChatGPT pricing (`chatgpt.com/pricing`) returns 403: find a readable official alternative or disable with a reason
 - [ ] [small] OpenAI news (`openai.com/news/`) returns 403: try the RSS feed or another official source
 - [x] [small] Agnes AI home returns no readable text (JS-only): fixed by meta-tag fallback
@@ -37,7 +37,8 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
-- **2026-11-02**: Competitive intelligence. `watch/company.yml` (who we are + ICP), daily Claude web-search run (`daily-intel.yml`) that adds new competitors with the same ICP, drops dead ones, and logs launches / news / social via `tripwire.py intel`. Reports get "Watch list changes" and "Launches, news & social" sections. SKILL.md gains Discover and Daily refresh.
+- **2026-11-03**: v0.3. Skill-only: installable as a Claude Code plugin (`.claude-plugin/`), runs locally in the user's folder. Removed the GitHub scan and intel workflows and the committed Teamily data; GitHub only runs Claude's dev and release work.
+- **2026-11-02**: Competitive intelligence. `watch/company.yml` (who we are + ICP), Claude web-search refresh that adds new competitors with the same ICP, drops dead ones, and logs launches / news / social via `tripwire.py intel`. Reports get "Watch list changes" and "Launches, news & social" sections. SKILL.md gains Discover and Daily refresh.
 - **2026-11-02**: JS-only pages (Agnes, Cue) now fall back to meta title/description so they can be watched.
 - **2026-11-02**: v0.1. Nightly scan, readable-text diff, noise filters, change tags, optional AI summary, Pages dashboard, unit tests.
 - **2026-11-02**: Teamily watch list (13 competitors, 17 pages) + `group` filter (direct / platform / indirect).

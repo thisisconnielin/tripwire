@@ -12,7 +12,8 @@ do about it. Two halves:
   logging them with `scripts/tripwire.py intel`. Both land in the same report.
 
 The scanner is `scripts/tripwire.py` (Python 3.9+, needs `pyyaml`, no API key).
-It keeps everything next to the watch list, `watch/targets.yml` in the current project:
+It runs locally in the user's current folder and keeps everything in `watch/` there
+(suggest a dedicated folder such as `~/<company>-intel` if they're inside an unrelated code repo):
 
 ```
 watch/company.yml          who "we" are: name, url, one-liner, ICP, competitor groups
@@ -55,7 +56,7 @@ Pick what the user asked for:
 | "this week" / digest | `python SKILL_DIR/scripts/tripwire.py report --days 7` |
 | "last month" | `python SKILL_DIR/scripts/tripwire.py report --days 30` |
 
-If the repo already has a scan from today (check `last_run` in `watch/data/status.json`), skip the
+If there is already a scan from today (check `last_run` in `watch/data/status.json`), skip the
 scan and read the report. A first scan of a page only records a baseline; say so, and that changes
 appear from the next scan.
 
@@ -64,7 +65,7 @@ at the full `added` / `removed` lines in `watch/data/changes.json` so you quote 
 
 ## 3. Daily refresh (new competitors, drop-outs, launches, news, social)
 
-Do this when asked "what did competitors do / launch / post", and in the scheduled daily run.
+Do this when asked "what did competitors do / launch / post / change today", together with a scan.
 Read `watch/company.yml`, `watch/targets.yml` and the last 14 days of `watch/data/intel.json`
 (so you don't log the same thing twice).
 

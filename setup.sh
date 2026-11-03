@@ -17,7 +17,7 @@ Options (environment variables):
   REPO_VISIBILITY=private|public   Default: private; never changes existing visibility
   PROVISION_CLAUDE_SECRET=true|false  Default: false; explicit, interactive credential step
   ENABLE_DAILY_DEV=true|false      Default: false; requires an existing Claude OAuth secret
-Scan reports are committed to watch/reports/ in the repository.
+Sets up the repo for Claude's daily dev runs. The skill itself runs locally; nothing scans on GitHub.
 HELP
   exit 0
 fi
@@ -29,7 +29,7 @@ done
 command -v gh >/dev/null || fail "Install GitHub CLI, then run gh auth login before setup."
 gh auth status >/dev/null 2>&1 || fail "Run gh auth login, then retry setup."
 
-echo "1/4  Preparing $REPO ($REPO_VISIBILITY)…"
+echo "1/3  Preparing $REPO ($REPO_VISIBILITY)…"
 if remote="$(git remote get-url origin 2>/dev/null)"; then
   case "$remote" in
     "https://github.com/$REPO.git"|"https://github.com/$REPO"|"git@github.com:$REPO.git") ;;
@@ -49,13 +49,13 @@ fi
 gh variable set ENABLE_DAILY_DEV -R "$REPO" --body false
 git push -u origin main
 
-echo "2/4  Setting your commit author (so daily commits count on your profile)…"
+echo "2/3  Setting your commit author (so daily commits count on your profile)…"
 EMAIL="$(gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"')"
 NAME="$(gh api user --jq '.name // .login')"
 gh variable set COMMIT_AUTHOR -R "$REPO" --body "$NAME <$EMAIL>"
 echo "     → $NAME <$EMAIL>"
 
-echo "3/4  Claude credential setup…"
+echo "3/3  Claude credential setup…"
 CLAUDE_CLI=claude
 if command -v claude-work >/dev/null; then CLAUDE_CLI=claude-work; fi
 if [ "$PROVISION_CLAUDE_SECRET" = true ]; then
@@ -75,13 +75,10 @@ if [ "$ENABLE_DAILY_DEV" = true ]; then
     || fail "Daily dev requires CLAUDE_CODE_OAUTH_TOKEN. Provision it after company approval first."
 fi
 
-echo "4/4  Running the first scan…"
-gh workflow run scan.yml -R "$REPO"
 gh variable set ENABLE_DAILY_DEV -R "$REPO" --body "$ENABLE_DAILY_DEV"
 
 echo
-echo "Setup complete; the first scan was dispatched. Check Actions for its result."
+echo "Setup complete."
 echo "  Repo:       https://github.com/$REPO"
-echo "  Reports:    https://github.com/$REPO/blob/main/watch/reports/latest.md"
 echo "  Daily dev enabled: $ENABLE_DAILY_DEV"
-echo "  Schedule (PST): Claude dev 8:30am, 2:30pm, 8:30pm; intel 7:30pm; scan 9pm; release Friday 10am."
+echo "  Schedule (PST): Claude dev 8:30am, 2:30pm, 8:30pm; release Friday 10am."

@@ -1,31 +1,26 @@
-# Tripwire: maintainer rules for the scheduled Claude runs
+# Tripwire: maintainer rules for the scheduled Claude dev runs
 
-Tripwire is a Claude skill for competitive intelligence: from a company profile it finds competitors
-with the same ICP, tracks their website changes, launches, news and social posts daily, and writes a
-GTM report.
+This repo is the source of **Tripwire**, a Claude skill (and plugin) for competitive intelligence:
+from a company profile it finds competitors with the same ICP, tracks their website changes,
+launches, news and social posts, and writes a GTM readout. Users install it and run it in their own
+Claude Code; nothing in this repo scans competitors on GitHub.
+
 - Skill: `skills/tripwire/SKILL.md` (what Claude does when a user asks) and
-  `skills/tripwire/scripts/tripwire.py` (scanner + reports; stdlib + pyyaml only).
-- This repo's own data: `watch/` (`company.yml`, `targets.yml`, `snapshots/`, `data/`, `reports/`).
-- The **Daily intel** workflow (Claude + web search) owns competitor discovery and
-  `watch/data/intel.json`. Dev runs improve the code; they don't log intel.
-- Tests: `tests/`. Version: `VERSION`. Plans: `ROADMAP.md`.
-
-There is no website. Output is Markdown in `watch/reports/`.
+  `skills/tripwire/scripts/tripwire.py` (scanner, intel log, reports; stdlib + pyyaml only).
+- Plugin manifests: `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`.
+- Tests: `tests/`. Version: `VERSION` (keep `plugin.json` "version" in sync). Plans: `ROADMAP.md`.
+- Never commit a real watch list or scan data (`watch/` is gitignored). Use temp dirs and fixtures.
 
 ## Daily run (3× a day): ship exactly ONE small, finished improvement
 
 Pick the work in this order:
 1. **Special request** from the prompt, if not empty.
-2. **Broken scans.** Read `watch/data/status.json`. For any page with `ok: false`:
-   - Wrong / moved URL → find the correct official page (WebFetch / curl) and fix `watch/targets.yml`.
-   - Bot-blocked or JS-only page → improve the fetcher (headers, retries, fallback, a static
-     alternative URL) or, if that's not possible, set `enabled: false` with a comment saying why.
-   - Fix one page (or one root cause) per run.
-3. **Noise.** Read the last ~14 days in `watch/data/changes.json` / `watch/reports/`. If a page
-   reports meaningless churn (rotating testimonials, counters, trace ids, nav reordering), add a
-   targeted `ignore` regex or improve extraction.
-4. **Bugs** you find while reading the code.
-5. Otherwise, the **top unchecked `[small]` item in `ROADMAP.md`**. Never start a `[big]` item.
+2. **Bugs** you find while reading the code or SKILL.md (wrong instructions count as bugs).
+3. The **top unchecked `[small]` item in `ROADMAP.md`**. Never start a `[big]` item.
+   For fetcher items (403, JS-only pages, noise), reproduce with a temporary watch list:
+   write `/tmp/smoke/watch/targets.yml`, run
+   `python skills/tripwire/scripts/tripwire.py scan --config /tmp/smoke/watch/targets.yml`,
+   fix the fetcher or extraction, and add a fixture-based test.
 
 Check `git log --since=24.hours` first so you don't redo or conflict with today's earlier runs.
 
@@ -34,19 +29,18 @@ Check `git log --since=24.hours` first so you don't redo or conflict with today'
 1. Special request if not empty, otherwise the **top unchecked `[big]` item in `ROADMAP.md`**.
 2. Build it in **3–6 commits**, each one working and tested on its own (e.g. core logic → tests →
    wiring into the CLI/report → SKILL.md/README docs). Push after each commit.
-3. Finish with a release commit: bump `VERSION` (minor: 0.2.0 → 0.3.0), add a changelog line,
-   then `git tag v<version>` and `git push origin v<version>`.
+3. Finish with a release commit: bump `VERSION` and `plugin.json` (minor: 0.3.0 → 0.4.0), add a
+   changelog line, then `git tag v<version>` and `git push origin v<version>`.
 4. If the feature can't be finished today, ship a complete, useful first part, split the rest into
    new roadmap items, and still release.
 
 ## Definition of done (every run)
 - Every logic change has a test in `tests/`. `python -m unittest discover tests` must pass.
-- `python -c "import sys; sys.path.insert(0,'skills/tripwire/scripts'); import tripwire; tripwire.load_targets('watch/targets.yml')"` must succeed.
+- `python -c "import sys; sys.path.insert(0,'skills/tripwire/scripts'); import tripwire; tripwire.load_targets('skills/tripwire/targets.example.yml')"` must succeed.
 - Reports must still render with empty data (`[]` / `{}`).
 - If you change what the skill can do, update `skills/tripwire/SKILL.md` so Claude knows to use it.
 - Never add a dependency that needs an API key to run. AI features stay optional.
-- Never commit secrets. Don't hand-edit `watch/data/`, `watch/snapshots/` or `watch/reports/`
-  (the scan owns them), except to remove data for a page you deleted.
+- Never commit secrets or a real watch list.
 - Update `ROADMAP.md`: tick the item (or split it), add a dated line under **Changelog**, and add
   one new idea if you have a good one (mark it `[small]` or `[big]`).
 - Update `README.md` if usage changed.

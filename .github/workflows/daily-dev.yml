@@ -1,7 +1,7 @@
 name: Daily dev (Claude)
 
 # When ENABLE_DAILY_DEV=true, Claude ships one small, tested improvement and pushes to main,
-# three times a day. The last run is 30 min before the nightly scan so the scan uses the new code.
+# three times a day. It develops the skill's code; it never scans competitors.
 on:
   schedule:
     - cron: "30 16 * * *"  # 8:30am PST / 9:30am PDT

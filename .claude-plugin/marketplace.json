@@ -1,0 +1,15 @@
+{
+  "name": "tripwire",
+  "description": "Tripwire, a Claude skill for competitive intelligence, by Connie & Claude.",
+  "owner": {
+    "name": "Connie Lin",
+    "url": "https://github.com/thisisconnielin"
+  },
+  "plugins": [
+    {
+      "name": "tripwire",
+      "source": "./",
+      "description": "Find competitors with your ICP and track what they change, launch and post."
+    }
+  ]
+}
