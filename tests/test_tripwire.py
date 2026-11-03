@@ -24,6 +24,24 @@ class TestTripwire(unittest.TestCase):
         self.assertEqual(s.extract_lines(html, [])[1], ["Agents with email", "Cue"])
         self.assertEqual(s.extract_lines("<html><body></body></html>", [])[1], [])
 
+    def test_add_competitor_keeps_comments(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp()) / "watch" / "targets.yml"
+        d.parent.mkdir()
+        d.write_text("# my list\ncompetitors:\n  - name: A\n    pages:\n      - { label: home, url: https://a.com }\n")
+        self.assertTrue(s.add_competitor(d, "Beta: Co", "https://b.com", pricing="https://b.com/p", group="direct", reason="same ICP"))
+        self.assertFalse(s.add_competitor(d, "beta: co", "https://b.com"))
+        self.assertIn("# my list", d.read_text())
+        t = s.load_targets(d)
+        self.assertEqual([x["slug"] for x in t], ["a-home", "beta-co-home", "beta-co-pricing"])
+        e = d.parent / "new.yml"
+        s.add_competitor(e, "C", "https://c.com")
+        self.assertEqual(len(s.load_targets(e)), 1)
+        f = d.parent / "empty.yml"
+        f.write_text("# x\ncompetitors: []\n")
+        s.add_competitor(f, "D", "https://d.com")
+        self.assertEqual(len(s.load_targets(f)), 1)
+
     def test_diff_and_tags(self):
         added, removed = s.diff_lines(self.lines("v1.html"), self.lines("v2.html"))
         self.assertIn("$29/mo per seat", added)

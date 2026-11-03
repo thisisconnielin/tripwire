@@ -38,9 +38,10 @@ If `watch/company.yml` is missing, ask for the company name or URL (one question
 3. Show the user a ranked list (name, url, group, one-line reason it shares the ICP). Aim for
    8–15. Wait for approval unless the user said to go ahead.
 4. Run `python SKILL_DIR/scripts/tripwire.py init` if `watch/targets.yml` doesn't exist, then add
-   each approved competitor with `group`, `added: <YYYY-MM-DD>` and `reason: <one line>`, and its
-   key pages: home, pricing, and changelog / release notes or blog if they exist. Check each URL
-   loads (curl / WebFetch); skip ones that don't.
+   each approved competitor with
+   `python SKILL_DIR/scripts/tripwire.py add "Name" --url <home> --pricing <url> --group <g> --reason "<one line>"`
+   (keeps comments, skips duplicates, records the added date). Add changelog / blog pages by
+   editing `watch/targets.yml`. Check each URL loads (curl / WebFetch); skip ones that don't.
 5. Run a scan (baseline), then do a daily refresh (section 3) so the first report has news too.
 
 To add or remove something by hand, edit `watch/targets.yml` (set `enabled: false` to pause).

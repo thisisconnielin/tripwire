@@ -5,7 +5,7 @@ Friday releases ship the top unchecked `[big]` item in several commits.
 Tick an item when it ships and add a line to the changelog.
 
 ## Core: find and track competitors (highest priority after broken scans)
-- [ ] [small] `tripwire.py add <name> --url <home> [--pricing URL] [--group G] [--reason R]` appends a competitor to `watch/targets.yml` without losing comments, so discovery doesn't hand-edit YAML
+- [x] [small] `tripwire.py add <name> --url <home> [--pricing URL] [--group G] [--reason R]` appends a competitor to `watch/targets.yml` without losing comments, so discovery doesn't hand-edit YAML
 - [ ] [small] Report: "Top moves" line at the very top, mixing page changes and intel by importance (pricing > launch > funding > social)
 - [ ] [small] Report: watch-list table (competitor, group, added date, reason, pages OK / broken)
 - [ ] [small] `tripwire.py candidates`: keep a `data/candidates.json` of possible competitors seen but not added, with how often they show up, so strong ones get promoted
@@ -37,6 +37,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-03**: `tripwire.py add "Name" --url ... [--pricing --group --reason]` appends a competitor to the watch list without losing comments.
 - **2026-11-03**: v0.3. Skill-only: installable as a Claude Code plugin (`.claude-plugin/`), runs locally in the user's folder. Removed the GitHub scan and intel workflows and the committed Teamily data; GitHub only runs Claude's dev and release work.
 - **2026-11-02**: Competitive intelligence. `watch/company.yml` (who we are + ICP), Claude web-search refresh that adds new competitors with the same ICP, drops dead ones, and logs launches / news / social via `tripwire.py intel`. Reports get "Watch list changes" and "Launches, news & social" sections. SKILL.md gains Discover and Daily refresh.
 - **2026-11-02**: JS-only pages (Agnes, Cue) now fall back to meta title/description so they can be watched.

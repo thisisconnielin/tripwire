@@ -73,6 +73,7 @@ The page diffing is a plain Python script you can also run without Claude:
 ```bash
 S=~/.claude/skills/tripwire/scripts/tripwire.py
 python $S init                 # create watch/targets.yml
+python $S add "Acme" --url https://acme.com --pricing https://acme.com/pricing --group direct --reason "same ICP"
 python $S scan                 # scan everything → watch/reports/latest.md
 python $S scan --only Acme     # one competitor
 python $S report --days 7      # 7-day digest
