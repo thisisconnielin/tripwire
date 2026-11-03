@@ -397,6 +397,29 @@ def _ts(value):
     return d if d.tzinfo else d.replace(tzinfo=dt.timezone.utc)
 
 
+MAX_TOP_MOVES = 5
+# Lower is more important. Page changes rank by their tags, intel by its type.
+MOVE_RANK = {"pricing": 0, "launch": 1, "product": 1, "funding": 2, "competitor_added": 3,
+             "competitor_dropped": 3, "partnership": 3, "hiring": 4, "messaging": 5, "news": 5,
+             "social": 6}
+
+
+def top_moves(real, found, limit=MAX_TOP_MOVES):
+    """The most important page changes and intel items, one Markdown bullet each."""
+    moves = []
+    for e in real:
+        rank = min((MOVE_RANK.get(t, 5) for t in e.get("tags") or []), default=5)
+        tag = min(e.get("tags") or ["messaging"], key=lambda t: MOVE_RANK.get(t, 5))
+        what = _quote(e.get("summary") or "page changed")
+        moves.append((rank, f"- **{e['competitor']}** `{tag}` [{e['label']}]({e['url']}) page: {what}"))
+    for i in found:
+        title = _quote(i.get("title") or "(untitled)")
+        link = f"[{title}]({i['url']})" if i.get("url") else title
+        moves.append((MOVE_RANK.get(i["type"], 5), f"- **{i['competitor']}** `{i['type']}` {link}"))
+    moves.sort(key=lambda m: m[0])  # stable: keeps page changes before intel at equal rank
+    return [line for _, line in moves[:limit]]
+
+
 def render_report(changes, status, now, days=1, intel=None):
     """Markdown report of what was found in the `days` days up to `now`, plus scan health."""
     end = _ts(now)
@@ -419,6 +442,10 @@ def render_report(changes, status, now, days=1, intel=None):
            f"{len(targets)} pages watched · **{len(real)} page change{'s' * (len(real) != 1)}** · "
            f"**{len(news)} launch / news / social item{'s' * (len(news) != 1)}** · "
            f"{len(targets) - len(broken)} OK · {len(broken)} not readable", ""]
+
+    moves = top_moves(real, found)
+    if moves:
+        out += ["## Top moves", ""] + moves + [""]
 
     if watchlist:
         out += ["## Watch list changes", ""]

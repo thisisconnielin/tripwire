@@ -282,6 +282,23 @@ class TestIntel(unittest.TestCase):
         self.assertNotIn("Old news", text)
         self.assertLess(text.index("## Launches"), text.index("## Website changes"))
 
+    def test_top_moves_ranked_by_importance(self):
+        changes = [{"type": "change", "competitor": "Zed", "label": "home", "url": "https://z", "date": self.NOW,
+                    "tags": ["messaging"], "summary": "New headline"},
+                   {"type": "change", "competitor": "Acme", "label": "pricing", "url": "https://p", "date": self.NOW,
+                    "tags": ["product", "pricing"], "summary": "Pro: $25 → $29/mo"}]
+        intel = [{"competitor": "Bee", "type": "social", "title": "A post", "url": "https://s", "found": self.NOW},
+                 {"competitor": "Cee", "type": "funding", "title": "Series B", "url": "https://f", "found": self.NOW},
+                 {"competitor": "Dee", "type": "launch", "title": "Dee Agents", "url": "https://l", "found": self.NOW}]
+        text = s.render_report(changes, {}, self.NOW, days=1, intel=intel)
+        top = text[text.index("## Top moves"):text.index("## Launches")]
+        order = [top.index(x) for x in ("**Acme** `pricing`", "**Dee** `launch`", "**Cee** `funding`",
+                                         "**Zed** `messaging`", "**Bee** `social`")]
+        self.assertEqual(order, sorted(order))
+        self.assertLess(text.index("## Top moves"), text.index("## Launches"))
+        self.assertEqual(len(s.top_moves(changes * 4, intel)), s.MAX_TOP_MOVES)
+        self.assertNotIn("Top moves", s.render_report([], {}, self.NOW))
+
     def test_report_tolerates_hand_edited_items(self):
         intel = [{"competitor": "Acme", "type": "news", "title": "Date only", "url": "https://a", "date": "2026-11-03"},
                  {"competitor": "Acme", "type": "social", "title": "No url", "found": self.NOW},

@@ -85,7 +85,9 @@ If there is already a scan from today (check `last_run` in `watch/data/status.js
 scan and read the report. A first scan of a page only records a baseline; say so, and that changes
 appear from the next scan.
 
-Then read `watch/reports/latest.md` (or the printed report). For any change you will highlight, look
+Then read `watch/reports/latest.md` (or the printed report). Its **Top moves** section lists the
+most important items first (pricing > launch > funding > watch list > hiring > messaging / news >
+social); lead your readout with those. For any change you will highlight, look
 at the full `added` / `removed` lines in `watch/data/changes.json` so you quote them accurately.
 
 ## 3. Daily refresh (new competitors, drop-outs, launches, news, social)
