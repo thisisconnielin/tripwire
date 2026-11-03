@@ -32,17 +32,41 @@ watch/reports/latest.md    Markdown report of the newest scan or digest
 If `watch/company.yml` is missing, ask for the company name or URL (one question, nothing else).
 1. Read the company's site. Write `watch/company.yml`: name, url, one_liner, icp (2–4 bullets: who
    buys, what job), groups (what counts as direct / platform / indirect), signals.
-2. Find competitors with the same ICP. Use WebSearch broadly: "<company> alternatives",
-   "<category> tools", "<top competitor> vs", "<category> startup raises", Product Hunt, G2 /
-   Capterra categories, recent launch posts. Prefer companies selling the same job to the same buyer.
-3. Show the user a ranked list (name, url, group, one-line reason it shares the ICP). Aim for
-   8–15. Wait for approval unless the user said to go ahead.
-4. Run `python SKILL_DIR/scripts/tripwire.py init` if `watch/targets.yml` doesn't exist, then add
+2. Find candidates. Use WebSearch broadly: "<company> alternatives", "<category> tools",
+   "<top competitor> vs", "<category> startup raises", Product Hunt, G2 / Capterra categories,
+   recent launch posts. Search results only *nominate* candidates; they never qualify one.
+3. **Qualify every candidate** with the competitor test below. Most candidates should fail it.
+4. Show the user a ranked list: name, url, group, confidence, and the `fit` quote. Aim for the
+   8–15 strongest, not the most. Wait for approval unless the user said to go ahead.
+5. Run `python SKILL_DIR/scripts/tripwire.py init` if `watch/targets.yml` doesn't exist, then add
    each approved competitor with
-   `python SKILL_DIR/scripts/tripwire.py add "Name" --url <home> --pricing <url> --group <g> --reason "<one line>"`
+   `python SKILL_DIR/scripts/tripwire.py add "Name" --url <home> --pricing <url> --group <g> --reason "<why>" --fit "<their words>"`
    (keeps comments, skips duplicates, records the added date). Add changelog / blog pages by
-   editing `watch/targets.yml`. Check each URL loads (curl / WebFetch); skip ones that don't.
-5. Run a scan (baseline), then do a daily refresh (section 3) so the first report has news too.
+   editing `watch/targets.yml`.
+6. Run `python SKILL_DIR/scripts/tripwire.py check` and re-read every row; fix anything that
+   doesn't match. Then scan (baseline) and do a daily refresh (section 3) so the first report
+   has news too.
+
+### The competitor test
+
+A company is a competitor only if **all** of these hold, judged from **its own website**:
+
+1. **Right company.** The domain is the product you mean. Names collide constantly (a "Lio" that
+   is AI procurement software is not a "Lio" group-chat app). Open the homepage; if the title,
+   description or hero describe a different product, find the right domain or reject it.
+   Cross-domain redirects (`check` flags them) mean renamed, acquired or wrong.
+2. **Same buyer.** It sells to the people in `company.yml` → `icp` (company size, role, consumer
+   vs. business), not just "people who use AI".
+3. **Same job, or a real substitute.** A buyer would compare the two when choosing. Sharing a
+   technology (LLMs, agents, an API) is not enough.
+4. **Live product.** The site works and the product is available (waitlist is OK; dead, parked or
+   "we're shutting down" is not).
+
+Record the evidence: `fit` = a short quote from their own title / description / hero that shows
+the overlap. Confidence: **high** = all four clearly hold from their site; **medium** = buyer or
+job overlaps only partly (e.g. an AI bot *inside* Slack vs. a messenger with agents) → group it
+as `indirect` or leave it as a candidate; **low** → reject. Put platforms (huge companies where
+the overlap is one feature) in `platform` and only watch the pages about that feature.
 
 To add or remove something by hand, edit `watch/targets.yml` (set `enabled: false` to pause).
 
@@ -70,15 +94,18 @@ Do this when asked "what did competitors do / launch / post / change today", tog
 Read `watch/company.yml`, `watch/targets.yml` and the last 14 days of `watch/data/intel.json`
 (so you don't log the same thing twice).
 
-**a. Competitor list.** Run a few WebSearch queries for new entrants with the same ICP (launches,
-funding announcements, "alternative to <competitor>", Product Hunt). Then:
-- A new company that clearly shares the ICP → add it to `watch/targets.yml` (with `added`,
-  `reason`, home + pricing pages that load) and log a `competitor_added` item. Max 2 per day. Before
-  adding, open the candidate's site and confirm it sells the same job to the same buyer. List
-  weaker candidates in your final message instead.
-- A watched competitor that shut down, was acquired, pivoted away from the ICP, or whose site is
-  dead → set `enabled: false` on it with a dated comment saying why, and log `competitor_dropped`.
-  Never drop on one failed fetch; need evidence (news, redirect to acquirer, shutdown notice).
+**a. Competitor list.** First run `python SKILL_DIR/scripts/tripwire.py check` and audit the
+current list against the competitor test: wrong company, redirects to another site, pivoted away
+from the ICP, or `fit` no longer true → fix the URL or drop it (below). Then run a few WebSearch
+queries for new entrants with the same ICP (launches, funding announcements, "alternative to
+<competitor>", Product Hunt). Then:
+- A new company that passes the competitor test with **high** confidence → add it with `add`
+  (`--reason`, `--fit`, home + pricing pages that load) and log a `competitor_added` item. Max 2
+  per day. Medium-confidence candidates go in your final message, not the list.
+- A watched competitor that fails the test (wrong company, shut down, acquired, pivoted away from
+  the ICP, dead site) → set `enabled: false` on it with a dated comment saying why, and log
+  `competitor_dropped`. Never drop on one failed fetch or a bot-protection page; need evidence
+  (its own homepage, news, redirect to acquirer, shutdown notice).
 
 **b. Activity.** Cover **every** enabled competitor: at least one WebSearch each, more for direct
 competitors (news + X / LinkedIn + their blog or changelog). Partial coverage is a failed run.

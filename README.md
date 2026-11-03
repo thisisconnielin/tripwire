@@ -42,7 +42,8 @@ mkdir ~/acme-intel && cd ~/acme-intel && claude
 
 Then just ask:
 
-- *"Set up tripwire for acme.com"*: writes `watch/company.yml` (your ICP), finds competitors,
+- *"Set up tripwire for acme.com"*: writes `watch/company.yml` (your ICP), finds competitors
+  (each one verified against its own homepage, so no name-collision mix-ups),
   and after you approve the list, creates `watch/targets.yml` and takes a baseline.
 - *"What did our competitors change / launch today?"*: scans their pages, searches the web for
   launches, news and posts, updates the competitor list, and gives you the readout.
@@ -78,6 +79,7 @@ python $S scan                 # scan everything → watch/reports/latest.md
 python $S scan --only Acme     # one competitor
 python $S report --days 7      # 7-day digest
 python $S intel --file x.json  # log launches / news / social items
+python $S check                # what each competitor's own homepage says it is
 ```
 
 The first scan of a page saves a baseline; changes show from the next scan.

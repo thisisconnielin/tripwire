@@ -40,6 +40,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-03**: Accurate competitors. SKILL.md gets a 4-part competitor test (right company, same buyer, same job, live product) judged from each company's own site, with a `fit` quote and confidence; the daily refresh audits the existing list with the new `tripwire.py check`. Block pages ("request has been blocked") are errors, not changes. Page titles ignore SVG tooltips.
 - **2026-11-03**: Bug fixes. `scan --only` no longer wipes other pages from the report; fetcher follows 308 redirects and retries timeouts / 5xx; report tolerates hand-edited intel and bad dates; `add` inserts into the competitor list instead of breaking files where other keys follow it; trace / request ids and hashes are ignored by default.
 - **2026-11-03**: `tripwire.py add "Name" --url ... [--pricing --group --reason]` appends a competitor to the watch list without losing comments.
 - **2026-11-03**: v0.3. Skill-only: installable as a Claude Code plugin (`.claude-plugin/`), runs locally in the user's folder. Removed the GitHub scan and intel workflows and the committed Teamily data; GitHub only runs Claude's dev and release work.
