@@ -90,7 +90,7 @@ Google Home Premium (Standard plan)5
 30 days of event history and Gemini features
 Gemini in Chrome
 Access Chrome auto browse to help complete tasks for you
-YouTube Premium Lite plan7
+YouTube Premium Lite plan6
 Most videos ad-free, offline, and in the background
 Storage
 5 TB of cloud storage across Gmail, Drive, and Photos
@@ -124,7 +124,7 @@ Google Home Premium (Advanced plan)5
 24/7 video history, event descriptions, and more
 Gemini in Chrome
 Highest access to Chrome auto browse to help complete tasks for you
-Project Genie6
+Project Genie7
 Create and explore interactive worlds in realtime with our breakthrough Genie 3 world model
 YouTube Premium individual plan8
 YouTube ad-free, offline, and in the background
@@ -318,9 +318,9 @@ Gemini 4 Argon model, Nano Banana Pro, and Deep Search in AI Mode are available 
 5.
 Requires Google Home app, Wi-Fi, and internet connection. Features subject to change; available in select countries and languages. Gemini features work independently of Gemini apps. Check responses for accuracy; results may vary.
 6.
-Project Genie is available in more than 140 countries — see full list of countries. Only available with a Google AI Ultra plan.
-7.
 The YouTube Premium Lite plan included in this bundle won’t activate if you already have an equivalent or YouTube Premium subscription. Learn more. Already have a YouTube membership? Learn more about managing memberships.
+7.
+Project Genie is available in more than 140 countries — see full list of countries. Only available with a Google AI Ultra plan.
 8.
 YouTube Premium individual plan is available in over 40 countries — see full list of countries.
 What Gemini Can Do

@@ -1,6 +1,129 @@
 [
   {
     "type": "baseline",
+    "summary": "Started watching. 80 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-03-ando-home",
+    "date": "2026-11-03T05:36:16+00:00",
+    "competitor": "Ando",
+    "group": "direct",
+    "label": "home",
+    "url": "https://ando.so",
+    "slug": "ando-home"
+  },
+  {
+    "type": "baseline",
+    "summary": "Started watching. 59 lines captured.",
+    "tags": [
+      "baseline"
+    ],
+    "added": [],
+    "removed": [],
+    "id": "2026-11-03-ando-pricing",
+    "date": "2026-11-03T05:36:16+00:00",
+    "competitor": "Ando",
+    "group": "direct",
+    "label": "pricing",
+    "url": "https://ando.so/pricing",
+    "slug": "ando-pricing"
+  },
+  {
+    "type": "change",
+    "tags": [
+      "messaging"
+    ],
+    "summary": "+2 lines, −2 lines. New: “YouTube Premium Lite plan6”",
+    "added": [
+      "YouTube Premium Lite plan6",
+      "Project Genie7"
+    ],
+    "removed": [
+      "YouTube Premium Lite plan7",
+      "Project Genie6"
+    ],
+    "added_total": 2,
+    "removed_total": 2,
+    "id": "2026-11-03-gemini-plans",
+    "date": "2026-11-03T05:36:16+00:00",
+    "competitor": "Gemini",
+    "group": "platform",
+    "label": "plans",
+    "url": "https://gemini.google/subscriptions/",
+    "slug": "gemini-plans"
+  },
+  {
+    "type": "change",
+    "tags": [
+      "messaging"
+    ],
+    "summary": "+1 line, −1 line. New: “This is the Trace Id: d1cc886fca5d8043f2759b80b6a411d8”",
+    "added": [
+      "This is the Trace Id: d1cc886fca5d8043f2759b80b6a411d8"
+    ],
+    "removed": [
+      "This is the Trace Id: 5235489f8f74d660e20db2b134960bf2"
+    ],
+    "added_total": 1,
+    "removed_total": 1,
+    "id": "2026-11-03-microsoft-copilot-business",
+    "date": "2026-11-03T05:36:16+00:00",
+    "competitor": "Microsoft Copilot",
+    "group": "platform",
+    "label": "business",
+    "url": "https://www.microsoft.com/en-us/microsoft-365/copilot/business",
+    "slug": "microsoft-copilot-business"
+  },
+  {
+    "type": "change",
+    "tags": [
+      "pricing"
+    ],
+    "summary": "+2 lines, −1 line. New: “$45USD”",
+    "added": [
+      "$45USD",
+      "per user / month, when paying annually"
+    ],
+    "removed": [
+      "Contact sales for pricing"
+    ],
+    "added_total": 2,
+    "removed_total": 1,
+    "id": "2026-11-03-slack-pricing",
+    "date": "2026-11-03T05:36:16+00:00",
+    "competitor": "Slack",
+    "group": "indirect",
+    "label": "pricing",
+    "url": "https://slack.com/pricing",
+    "slug": "slack-pricing"
+  },
+  {
+    "type": "change",
+    "tags": [
+      "messaging"
+    ],
+    "summary": "+1 line, −1 line. New: “This is the Trace Id: b365d2b2606f17ec4096ea94267a5f26”",
+    "added": [
+      "This is the Trace Id: b365d2b2606f17ec4096ea94267a5f26"
+    ],
+    "removed": [
+      "This is the Trace Id: ea65c8cd1ab9d29caa7e4b72854ee0bd"
+    ],
+    "added_total": 1,
+    "removed_total": 1,
+    "id": "2026-11-03-microsoft-teams-plans",
+    "date": "2026-11-03T05:36:16+00:00",
+    "competitor": "Microsoft Teams",
+    "group": "indirect",
+    "label": "plans",
+    "url": "https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options",
+    "slug": "microsoft-teams-plans"
+  },
+  {
+    "type": "baseline",
     "summary": "Started watching. 1 lines captured.",
     "tags": [
       "baseline"
@@ -52,102 +175,6 @@
     "label": "news",
     "url": "https://www.anthropic.com/news",
     "slug": "claude-news"
-  },
-  {
-    "type": "change",
-    "tags": [
-      "messaging"
-    ],
-    "summary": "+2 lines, −2 lines. New: “YouTube Premium Lite plan7”",
-    "added": [
-      "YouTube Premium Lite plan7",
-      "Project Genie6"
-    ],
-    "removed": [
-      "YouTube Premium Lite plan6",
-      "Project Genie7"
-    ],
-    "added_total": 2,
-    "removed_total": 2,
-    "id": "2026-11-03-gemini-plans",
-    "date": "2026-11-03T05:32:08+00:00",
-    "competitor": "Gemini",
-    "group": "platform",
-    "label": "plans",
-    "url": "https://gemini.google/subscriptions/",
-    "slug": "gemini-plans"
-  },
-  {
-    "type": "change",
-    "tags": [
-      "messaging"
-    ],
-    "summary": "+1 line, −1 line. New: “This is the Trace Id: 5235489f8f74d660e20db2b134960bf2”",
-    "added": [
-      "This is the Trace Id: 5235489f8f74d660e20db2b134960bf2"
-    ],
-    "removed": [
-      "This is the Trace Id: f39c0eef788def0346e90c2dd3f3fa6c"
-    ],
-    "added_total": 1,
-    "removed_total": 1,
-    "id": "2026-11-03-microsoft-copilot-business",
-    "date": "2026-11-03T05:32:08+00:00",
-    "competitor": "Microsoft Copilot",
-    "group": "platform",
-    "label": "business",
-    "url": "https://www.microsoft.com/en-us/microsoft-365/copilot/business",
-    "slug": "microsoft-copilot-business"
-  },
-  {
-    "type": "change",
-    "tags": [
-      "product"
-    ],
-    "summary": "+4 lines, −4 lines. New: “Slackbot (personal AI agent)”",
-    "added": [
-      "Slackbot (personal AI agent)",
-      "Slackbot (personal AI agent)",
-      "Slackbot (personal AI agent)",
-      "Slackbot (personal AI agent)"
-    ],
-    "removed": [
-      "Slackbot (personal AI agent)New",
-      "Slackbot (personal AI agent)New",
-      "Slackbot (personal AI agent)New",
-      "Slackbot (personal AI agent)New"
-    ],
-    "added_total": 4,
-    "removed_total": 4,
-    "id": "2026-11-03-slack-pricing",
-    "date": "2026-11-03T05:32:08+00:00",
-    "competitor": "Slack",
-    "group": "indirect",
-    "label": "pricing",
-    "url": "https://slack.com/pricing",
-    "slug": "slack-pricing"
-  },
-  {
-    "type": "change",
-    "tags": [
-      "messaging"
-    ],
-    "summary": "+1 line, −1 line. New: “This is the Trace Id: ea65c8cd1ab9d29caa7e4b72854ee0bd”",
-    "added": [
-      "This is the Trace Id: ea65c8cd1ab9d29caa7e4b72854ee0bd"
-    ],
-    "removed": [
-      "This is the Trace Id: db940b20a9876724a8263b06cc827ac4"
-    ],
-    "added_total": 1,
-    "removed_total": 1,
-    "id": "2026-11-03-microsoft-teams-plans",
-    "date": "2026-11-03T05:32:08+00:00",
-    "competitor": "Microsoft Teams",
-    "group": "indirect",
-    "label": "plans",
-    "url": "https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-business-options",
-    "slug": "microsoft-teams-plans"
   },
   {
     "type": "change",
