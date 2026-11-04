@@ -234,6 +234,29 @@ class TestReport(unittest.TestCase):
         self.assertIn("| Blocked |", text)
         self.assertIn("Newbie", text)
 
+    def test_watch_list_table(self):
+        import tempfile
+        cfg_text = ("competitors:\n"
+                    "  - name: Acme\n    group: direct\n    added: 2026-10-01\n    reason: same ICP\n    pages:\n"
+                    "      - { label: home, url: https://acme.example }\n"
+                    "      - { label: pricing, url: https://acme.example/pricing }\n"
+                    "  - name: Beta\n    fit: AI for sales teams\n    pages:\n      - { label: home, url: https://b.example }\n"
+                    "  - name: New\n    pages:\n      - { label: home, url: https://n.example }\n")
+        with tempfile.TemporaryDirectory() as d:
+            cfg = Path(d) / "targets.yml"
+            cfg.write_text(cfg_text)
+            targets = s.load_targets(cfg)
+        status = {"targets": [{"competitor": "Acme", "label": "home", "ok": True},
+                              {"competitor": "Acme", "label": "pricing", "ok": False, "error": "403"},
+                              {"competitor": "Beta", "label": "home", "ok": True}]}
+        text = s.render_report([], status, self.NOW, targets=targets)
+        self.assertIn("## Watch list", text)
+        self.assertIn("| Acme | direct | 2026-10-01 | same ICP | 1 OK, **1 broken** |", text)
+        self.assertIn("| Beta | other |  | AI for sales teams | 1 OK |", text)
+        self.assertIn("| New | other |  |  | not scanned yet |", text)
+        self.assertNotIn("## Watch list\n", s.render_report([], {}, self.NOW))       # no targets, no table
+        self.assertIn("not scanned yet", s.render_report([], {}, self.NOW, targets=targets))
+
     def test_digest_covers_more_days(self):
         changes = [self.event("Old", "pricing", "2026-10-30T05:00:00+00:00")]
         text = s.render_report(changes, {}, self.NOW, days=7)

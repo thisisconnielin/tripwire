@@ -87,7 +87,8 @@ appear from the next scan.
 
 Then read `watch/reports/latest.md` (or the printed report). Its **Top moves** section lists the
 most important items first (pricing > launch > funding > watch list > hiring > messaging / news >
-social); lead your readout with those. For any change you will highlight, look
+social); lead your readout with those. It ends with a **Watch list** table (group, date added,
+why each competitor is watched, pages readable / broken); use it for the coverage line. For any change you will highlight, look
 at the full `added` / `removed` lines in `watch/data/changes.json` so you quote them accurately.
 
 ## 3. Daily refresh (new competitors, drop-outs, launches, news, social)

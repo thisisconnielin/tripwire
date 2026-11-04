@@ -260,6 +260,8 @@ def load_targets(path):
                 "slug": slugify(f"{comp['name']}-{label}"),
                 "ignore": DEFAULT_IGNORE + cfg.get("ignore", []) + comp.get("ignore", []) + page.get("ignore", []),
                 "min_lines": page.get("min_lines", cfg.get("min_lines", 1)),
+                "added": str(comp["added"]) if comp.get("added") else None,
+                "reason": comp.get("reason") or comp.get("fit"),
             })
     return targets
 
@@ -333,7 +335,7 @@ def scan(targets, now, workdir, only=None):
     save_json(data_dir / "changes.json", changes)
     save_json(data_dir / "status.json", {"last_run": now, "targets": health})
     write_report(workdir, render_report(changes, {"last_run": now, "targets": health}, now, days=1,
-                                        intel=load_json(data_dir / "intel.json", [])),
+                                        intel=load_json(data_dir / "intel.json", []), targets=targets),
                  f"{now[:10]}.md")
     real = [e for e in new_events if e["type"] == "change"]
     print(f"\nDone. {len(real)} change(s), {len(new_events) - len(real)} baseline(s), "
@@ -420,8 +422,27 @@ def top_moves(real, found, limit=MAX_TOP_MOVES):
     return [line for _, line in moves[:limit]]
 
 
-def render_report(changes, status, now, days=1, intel=None):
-    """Markdown report of what was found in the `days` days up to `now`, plus scan health."""
+def watch_table(targets, health):
+    """Watch-list table: one row per competitor in `targets` (from load_targets), with how many
+    of its pages the last scan could read, from `health` (status.json targets)."""
+    comps = {}
+    for t in targets:
+        comps.setdefault(t["competitor"], t)
+    out = ["| Competitor | Group | Added | Why it's watched | Pages |", "|---|---|---|---|---|"]
+    for name in sorted(comps, key=str.lower):
+        t = comps[name]
+        pages = [h for h in health if h.get("competitor") == name]
+        ok = sum(bool(h.get("ok")) for h in pages)
+        state = "not scanned yet" if not pages else \
+            f"{ok} OK" + (f", **{len(pages) - ok} broken**" if len(pages) > ok else "")
+        out.append(f"| {_quote(name)} | {_quote(t.get('group') or '')} | {t.get('added') or ''} | "
+                   f"{_quote(t.get('reason') or '')} | {state} |")
+    return out
+
+
+def render_report(changes, status, now, days=1, intel=None, targets=None):
+    """Markdown report of what was found in the `days` days up to `now`, plus scan health.
+    With `targets` (the watch list from load_targets), it ends with a watch-list table."""
     end = _ts(now)
     start = end - dt.timedelta(days=days)
     within = lambda d: (t := _ts(d)) is not None and start < t <= end
@@ -507,6 +528,8 @@ def render_report(changes, status, now, days=1, intel=None):
         out += ["## Started watching", ""]
         out += [f"- {e['competitor']} · [{e['label']}]({e['url']})" for e in baselines]
         out.append("")
+    if targets:
+        out += ["## Watch list", ""] + watch_table(targets, status.get("targets", [])) + [""]
     return "\n".join(out).rstrip() + "\n"
 
 
@@ -684,7 +707,8 @@ def main(argv=None):
     if args.command == "report":
         text = render_report(load_json(workdir / "data" / "changes.json", []),
                              load_json(workdir / "data" / "status.json", {}), now, days=args.days,
-                             intel=load_json(workdir / "data" / "intel.json", []))
+                             intel=load_json(workdir / "data" / "intel.json", []),
+                             targets=load_targets(config) if config.exists() else None)
         if args.out:
             print(f"Wrote {write_report(workdir, text, args.out)}")
         else:

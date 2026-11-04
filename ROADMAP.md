@@ -7,7 +7,7 @@ Tick an item when it ships and add a line to the changelog.
 ## Core: find and track competitors (highest priority after broken scans)
 - [x] [small] `tripwire.py add <name> --url <home> [--pricing URL] [--group G] [--reason R]` appends a competitor to `watch/targets.yml` without losing comments, so discovery doesn't hand-edit YAML
 - [x] [small] Report: "Top moves" line at the very top, mixing page changes and intel by importance (pricing > launch > funding > social)
-- [ ] [small] Report: watch-list table (competitor, group, added date, reason, pages OK / broken)
+- [x] [small] Report: watch-list table (competitor, group, added date, reason, pages OK / broken)
 - [ ] [small] `tripwire.py candidates`: keep a `data/candidates.json` of possible competitors seen but not added, with how often they show up, so strong ones get promoted
 - [ ] [big] Free feeds without AI: for each competitor, auto-detect blog / changelog RSS and log new posts as `launch` / `news` intel
 - [ ] [big] Hacker News (Algolia API) + Product Hunt + GitHub releases: log competitor mentions and launches as intel, no API key
@@ -28,6 +28,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [small] Headline watcher: flag when the H1 / hero line changes (the clearest messaging signal)
 - [ ] [small] Report: show "first seen / last changed" per page in a coverage table
 - [ ] [small] Top moves: let `company.yml` set per-competitor weight (e.g. direct > indirect group) so a direct rival's messaging change outranks an indirect one's
+- [ ] [small] Watch list table: flag competitors whose every page has been broken for 7+ days as "consider dropping or fixing URLs"
 - [ ] [small] Noise auto-learning: list lines that flip every scan and suggest `ignore` rules
 - [ ] [big] Battlecard generator: `tripwire.py battlecard <name>` builds a Markdown battlecard from 30 days of changes + current pricing snapshot
 - [ ] [big] Pricing table extractor → structured plans/prices per competitor, compared side by side in the report
@@ -39,6 +40,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-04**: Reports end with a **Watch list** table: each competitor's group, date added, why it's watched (`reason` or `fit`) and how many of its pages are readable or broken (0.3.4).
 - **2026-11-03**: Reports open with **Top moves**: up to 5 page changes and intel items ranked pricing > launch > funding > watch list > hiring > messaging / news > social. Removed two duplicate roadmap items.
 - **2026-11-03**: Accurate competitors. SKILL.md gets a 4-part competitor test (right company, same buyer, same job, live product) judged from each company's own site, with a `fit` quote and confidence; the daily refresh audits the existing list with the new `tripwire.py check`. Block pages ("request has been blocked") are errors, not changes. Page titles ignore SVG tooltips.
 - **2026-11-03**: Bug fixes. `scan --only` no longer wipes other pages from the report; fetcher follows 308 redirects and retries timeouts / 5xx; report tolerates hand-edited intel and bad dates; `add` inserts into the competitor list instead of breaking files where other keys follow it; trace / request ids and hashes are ignored by default.

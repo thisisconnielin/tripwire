@@ -1,6 +1,6 @@
 {
   "name": "tripwire",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Competitive intelligence skill: finds competitors with your ICP, tracks their website changes, launches, news and social posts, and writes a GTM readout.",
   "author": { "name": "Connie Lin", "url": "https://github.com/thisisconnielin" },
   "homepage": "https://github.com/thisisconnielin/tripwire",
