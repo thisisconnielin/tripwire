@@ -247,7 +247,7 @@ class TestReport(unittest.TestCase):
             cfg.write_text(cfg_text)
             targets = s.load_targets(cfg)
         status = {"targets": [{"competitor": "Acme", "label": "home", "ok": True},
-                              {"competitor": "Acme", "label": "pricing", "ok": False, "error": "403"},
+                              {"competitor": "Acme", "label": "pricing", "url": "u", "ok": False, "error": "403"},
                               {"competitor": "Beta", "label": "home", "ok": True}]}
         text = s.render_report([], status, self.NOW, targets=targets)
         self.assertIn("## Watch list", text)

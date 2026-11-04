@@ -454,15 +454,15 @@ def render_report(changes, status, now, days=1, intel=None, targets=None):
     news = [i for i in found if i["type"] not in WATCHLIST_TYPES]
     real = [e for e in recent if e["type"] == "change"]
     baselines = [e for e in recent if e["type"] == "baseline"]
-    targets = status.get("targets", [])
-    broken = [t for t in targets if not t.get("ok")]
+    health = status.get("targets", [])
+    broken = [t for t in health if not t.get("ok")]
 
     title = f"Tripwire report: {now[:10]}" if days == 1 else \
         f"Tripwire digest: {start.date().isoformat()} to {now[:10]}"
     out = [f"# {title}", "",
-           f"{len(targets)} pages watched · **{len(real)} page change{'s' * (len(real) != 1)}** · "
+           f"{len(health)} pages watched · **{len(real)} page change{'s' * (len(real) != 1)}** · "
            f"**{len(news)} launch / news / social item{'s' * (len(news) != 1)}** · "
-           f"{len(targets) - len(broken)} OK · {len(broken)} not readable", ""]
+           f"{len(health) - len(broken)} OK · {len(broken)} not readable", ""]
 
     moves = top_moves(real, found)
     if moves:
@@ -529,7 +529,7 @@ def render_report(changes, status, now, days=1, intel=None, targets=None):
         out += [f"- {e['competitor']} · [{e['label']}]({e['url']})" for e in baselines]
         out.append("")
     if targets:
-        out += ["## Watch list", ""] + watch_table(targets, status.get("targets", [])) + [""]
+        out += ["## Watch list", ""] + watch_table(targets, health) + [""]
     return "\n".join(out).rstrip() + "\n"
 
 
