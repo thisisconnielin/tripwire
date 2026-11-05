@@ -8,7 +8,8 @@ Tick an item when it ships and add a line to the changelog.
 - [x] [small] `tripwire.py add <name> --url <home> [--pricing URL] [--group G] [--reason R]` appends a competitor to `watch/targets.yml` without losing comments, so discovery doesn't hand-edit YAML
 - [x] [small] Report: "Top moves" line at the very top, mixing page changes and intel by importance (pricing > launch > funding > social)
 - [x] [small] Report: watch-list table (competitor, group, added date, reason, pages OK / broken)
-- [ ] [small] `tripwire.py candidates`: keep a `data/candidates.json` of possible competitors seen but not added, with how often they show up, so strong ones get promoted
+- [x] [small] `tripwire.py candidates`: keep a `data/candidates.json` of possible competitors seen but not added, with how often they show up, so strong ones get promoted
+- [ ] [small] Report: list candidates flagged "consider adding" in the weekly digest so promotion happens without asking
 - [ ] [big] Free feeds without AI: for each competitor, auto-detect blog / changelog RSS and log new posts as `launch` / `news` intel
 - [ ] [big] Hacker News (Algolia API) + Product Hunt + GitHub releases: log competitor mentions and launches as intel, no API key
 - [ ] [big] Competitor profile pages: `watch/competitors/<slug>.md` with positioning, pricing, latest launches, 30-day timeline
@@ -40,6 +41,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-04**: `tripwire.py candidates`: discovery and the daily refresh log possible competitors they didn't add to `data/candidates.json` (one sighting per day, matched by name or domain); the list hides ones already watched and flags those seen on 3+ days as "consider adding" (0.3.5).
 - **2026-11-04**: Reports end with a **Watch list** table: each competitor's group, date added, why it's watched (`reason` or `fit`) and how many of its pages are readable or broken (0.3.4).
 - **2026-11-03**: Reports open with **Top moves**: up to 5 page changes and intel items ranked pricing > launch > funding > watch list > hiring > messaging / news > social. Removed two duplicate roadmap items.
 - **2026-11-03**: Accurate competitors. SKILL.md gets a 4-part competitor test (right company, same buyer, same job, live product) judged from each company's own site, with a `fit` quote and confidence; the daily refresh audits the existing list with the new `tripwire.py check`. Block pages ("request has been blocked") are errors, not changes. Page titles ignore SVG tooltips.

@@ -22,6 +22,7 @@ watch/snapshots/*.txt      last readable text of each page
 watch/data/changes.json    every change event, newest first
 watch/data/status.json     per-page health from the last scan
 watch/data/intel.json      launches, news, social posts, watch-list changes (from the web)
+watch/data/candidates.json possible competitors seen but not added, with how many days they showed up
 watch/reports/latest.md    Markdown report of the newest scan or digest
 ```
 
@@ -38,6 +39,7 @@ If `watch/company.yml` is missing, ask for the company name or URL (one question
 3. **Qualify every candidate** with the competitor test below. Most candidates should fail it.
 4. Show the user a ranked list: name, url, group, confidence, and the `fit` quote. Aim for the
    8–15 strongest, not the most. Wait for approval unless the user said to go ahead.
+   Record every medium-confidence or not-approved candidate (see "Candidates" below).
 5. Run `python SKILL_DIR/scripts/tripwire.py init` if `watch/targets.yml` doesn't exist, then add
    each approved competitor with
    `python SKILL_DIR/scripts/tripwire.py add "Name" --url <home> --pricing <url> --group <g> --reason "<why>" --fit "<their words>"`
@@ -104,11 +106,21 @@ queries for new entrants with the same ICP (launches, funding announcements, "al
 <competitor>", Product Hunt). Then:
 - A new company that passes the competitor test with **high** confidence → add it with `add`
   (`--reason`, `--fit`, home + pricing pages that load) and log a `competitor_added` item. Max 2
-  per day. Medium-confidence candidates go in your final message, not the list.
+  per day. Medium-confidence candidates go in your final message, not the list, and are recorded
+  as candidates (below).
 - A watched competitor that fails the test (wrong company, shut down, acquired, pivoted away from
   the ICP, dead site) → set `enabled: false` on it with a dated comment saying why, and log
   `competitor_dropped`. Never drop on one failed fetch or a bot-protection page; need evidence
   (its own homepage, news, redirect to acquirer, shutdown notice).
+
+**Candidates.** Write the plausible companies you didn't add (medium confidence, over the daily
+cap, or not approved) to `watch/candidates-inbox.json` as
+`[{"name": "Newco", "url": "https://newco.ai", "confidence": "medium", "reason": "AI notes for sales teams; overlaps on SMB buyers"}]`,
+run `python SKILL_DIR/scripts/tripwire.py candidates --file watch/candidates-inbox.json`, then
+delete the inbox file. It counts one sighting per day (matched by name or domain) and prints the
+waiting list, most often seen first, hiding anything already in `watch/targets.yml`. Re-run the
+competitor test on rows marked **consider adding** (seen on 3+ days) and add the ones that now
+pass. `python SKILL_DIR/scripts/tripwire.py candidates` alone just prints the list.
 
 **b. Activity.** Cover **every** enabled competitor: at least one WebSearch each, more for direct
 competitors (news + X / LinkedIn + their blog or changelog). Partial coverage is a failed run.

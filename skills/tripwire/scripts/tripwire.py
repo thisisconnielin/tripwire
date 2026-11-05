@@ -11,10 +11,12 @@ Everything lives next to the config file (default watch/targets.yml):
   data/changes.json         feed of change events (newest first)
   data/status.json          last run + per-page health
   data/intel.json           launches, news, social posts and watch-list changes found on the web
+  data/candidates.json      possible competitors seen but not added, with how often they show up
   reports/<date>.md         Markdown report of each scan (reports/latest.md = newest)
 
       python tripwire.py intel < items.json    (log web findings; duplicates are skipped)
       python tripwire.py check                 (what each competitor's own homepage says it is)
+      python tripwire.py candidates [--file c.json]  (possible competitors not added yet, by sightings)
 """
 import argparse, datetime as dt, difflib, json, os, re, sys, time, urllib.error, urllib.request
 from html.parser import HTMLParser
@@ -381,6 +383,80 @@ def add_intel(workdir, items, now):
     return len(fresh), skipped
 
 
+# ---------------------------------------------------------------- candidates
+PROMOTE_AFTER = 3  # days a candidate must show up before it's suggested for the watch list
+
+
+def _watched(config):
+    """Lower-case names and hosts of every competitor in the watch list, paused ones included."""
+    try:
+        cfg = yaml.safe_load(Path(config).read_text()) or {}
+    except FileNotFoundError:
+        return set(), set()
+    comps = cfg.get("competitors") or []
+    names = {str(c.get("name", "")).strip().lower() for c in comps}
+    hosts = {_host(p["url"]) for c in comps for p in c.get("pages") or [] if p.get("url")}
+    return names, hosts - {""}
+
+
+def _same_candidate(a, b):
+    if a["name"].lower() == b["name"].lower():
+        return True
+    return bool(a.get("url") and b.get("url") and _host(a["url"]) == _host(b["url"]))
+
+
+def add_candidates(workdir, items, now):
+    """Record possible competitors seen during discovery but not added, in data/candidates.json.
+
+    Each item: {name, url?, reason?, confidence?, source?}. A candidate counts at most one sighting
+    per day, so repeated runs on one day don't inflate it. Returns the number of new candidates."""
+    path = workdir / "data" / "candidates.json"
+    known = load_json(path, [])
+    today, new = now[:10], 0
+    for raw in items:
+        item = {k: (v.strip() if isinstance(v, str) else v) for k, v in raw.items()}
+        if not item.get("name"):
+            raise ValueError(f"candidate needs a name: {raw}")
+        match = next((c for c in known if _same_candidate(c, item)), None)
+        if match is None:
+            match = {"name": item["name"], "first_seen": today, "last_seen": today, "seen": 1}
+            known.append(match)
+            new += 1
+        elif match.get("last_seen") != today:
+            match["seen"] = int(match.get("seen") or 0) + 1
+            match["last_seen"] = today
+        for key in ("url", "reason", "confidence", "source"):
+            if item.get(key):
+                match[key] = item[key]
+    save_json(path, known)
+    return new
+
+
+def list_candidates(workdir, config):
+    """Candidates not yet on the watch list, most often seen first."""
+    names, hosts = _watched(config)
+    rows = [c for c in load_json(workdir / "data" / "candidates.json", [])
+            if isinstance(c, dict) and c.get("name")
+            and c["name"].strip().lower() not in names
+            and not (c.get("url") and _host(c["url"]) in hosts)]
+    rows.sort(key=lambda c: str(c.get("last_seen") or ""), reverse=True)
+    return sorted(rows, key=lambda c: -int(c.get("seen") or 0))
+
+
+def render_candidates(rows):
+    if not rows:
+        return "No candidates waiting. Log the ones you don't add with `candidates --file`.\n"
+    out = ["| Candidate | Seen (days) | First / last seen | Confidence | Why | |",
+           "|---|---|---|---|---|---|"]
+    for c in rows:
+        name = f"[{c['name']}]({c['url']})" if c.get("url") else c["name"]
+        hint = "**consider adding**" if int(c.get("seen") or 0) >= PROMOTE_AFTER else ""
+        out.append(f"| {_quote(name)} | {c.get('seen', 1)} | {c.get('first_seen', '?')} / "
+                   f"{c.get('last_seen', '?')} | {c.get('confidence') or ''} | "
+                   f"{_quote(c.get('reason') or '')} | {hint} |")
+    return "\n".join(out) + "\n"
+
+
 # ---------------------------------------------------------------- reports
 MAX_REPORT_LINES = 8  # per side, per change
 
@@ -657,7 +733,7 @@ def add_competitor(config, name, url, pricing=None, group=None, reason=None, fit
 # ---------------------------------------------------------------- main
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Watch competitor pages and report what changed.")
-    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init", "intel", "add", "check"])
+    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init", "intel", "add", "check", "candidates"])
     ap.add_argument("--config", default=os.environ.get("TRIPWIRE_CONFIG", str(DEFAULT_CONFIG)),
                     help="watch list (default: watch/targets.yml); data is stored next to it")
     ap.add_argument("name", nargs="?", help="add: competitor name")
@@ -669,7 +745,7 @@ def main(argv=None):
     ap.add_argument("--only", help="scan / check: only this competitor name")
     ap.add_argument("--days", type=int, default=7, help="report: how many days to cover (default 7)")
     ap.add_argument("--out", help="report: file name inside reports/ (default: printed only)")
-    ap.add_argument("--file", help="intel: JSON file with a list of items (default: stdin)")
+    ap.add_argument("--file", help="intel / candidates: JSON file with a list of items (intel default: stdin)")
     args = ap.parse_args(argv)
     config = Path(args.config)
     workdir = config.parent
@@ -702,6 +778,14 @@ def main(argv=None):
         items = json.loads(raw)
         added, skipped = add_intel(workdir, items if isinstance(items, list) else [items], now)
         print(f"Logged {added} new item(s), skipped {skipped} already known.")
+        return
+
+    if args.command == "candidates":
+        if args.file:
+            items = json.loads(Path(args.file).read_text())
+            new = add_candidates(workdir, items if isinstance(items, list) else [items], now)
+            print(f"Recorded {new} new candidate(s).\n")
+        print(render_candidates(list_candidates(workdir, config)))
         return
 
     if args.command == "report":

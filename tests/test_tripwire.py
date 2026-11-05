@@ -334,6 +334,32 @@ class TestIntel(unittest.TestCase):
         self.assertNotIn("Bad date", text)
 
 
+class TestCandidates(unittest.TestCase):
+    def test_counts_days_skips_watched_and_ranks(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            cfg = wd / "targets.yml"
+            cfg.write_text("competitors:\n  - name: Acme\n    enabled: false\n    pages:\n"
+                           "      - { label: home, url: https://www.acme.com }\n")
+            day = lambda n: f"2026-11-0{n}T04:00:00+00:00"
+            strong = {"name": "Strongco", "url": "https://strong.co", "reason": "same ICP", "confidence": "medium"}
+            self.assertEqual(s.add_candidates(wd, [strong, {"name": "Weak"}, {"name": "Acme Inc", "url": "https://acme.com/x"}], day(1)), 3)
+            self.assertEqual(s.add_candidates(wd, [strong], day(1)), 0)      # same day: no extra sighting
+            s.add_candidates(wd, [{"name": "StrongCo AI", "url": "https://www.strong.co/"}], day(2))  # same host
+            s.add_candidates(wd, [{"name": "strongco"}], day(3))
+            with self.assertRaises(ValueError):
+                s.add_candidates(wd, [{"url": "https://x.com"}], day(3))
+            rows = s.list_candidates(wd, cfg)
+            self.assertEqual([r["name"] for r in rows], ["Strongco", "Weak"])  # Acme is watched (paused)
+            self.assertEqual((rows[0]["seen"], rows[0]["first_seen"], rows[0]["last_seen"]), (3, "2026-11-01", "2026-11-03"))
+            text = s.render_candidates(rows)
+            self.assertIn("[Strongco](https://www.strong.co/)", text)
+            self.assertEqual(text.count("consider adding"), 1)
+            self.assertIn("No candidates", s.render_candidates([]))
+            self.assertEqual(s.list_candidates(wd / "none", wd / "none.yml"), [])
+
+
 class TestRepo(unittest.TestCase):
     def test_plugin_version_matches_version_file(self):
         import json

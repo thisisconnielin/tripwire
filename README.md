@@ -55,7 +55,7 @@ Everything stays in `watch/` in that folder:
 watch/company.yml         who you are + your ICP
 watch/targets.yml         competitors and the pages to watch
 watch/snapshots/          last readable text of each page
-watch/data/               changes.json, intel.json (launches/news/social), status.json
+watch/data/               changes.json, intel.json (launches/news/social), candidates.json, status.json
 watch/reports/latest.md   the newest report
 ```
 
@@ -80,6 +80,7 @@ python $S scan --only Acme     # one competitor
 python $S report --days 7      # 7-day digest
 python $S intel --file x.json  # log launches / news / social items
 python $S check                # what each competitor's own homepage says it is
+python $S candidates [--file c.json]  # possible competitors not added yet, most often seen first
 ```
 
 The first scan of a page saves a baseline; changes show from the next scan.
