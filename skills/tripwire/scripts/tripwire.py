@@ -516,9 +516,11 @@ def watch_table(targets, health):
     return out
 
 
-def render_report(changes, status, now, days=1, intel=None, targets=None):
+def render_report(changes, status, now, days=1, intel=None, targets=None, candidates=None):
     """Markdown report of what was found in the `days` days up to `now`, plus scan health.
-    With `targets` (the watch list from load_targets), it ends with a watch-list table."""
+    With `targets` (the watch list from load_targets), it ends with a watch-list table.
+    With `candidates` (from list_candidates), ones seen on PROMOTE_AFTER+ days are listed as
+    "Consider adding"."""
     end = _ts(now)
     start = end - dt.timedelta(days=days)
     within = lambda d: (t := _ts(d)) is not None and start < t <= end
@@ -603,6 +605,15 @@ def render_report(changes, status, now, days=1, intel=None, targets=None):
     if baselines:
         out += ["## Started watching", ""]
         out += [f"- {e['competitor']} · [{e['label']}]({e['url']})" for e in baselines]
+        out.append("")
+    promote = [c for c in candidates or [] if int(c.get("seen") or 0) >= PROMOTE_AFTER]
+    if promote:
+        out += ["## Consider adding", "",
+                f"Seen on {PROMOTE_AFTER}+ days of discovery but not on the watch list yet:", ""]
+        for c in promote:
+            name = f"[{_quote(c['name'])}]({c['url']})" if c.get("url") else _quote(c["name"])
+            why = f": {_quote(c['reason'])}" if c.get("reason") else ""
+            out.append(f"- **{name}** ({c['seen']} days, last {c.get('last_seen') or '?'}){why}")
         out.append("")
     if targets:
         out += ["## Watch list", ""] + watch_table(targets, health) + [""]
@@ -792,7 +803,8 @@ def main(argv=None):
         text = render_report(load_json(workdir / "data" / "changes.json", []),
                              load_json(workdir / "data" / "status.json", {}), now, days=args.days,
                              intel=load_json(workdir / "data" / "intel.json", []),
-                             targets=load_targets(config) if config.exists() else None)
+                             targets=load_targets(config) if config.exists() else None,
+                             candidates=list_candidates(workdir, config))
         if args.out:
             print(f"Wrote {write_report(workdir, text, args.out)}")
         else:

@@ -359,6 +359,17 @@ class TestCandidates(unittest.TestCase):
             self.assertIn("No candidates", s.render_candidates([]))
             self.assertEqual(s.list_candidates(wd / "none", wd / "none.yml"), [])
 
+    def test_report_lists_candidates_to_consider(self):
+        now = "2026-11-05T12:00:00+00:00"
+        rows = [{"name": "Strongco", "url": "https://strong.co", "seen": 3, "last_seen": "2026-11-05",
+                 "reason": "same ICP | SMB"}, {"name": "Weak", "seen": 1}]
+        text = s.render_report([], {}, now, days=7, candidates=rows)
+        self.assertIn("## Consider adding", text)
+        self.assertIn("**[Strongco](https://strong.co)** (3 days, last 2026-11-05): same ICP \\| SMB", text)
+        self.assertNotIn("Weak", text)
+        for empty in (None, [], rows[1:]):
+            self.assertNotIn("Consider adding", s.render_report([], {}, now, days=7, candidates=empty))
+
 
 class TestRepo(unittest.TestCase):
     def test_plugin_version_matches_version_file(self):

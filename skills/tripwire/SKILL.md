@@ -90,7 +90,9 @@ appear from the next scan.
 Then read `watch/reports/latest.md` (or the printed report). Its **Top moves** section lists the
 most important items first (pricing > launch > funding > watch list > hiring > messaging / news >
 social); lead your readout with those. It ends with a **Watch list** table (group, date added,
-why each competitor is watched, pages readable / broken); use it for the coverage line. For any change you will highlight, look
+why each competitor is watched, pages readable / broken); use it for the coverage line. Digests
+(`report`) also list **Consider adding**: candidates seen on 3+ days of discovery; run the
+competitor test on them and offer to add the ones that pass. For any change you will highlight, look
 at the full `added` / `removed` lines in `watch/data/changes.json` so you quote them accurately.
 
 ## 3. Daily refresh (new competitors, drop-outs, launches, news, social)
@@ -157,7 +159,7 @@ Reply in the user's language. Keep it short and lead with what matters:
    headline > hiring signals > copy tweaks.
 3. **What to do**: 1–3 concrete actions (update the battlecard, answer in our pricing page, tell
    sales, ship a comparison post). Skip if nothing is worth acting on.
-4. **Watch list**: competitors added or dropped, if any.
+4. **Watch list**: competitors added or dropped, if any, and any **Consider adding** candidates.
 5. **Coverage**: one line on pages that could not be read, if any.
 
 Rules:

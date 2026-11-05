@@ -77,7 +77,7 @@ python $S init                 # create watch/targets.yml
 python $S add "Acme" --url https://acme.com --pricing https://acme.com/pricing --group direct --reason "same ICP"
 python $S scan                 # scan everything → watch/reports/latest.md
 python $S scan --only Acme     # one competitor
-python $S report --days 7      # 7-day digest
+python $S report --days 7      # 7-day digest (+ candidates seen on 3+ days to consider adding)
 python $S intel --file x.json  # log launches / news / social items
 python $S check                # what each competitor's own homepage says it is
 python $S candidates [--file c.json]  # possible competitors not added yet, most often seen first
