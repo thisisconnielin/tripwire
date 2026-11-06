@@ -1,6 +1,10 @@
-"""Run: python -m unittest discover tests"""
-import sys, unittest
+"""Run: python3 -m unittest discover tests"""
+import os, sys, time, unittest
 from pathlib import Path
+
+# Dates in reports follow the local clock; pin it so results don't depend on the machine.
+os.environ["TZ"] = "UTC"
+time.tzset()
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "tripwire" / "scripts"))
 import tripwire as s
 
@@ -459,6 +463,154 @@ class TestRepo(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         plugin = json.loads((root / ".claude-plugin" / "plugin.json").read_text())
         self.assertEqual(plugin["version"], (root / "VERSION").read_text().strip())
+
+
+class TestLocalTime(unittest.TestCase):
+    def setUp(self):
+        os.environ["TZ"] = "America/Los_Angeles"
+        time.tzset()
+
+    def tearDown(self):
+        os.environ["TZ"] = "UTC"
+        time.tzset()
+
+    def test_evening_in_california_is_still_today(self):
+        now = "2026-11-06T05:00:00+00:00"          # 9pm Nov 5 in Los Angeles
+        self.assertEqual(s.local_day(now), "2026-11-05")
+        self.assertIn("Tripwire report: 2026-11-05", s.render_report([], {}, now, days=1))
+        self.assertIn("Tripwire digest: 2026-10-29 to 2026-11-05", s.render_report([], {}, now, days=7))
+
+
+class TestFixes(unittest.TestCase):
+    """Bugs found in the 2026-11-05 end-to-end test (see ROADMAP changelog)."""
+
+    def run_main(self, *argv, stdin=None):
+        import contextlib, io
+        out, err = io.StringIO(), io.StringIO()
+        code = 0
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            if stdin is not None:
+                sys.stdin = io.StringIO(stdin)
+            try:
+                s.main(list(argv))
+            except SystemExit as e:
+                code = e.code
+            finally:
+                sys.stdin = sys.__stdin__
+        return code, out.getvalue(), err.getvalue()
+
+    def tmp(self):
+        import tempfile
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        return Path(d.name) / "watch" / "targets.yml"
+
+    def test_scan_and_check_before_init_explain_what_to_do(self):
+        cfg = self.tmp()
+        for cmd in ("scan", "check"):
+            code, _, err = self.run_main(cmd, "--config", str(cfg))
+            self.assertEqual(code, 1)
+            self.assertIn("init", err)
+            self.assertNotIn("Traceback", err)
+
+    def test_init_has_no_live_placeholder_competitor(self):
+        cfg = self.tmp()
+        code, out, _ = self.run_main("init", "--config", str(cfg))
+        self.assertEqual(s.load_targets(cfg), [])
+        self.assertIn("python3 ", out)
+        self.assertIn(" add ", out)
+
+    def test_add_normalises_and_rejects_urls(self):
+        from unittest import mock
+        cfg = self.tmp()
+        self.run_main("init", "--config", str(cfg))
+        with mock.patch.object(s, "fetch_page", return_value=("<p>ok</p>", "https://linear.app")):
+            self.run_main("add", "Linear", "--url", "linear.app", "--pricing", "linear.app/pricing", "--config", str(cfg))
+        self.assertEqual([t["url"] for t in s.load_targets(cfg)], ["https://linear.app", "https://linear.app/pricing"])
+        code, _, err = self.run_main("add", "Bad", "--url", "not a url", "--config", str(cfg))
+        self.assertEqual(code, 1)
+        self.assertIn("not a web address", err)
+        self.assertEqual(len(s.load_targets(cfg)), 2)
+
+    def test_add_warns_when_url_does_not_load(self):
+        import socket, urllib.error
+        from unittest import mock
+        cfg = self.tmp()
+        self.run_main("init", "--config", str(cfg))
+        dns = urllib.error.URLError(socket.gaierror(8, "nodename nor servname provided"))
+        with mock.patch.object(s, "fetch_page", side_effect=dns):
+            code, out, _ = self.run_main("add", "Ghost", "--url", "https://ghost.invalid", "--config", str(cfg))
+        self.assertIn("Added Ghost", out)
+        self.assertIn("Warning: https://ghost.invalid didn't load (Domain not found", out)
+
+    def test_check_only_unknown_errors_like_scan(self):
+        cfg = self.tmp()
+        self.run_main("init", "--config", str(cfg))
+        for cmd in ("scan", "check"):
+            code, _, err = self.run_main(cmd, "--only", "Nope", "--config", str(cfg))
+            self.assertEqual(code, 1)
+            self.assertIn("no enabled competitor named 'Nope'", err)
+
+    def test_friendly_errors_and_no_retry_on_dns(self):
+        import socket, urllib.error
+        from unittest import mock
+        dns = urllib.error.URLError(socket.gaierror(8, "nodename nor servname provided"))
+        self.assertEqual(s.friendly_error(dns), "Domain not found (check the URL)")
+        self.assertEqual(s.friendly_error(urllib.error.HTTPError("u", 403, "Forbidden", {}, None)),
+                         "HTTP 403: the site blocks automated visitors")
+        self.assertIn("https://", s.friendly_error(ValueError("unknown url type: 'linear.app'")))
+        with mock.patch.object(s._OPENER, "open", side_effect=dns) as o, mock.patch.object(s, "RETRY_DELAY", 0):
+            with self.assertRaises(urllib.error.URLError):
+                s.fetch("https://ghost.invalid")
+            self.assertEqual(o.call_count, 1)
+
+    def test_doubled_text_is_collapsed_once(self):
+        html = '<p><span>$10 per user/month</span><span aria-hidden="true">$10 per user/month</span></p><p>Bora Bora</p>'
+        self.assertEqual(s.extract_lines(html, [])[1], ["$10 per user/month", "Bora Bora"])
+        pcs = s.price_changes(["$10 per user/month $10 per user"], ["$8 per user/month $8 per user"])
+        self.assertTrue(s.price_summary(pcs).startswith("Price change: $8 → $10 in"))
+
+    def test_intel_bad_input_is_one_clear_line(self):
+        cfg = self.tmp()
+        code, _, err = self.run_main("intel", "--config", str(cfg), stdin="not json")
+        self.assertEqual((code, "Traceback" in err), (1, False))
+        self.assertIn("JSON list", err)
+        code, _, err = self.run_main("intel", "--config", str(cfg),
+                                     stdin='[{"competitor":"X","type":"rumor","title":"t","url":"https://x"}]')
+        self.assertEqual(code, 1)
+        self.assertIn("nothing was logged", err)
+
+    def test_candidates_messages(self):
+        import json, tempfile
+        cfg = self.tmp()
+        self.run_main("init", "--config", str(cfg))
+        s.add_competitor(cfg, "Linear", "https://linear.app")
+        f = cfg.parent / "c.json"
+        f.write_text(json.dumps([{"name": "linear", "url": "https://linear.app"}, {"name": "Plane", "url": "https://plane.so"}]))
+        _, out, _ = self.run_main("candidates", "--file", str(f), "--config", str(cfg))
+        self.assertIn("Recorded 1 new candidate(s), skipped 1 already on the watch list.", out)
+        self.assertIn("| Candidate | Seen (days) | First / last seen | Why | Status |", out)   # no empty Confidence
+        _, out, _ = self.run_main("candidates", "--dismiss", "Nope", "--config", str(cfg))
+        self.assertIn("Nope wasn't a candidate yet", out)
+        _, out, _ = self.run_main("candidates", "--dismiss", "Plane", "--config", str(cfg))
+        self.assertIn("Dismissed Plane;", out)
+
+    def test_several_updates_on_one_changelog_url_are_kept(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            log = lambda date, title: {"competitor": "Youform", "type": "launch", "title": title,
+                                       "url": "https://feedback.youform.com/updates", "date": date}
+            now = "2026-11-06T18:00:00+00:00"
+            self.assertEqual(s.add_intel(wd, [log("2026-10-20", "Pages"), log("2026-10-28", "AI analysis"),
+                                              log("2026-11-03", "MCP")], now), (3, 0))
+            # Re-logging the same update (same link, same day) on a later run is still a duplicate.
+            self.assertEqual(s.add_intel(wd, [log("2026-10-28", "AI analysis (again)")], now), (0, 1))
+
+    def test_started_watching_is_labelled_with_its_window(self):
+        ev = {"type": "baseline", "competitor": "A", "label": "home", "url": "https://a", "date": "2026-11-03T05:00:00+00:00",
+              "tags": ["baseline"], "summary": "", "added": [], "removed": []}
+        self.assertIn("## Started watching (last 24 hours)", s.render_report([ev], {}, "2026-11-03T06:00:00+00:00", days=1))
 
 
 if __name__ == "__main__":

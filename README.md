@@ -74,17 +74,17 @@ The page diffing is a plain Python script you can also run without Claude:
 
 ```bash
 S=~/.claude/skills/tripwire/scripts/tripwire.py
-python $S init                 # create watch/targets.yml
-python $S add "Acme" --url https://acme.com --pricing https://acme.com/pricing --group direct --reason "same ICP"
-python $S scan                 # scan everything → watch/reports/latest.md
-python $S scan --only Acme     # one competitor
-python $S report --days 7      # 7-day digest (+ candidates seen on 3+ days to consider adding)
-python $S intel --file x.json  # log launches / news / social items
-python $S check                # what each competitor's own homepage says it is
-python $S candidates [--file c.json]  # possible competitors not added yet, most often seen first
-python $S candidates --dismiss Newco --reason "consumer only"  # reject one so it stops showing
-python $S candidates --all        # also list dismissed ones, with date and reason
-python $S candidates --restore Newco  # un-dismiss one so it shows again
+python3 $S init                 # create watch/targets.yml
+python3 $S add "Acme" --url https://acme.com --pricing https://acme.com/pricing --group direct --reason "same ICP"
+python3 $S scan                 # scan everything → watch/reports/latest.md
+python3 $S scan --only Acme     # one competitor
+python3 $S report --days 7      # 7-day digest (+ candidates seen on 3+ days to consider adding)
+python3 $S intel --file x.json  # log launches / news / social items
+python3 $S check                # what each competitor's own homepage says it is
+python3 $S candidates [--file c.json]  # possible competitors not added yet, most often seen first
+python3 $S candidates --dismiss Newco --reason "consumer only"  # reject one so it stops showing
+python3 $S candidates --all        # also list dismissed ones, with date and reason
+python3 $S candidates --restore Newco  # un-dismiss one so it shows again
 ```
 
 The first scan of a page saves a baseline; changes show from the next scan.
@@ -107,7 +107,7 @@ Connie develops Tripwire with Claude Code, which runs on her machine on a schedu
 | Weekly release | Friday 10am | one bigger feature in 3–6 commits, version bump, git tag |
 
 It follows [CLAUDE.md](CLAUDE.md) and works through [ROADMAP.md](ROADMAP.md).
-Run tests with `python -m unittest discover tests`.
+Run tests with `python3 -m unittest discover tests`.
 
 ## Credits
 

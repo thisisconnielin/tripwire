@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Tripwire: watch competitor pages, diff them, report what changed.
 
-Run:  python tripwire.py scan                  (scan every page in watch/targets.yml)
-      python tripwire.py scan --only Acme      (scan one competitor)
-      python tripwire.py report --days 7       (Markdown digest of the last 7 days)
-      python tripwire.py init                  (create watch/targets.yml from the example)
+Run:  python3 tripwire.py scan                  (scan every page in watch/targets.yml)
+      python3 tripwire.py scan --only Acme      (scan one competitor)
+      python3 tripwire.py report --days 7       (Markdown digest of the last 7 days)
+      python3 tripwire.py init                  (create watch/targets.yml from the example)
 
 Everything lives next to the config file (default watch/targets.yml):
   snapshots/<slug>.txt      latest readable text of each page
@@ -14,11 +14,11 @@ Everything lives next to the config file (default watch/targets.yml):
   data/candidates.json      possible competitors seen but not added, with how often they show up
   reports/<date>.md         Markdown report of each scan (reports/latest.md = newest)
 
-      python tripwire.py intel < items.json    (log web findings; duplicates are skipped)
-      python tripwire.py check                 (what each competitor's own homepage says it is)
-      python tripwire.py candidates [--file c.json]  (possible competitors not added yet, by sightings)
-      python tripwire.py candidates --dismiss <name> [--reason R]  (reject one so it stops showing)
-      python tripwire.py candidates --all | --restore <name>  (show dismissed ones / un-dismiss one)
+      python3 tripwire.py intel < items.json    (log web findings; duplicates are skipped)
+      python3 tripwire.py check                 (what each competitor's own homepage says it is)
+      python3 tripwire.py candidates [--file c.json]  (possible competitors not added yet, by sightings)
+      python3 tripwire.py candidates --dismiss <name> [--reason R]  (reject one so it stops showing)
+      python3 tripwire.py candidates --all | --restore <name>  (show dismissed ones / un-dismiss one)
 """
 import argparse, datetime as dt, difflib, json, os, re, sys, time, urllib.error, urllib.request
 from html.parser import HTMLParser
@@ -117,6 +117,9 @@ def extract_lines(html, ignore_patterns):
         body = "\n".join(dict.fromkeys(p.meta))
     for raw in body.split("\n"):
         line = re.sub(r"\s+", " ", raw).strip()
+        # Sites often render the same text twice (screen-reader copy + visible copy) and the two
+        # end up glued on one line: "$10 per user/month$10 per user/month". Keep one.
+        line = DOUBLED.sub(r"\1", line)
         for rx in ignore:
             line = rx.sub("", line).strip()
         if len(line) < 2 or line == seen_prev:
@@ -124,6 +127,9 @@ def extract_lines(html, ignore_patterns):
         lines.append(line)
         seen_prev = line
     return re.sub(r"\s+", " ", p.title).strip(), lines
+
+
+DOUBLED = re.compile(r"^(.{6,}?) ?\1$")
 
 
 # Bot-protection and error pages that come back as 200 / 403 with HTML instead of the real page.
@@ -150,10 +156,38 @@ class _Redirects(urllib.request.HTTPRedirectHandler):
 _OPENER = urllib.request.build_opener(_Redirects)
 
 
+def _dns_failure(err):
+    import socket
+    return isinstance(err, urllib.error.URLError) and isinstance(getattr(err, "reason", None), socket.gaierror)
+
+
 def _transient(err):
     if isinstance(err, urllib.error.HTTPError):
         return err.code == 429 or err.code >= 500
+    if _dns_failure(err):
+        return False  # the domain doesn't exist; asking again won't help
     return isinstance(err, (urllib.error.URLError, TimeoutError, ConnectionError))
+
+
+HTTP_HINTS = {401: "login required", 403: "the site blocks automated visitors", 404: "page not found",
+              410: "page removed", 429: "rate limited, try later"}
+
+
+def friendly_error(err):
+    """One plain-English line for a fetch failure."""
+    if isinstance(err, urllib.error.HTTPError):
+        hint = HTTP_HINTS.get(err.code) or ("server error" if err.code >= 500 else err.reason)
+        return f"HTTP {err.code}: {hint}"
+    if _dns_failure(err):
+        return "Domain not found (check the URL)"
+    if isinstance(err, ValueError) and "unknown url type" in str(err):
+        return "Not a web address (it must start with https://)"
+    reason = getattr(err, "reason", err)
+    if isinstance(reason, (TimeoutError,)) or "timed out" in str(reason):
+        return "Timed out"
+    if "CERTIFICATE_VERIFY_FAILED" in str(reason):
+        return "SSL certificate problem"
+    return f"{type(err).__name__}: {reason}"[:200]
 
 
 def fetch(url, timeout=30):
@@ -229,7 +263,7 @@ def price_changes(added, removed):
 
 def price_summary(changes):
     first = changes[0]
-    moves = ", ".join(f"{a} → {b}" for a, b in zip(first["from"], first["to"]) if a != b)
+    moves = ", ".join(dict.fromkeys(f"{a} → {b}" for a, b in zip(first["from"], first["to"]) if a != b))
     more = f" (+{len(changes) - 1} more price change{'s' * (len(changes) > 2)})" if len(changes) > 1 else ""
     line = first["new"] if len(first["new"]) <= 80 else first["new"][:77] + "…"
     return f"Price change: {moves} in “{line}”{more}"
@@ -274,6 +308,15 @@ def ai_summary(name, url, added, removed):
 
 
 # ---------------------------------------------------------------- io helpers
+def local_day(ts):
+    """The user's local calendar date (YYYY-MM-DD) for an ISO timestamp. Timestamps are stored in
+    UTC, but reports, file names and "today" follow the clock the user sees."""
+    d = dt.datetime.fromisoformat(ts)
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=dt.timezone.utc)
+    return d.astimezone().date().isoformat()
+
+
 def slugify(s):
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-") or "page"
 
@@ -334,7 +377,7 @@ def scan(targets, now, workdir, only=None):
         try:
             title, lines = extract_lines(fetch(t["url"]), t["ignore"])
         except Exception as e:
-            h.update(ok=False, error=f"{type(e).__name__}: {e}"[:200])
+            h.update(ok=False, error=friendly_error(e))
             print(f"  ! {h['error']}")
             health.append(h)
             continue
@@ -371,7 +414,7 @@ def scan(targets, now, workdir, only=None):
                 if prices:
                     ev["price_changes"] = prices
         if ev:
-            ev.update(id=f"{now[:10]}-{t['slug']}", date=now, competitor=t["competitor"], group=t["group"],
+            ev.update(id=f"{local_day(now)}-{t['slug']}", date=now, competitor=t["competitor"], group=t["group"],
                       label=t["label"], url=t["url"], slug=t["slug"])
             new_events.append(ev)
             h["last_changed"] = now
@@ -389,7 +432,7 @@ def scan(targets, now, workdir, only=None):
     save_json(data_dir / "status.json", {"last_run": now, "targets": health})
     write_report(workdir, render_report(changes, {"last_run": now, "targets": health}, now, days=1,
                                         intel=load_json(data_dir / "intel.json", []), targets=targets),
-                 f"{now[:10]}.md")
+                 f"{local_day(now)}.md")
     real = [e for e in new_events if e["type"] == "change"]
     print(f"\nDone. {len(real)} change(s), {len(new_events) - len(real)} baseline(s), "
           f"{sum(not h['ok'] for h in health)} error(s).")
@@ -400,7 +443,9 @@ def scan(targets, now, workdir, only=None):
 def _intel_key(item):
     url = (item.get("url") or "").strip().lower().rstrip("/")
     if url and item["type"] not in WATCHLIST_TYPES:
-        return url
+        # One changelog or release-notes URL often carries several updates on different days,
+        # so the same link only counts as a duplicate when the publish date matches too.
+        return f"{url}|{item.get('date') or ''}"
     return f"{item['type']}|{item['competitor'].lower()}|{item.get('title', '').strip().lower()}"
 
 
@@ -422,12 +467,12 @@ def add_intel(workdir, items, now):
             raise ValueError(f"intel type must be one of {INTEL_TYPES}: {raw}")
         if item["type"] not in WATCHLIST_TYPES and not item.get("url"):
             raise ValueError(f"intel item needs a source url: {raw}")
+        item.setdefault("date", local_day(now))
         key = _intel_key(item)
         if key in seen:
             skipped += 1
             continue
         seen.add(key)
-        item.setdefault("date", now[:10])
         item["found"] = now
         fresh.append(item)
     save_json(path, (fresh + existing)[:MAX_INTEL])
@@ -463,7 +508,7 @@ def add_candidates(workdir, items, now):
     per day, so repeated runs on one day don't inflate it. Returns the number of new candidates."""
     path = workdir / "data" / "candidates.json"
     known = load_json(path, [])
-    today, new = now[:10], 0
+    today, new = local_day(now), 0
     for raw in items:
         item = {k: (v.strip() if isinstance(v, str) else v) for k, v in raw.items()}
         if not item.get("name"):
@@ -500,9 +545,9 @@ def dismiss_candidate(workdir, name, now, reason=None):
     name = name.strip()
     match = _find_candidate(known, name)
     if match is None:
-        match = {"name": name, "first_seen": now[:10], "last_seen": now[:10], "seen": 0}
+        match = {"name": name, "first_seen": local_day(now), "last_seen": local_day(now), "seen": 0}
         known.append(match)
-    match["dismissed"] = now[:10]
+    match["dismissed"] = local_day(now)
     if reason:
         match["dismiss_reason"] = reason.strip()
     save_json(path, known)
@@ -540,8 +585,10 @@ def list_candidates(workdir, config, include_dismissed=False):
 def render_candidates(rows):
     if not rows:
         return "No candidates waiting. Log the ones you don't add with `candidates --file`.\n"
-    out = ["| Candidate | Seen (days) | First / last seen | Confidence | Why | |",
-           "|---|---|---|---|---|---|"]
+    show_conf = any(c.get("confidence") for c in rows)
+    out = ["| Candidate | Seen (days) | First / last seen |" + (" Confidence |" if show_conf else "") +
+           " Why | Status |",
+           "|---|---|---|" + ("---|" if show_conf else "") + "---|---|"]
     for c in rows:
         name = f"[{c['name']}]({c['url']})" if c.get("url") else c["name"]
         if c.get("dismissed"):
@@ -549,9 +596,9 @@ def render_candidates(rows):
             hint = f"dismissed {c['dismissed']}" + (f": {_quote(why)}" if why else "")
         else:
             hint = "**consider adding**" if int(c.get("seen") or 0) >= PROMOTE_AFTER else ""
+        conf = f" {c.get('confidence') or ''} |" if show_conf else ""
         out.append(f"| {_quote(name)} | {c.get('seen', 1)} | {c.get('first_seen', '?')} / "
-                   f"{c.get('last_seen', '?')} | {c.get('confidence') or ''} | "
-                   f"{_quote(c.get('reason') or '')} | {hint} |")
+                   f"{c.get('last_seen', '?')} |{conf} {_quote(c.get('reason') or '')} | {hint} |")
     return "\n".join(out) + "\n"
 
 
@@ -633,8 +680,8 @@ def render_report(changes, status, now, days=1, intel=None, targets=None, candid
     health = status.get("targets", [])
     broken = [t for t in health if not t.get("ok")]
 
-    title = f"Tripwire report: {now[:10]}" if days == 1 else \
-        f"Tripwire digest: {start.date().isoformat()} to {now[:10]}"
+    title = f"Tripwire report: {local_day(now)}" if days == 1 else \
+        f"Tripwire digest: {local_day(start.isoformat())} to {local_day(now)}"
     out = [f"# {title}", "",
            f"{len(health)} pages watched · **{len(real)} page change{'s' * (len(real) != 1)}** · "
            f"**{len(news)} launch / news / social item{'s' * (len(news) != 1)}** · "
@@ -705,7 +752,7 @@ def render_report(changes, status, now, days=1, intel=None, targets=None, candid
                 for t in broken]
         out.append("")
     if baselines:
-        out += ["## Started watching", ""]
+        out += ["## Started watching" + (" (last 24 hours)" if days == 1 else f" (last {days} days)"), ""]
         out += [f"- {e['competitor']} · [{e['label']}]({e['url']})" for e in baselines]
         out.append("")
     promote = [c for c in candidates or [] if int(c.get("seen") or 0) >= PROMOTE_AFTER]
@@ -763,7 +810,7 @@ def check_competitors(config, only=None, lines=6):
                        opening=text[:lines], final_url=final,
                        redirected_to_other_site=_host(final) != _host(page["url"]))
         except Exception as e:
-            row.update(ok=False, error=f"{type(e).__name__}: {e}"[:200])
+            row.update(ok=False, error=str(e) if isinstance(e, RuntimeError) else friendly_error(e))
         out.append(row)
     return out
 
@@ -788,10 +835,22 @@ def render_check(rows):
     return "\n".join(out).rstrip() + "\n"
 
 
+def normalize_url(url):
+    """Add https:// to a bare domain; refuse anything that isn't a web address."""
+    url = (url or "").strip()
+    if not re.match(r"^[a-z][a-z0-9+.-]*://", url, re.I):
+        url = "https://" + url.lstrip("/")
+    if not re.match(r"^https?://[^/\s.]+\.[^/\s]+", url, re.I):
+        raise ValueError(f"not a web address: {url!r}")
+    return url
+
+
 def add_competitor(config, name, url, pricing=None, group=None, reason=None, fit=None):
     """Insert a competitor at the end of the `competitors:` list, keeping comments and the rest of
     the file. Returns False if already present. Never writes a file that doesn't parse."""
     config = Path(config)
+    url = normalize_url(url)
+    pricing = normalize_url(pricing) if pricing else None
     text = config.read_text() if config.exists() else ""
     cfg = yaml.safe_load(text) or {}
     comps = cfg.get("competitors") or []
@@ -866,6 +925,28 @@ def main(argv=None):
     config = Path(args.config)
     workdir = config.parent
     now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+    me = f"python3 {Path(__file__).resolve()}"
+
+    def fail(msg):
+        print(f"tripwire: {msg}", file=sys.stderr)
+        sys.exit(1)
+
+    def read_items(raw, what):
+        try:
+            items = json.loads(raw)
+        except json.JSONDecodeError as e:
+            fail(f"{what} must be a JSON list of objects; couldn't parse it ({e.msg}, line {e.lineno}).")
+        items = items if isinstance(items, list) else [items]
+        if not all(isinstance(i, dict) for i in items):
+            fail(f"{what} must be a JSON list of objects.")
+        return items
+
+    if args.command in ("scan", "check") and not config.exists():
+        fail(f"no watch list at {config} yet. Create one with: {me} init")
+    if args.only and args.command in ("scan", "check"):
+        names = {t["competitor"].lower() for t in load_targets(config)}
+        if args.only.lower() not in names:
+            fail(f"no enabled competitor named {args.only!r} in {config}")
 
     if args.command == "init":
         if config.exists():
@@ -873,16 +954,29 @@ def main(argv=None):
             return
         config.parent.mkdir(parents=True, exist_ok=True)
         config.write_text((SKILL_DIR / "targets.example.yml").read_text())
-        print(f"Created {config}. Add your competitors, then run: python {Path(__file__).name} scan")
+        print(f"Created {config} (no competitors yet). Add one with:\n"
+              f"  {me} add \"Name\" --url https://example.com --pricing https://example.com/pricing\n"
+              f"then scan with: {me} scan")
         return
 
     if args.command == "add":
         if not args.name or not args.url:
             ap.error("add needs a name and --url")
-        if add_competitor(config, args.name, args.url, args.pricing, args.group, args.reason, args.fit):
-            print(f"Added {args.name} to {config}.")
-        else:
+        try:
+            added = add_competitor(config, args.name, args.url, args.pricing, args.group, args.reason, args.fit)
+        except ValueError as e:
+            fail(str(e))
+        if not added:
             print(f"{args.name} is already in {config}; nothing changed.")
+            return
+        print(f"Added {args.name} to {config}.")
+        for url in filter(None, (args.url, args.pricing)):
+            url = normalize_url(url)
+            try:
+                fetch_page(url, timeout=15)
+            except Exception as e:
+                print(f"  Warning: {url} didn't load ({friendly_error(e)}). Check the URL; "
+                      "it stays on the list and will show as not readable until fixed.")
         return
 
     if args.command == "check":
@@ -891,23 +985,34 @@ def main(argv=None):
 
     if args.command == "intel":
         raw = Path(args.file).read_text() if args.file else sys.stdin.read()
-        items = json.loads(raw)
-        added, skipped = add_intel(workdir, items if isinstance(items, list) else [items], now)
+        try:
+            added, skipped = add_intel(workdir, read_items(raw, "intel input"), now)
+        except ValueError as e:
+            fail(f"nothing was logged. {e}")
         print(f"Logged {added} new item(s), skipped {skipped} already known.")
         return
 
     if args.command == "candidates":
         if args.dismiss:
-            print(f"Dismissed {dismiss_candidate(workdir, args.dismiss, now, args.reason)}; "
-                  "it won't show in the candidates list or Consider adding.\n")
+            known = _find_candidate(load_json(workdir / "data" / "candidates.json", []), args.dismiss)
+            name = dismiss_candidate(workdir, args.dismiss, now, args.reason)
+            print(f"Dismissed {name}; it won't show in the candidates list or Consider adding.\n" if known
+                  else f"{name} wasn't a candidate yet; recorded it as dismissed so it won't be suggested.\n")
         if args.restore:
             restored = restore_candidate(workdir, args.restore)
             print(f"Restored {restored}; it shows in the candidates list again.\n" if restored
                   else f"{args.restore} isn't a dismissed candidate; nothing changed.\n")
         if args.file:
-            items = json.loads(Path(args.file).read_text())
-            new = add_candidates(workdir, items if isinstance(items, list) else [items], now)
-            print(f"Recorded {new} new candidate(s).\n")
+            items = read_items(Path(args.file).read_text(), "candidates input")
+            names, hosts = _watched(config)
+            watched = [i for i in items if str(i.get("name", "")).strip().lower() in names
+                       or (i.get("url") and _host(i["url"]) in hosts)]
+            try:
+                new = add_candidates(workdir, [i for i in items if i not in watched], now)
+            except ValueError as e:
+                fail(f"nothing was recorded. {e}")
+            skipped = f", skipped {len(watched)} already on the watch list" if watched else ""
+            print(f"Recorded {new} new candidate(s){skipped}.\n")
         print(render_candidates(list_candidates(workdir, config, include_dismissed=args.all)))
         return
 
@@ -924,8 +1029,6 @@ def main(argv=None):
         return
 
     targets = load_targets(config)
-    if args.only and not any(t["competitor"].lower() == args.only.lower() for t in targets):
-        ap.error(f"no enabled competitor named {args.only!r} in {config}")
     real = scan(targets, now, workdir, only=args.only)
     print(f"Report: {workdir / 'reports' / 'latest.md'}")
     if gh_out := os.environ.get("GITHUB_OUTPUT"):

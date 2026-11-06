@@ -1,4 +1,14 @@
-# Tripwire watch list. List each competitor and the pages you care about.
+# Tripwire watch list. Add competitors with `tripwire.py add`, or edit this file.
+#
+#   competitors:
+#     - name: Acme
+#       group: direct             # optional label: direct / platform / indirect …
+#       reason: why they're a competitor
+#       fit: their own homepage words that show the overlap
+#       pages:
+#         - { label: home,      url: https://acme.example }
+#         - { label: pricing,   url: https://acme.example/pricing }
+#         - { label: changelog, url: https://acme.example/changelog }
 #
 # Optional, at any level (global / competitor / page):
 #   ignore:    [regex, ...]   lines matching these are stripped before diffing
@@ -8,10 +18,4 @@
 min_lines: 1
 ignore: []
 
-competitors:
-  - name: Acme
-    group: direct             # optional label: direct / platform / indirect …
-    pages:
-      - { label: home,      url: https://acme.com }
-      - { label: pricing,   url: https://acme.com/pricing }
-      - { label: changelog, url: https://acme.com/changelog }
+competitors: []

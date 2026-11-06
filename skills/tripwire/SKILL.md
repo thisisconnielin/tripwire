@@ -40,14 +40,16 @@ If `watch/company.yml` is missing, ask for the company name or URL (one question
 4. Show the user a ranked list: name, url, group, confidence, and the `fit` quote. Aim for the
    8–15 strongest, not the most. Wait for approval unless the user said to go ahead.
    Record every medium-confidence or not-approved candidate (see "Candidates" below).
-5. Run `python SKILL_DIR/scripts/tripwire.py init` if `watch/targets.yml` doesn't exist, then add
+5. Run `python3 SKILL_DIR/scripts/tripwire.py init` if `watch/targets.yml` doesn't exist, then add
    each approved competitor with
-   `python SKILL_DIR/scripts/tripwire.py add "Name" --url <home> --pricing <url> --group <g> --reason "<why>" --fit "<their words>"`
+   `python3 SKILL_DIR/scripts/tripwire.py add "Name" --url <home> --pricing <url> --group <g> --reason "<why>" --fit "<their words>"`
    (keeps comments, skips duplicates, records the added date). Add changelog / blog pages by
    editing `watch/targets.yml`.
-6. Run `python SKILL_DIR/scripts/tripwire.py check` and re-read every row; fix anything that
+6. Run `python3 SKILL_DIR/scripts/tripwire.py check` and re-read every row; fix anything that
    doesn't match. Then scan (baseline) and do a daily refresh (section 3) so the first report
-   has news too.
+   has news too. In that first refresh, **don't log `competitor_added`** for the competitors you
+   just set up: they are the starting list, not new entrants. Present them as "Watch list" in the
+   readout. Log `competitor_added` only for companies added on later days.
 
 ### The competitor test
 
@@ -78,10 +80,10 @@ Pick what the user asked for:
 
 | Ask | Command |
 |---|---|
-| "what changed" / "run a scan" (no scan today yet) | `python SKILL_DIR/scripts/tripwire.py scan` |
-| one competitor | `python SKILL_DIR/scripts/tripwire.py scan --only "Name"` |
-| "this week" / digest | `python SKILL_DIR/scripts/tripwire.py report --days 7` |
-| "last month" | `python SKILL_DIR/scripts/tripwire.py report --days 30` |
+| "what changed" / "run a scan" (no scan today yet) | `python3 SKILL_DIR/scripts/tripwire.py scan` |
+| one competitor | `python3 SKILL_DIR/scripts/tripwire.py scan --only "Name"` |
+| "this week" / digest | `python3 SKILL_DIR/scripts/tripwire.py report --days 7` |
+| "last month" | `python3 SKILL_DIR/scripts/tripwire.py report --days 30` |
 
 If there is already a scan from today (check `last_run` in `watch/data/status.json`), skip the
 scan and read the report. A first scan of a page only records a baseline; say so, and that changes
@@ -101,7 +103,7 @@ Do this when asked "what did competitors do / launch / post / change today", tog
 Read `watch/company.yml`, `watch/targets.yml` and the last 14 days of `watch/data/intel.json`
 (so you don't log the same thing twice).
 
-**a. Competitor list.** First run `python SKILL_DIR/scripts/tripwire.py check` and audit the
+**a. Competitor list.** First run `python3 SKILL_DIR/scripts/tripwire.py check` and audit the
 current list against the competitor test: wrong company, redirects to another site, pivoted away
 from the ICP, or `fit` no longer true → fix the URL or drop it (below). Then run a few WebSearch
 queries for new entrants with the same ICP (launches, funding announcements, "alternative to
@@ -118,13 +120,13 @@ queries for new entrants with the same ICP (launches, funding announcements, "al
 **Candidates.** Write the plausible companies you didn't add (medium confidence, over the daily
 cap, or not approved) to `watch/candidates-inbox.json` as
 `[{"name": "Newco", "url": "https://newco.ai", "confidence": "medium", "reason": "AI notes for sales teams; overlaps on SMB buyers"}]`,
-run `python SKILL_DIR/scripts/tripwire.py candidates --file watch/candidates-inbox.json`, then
+run `python3 SKILL_DIR/scripts/tripwire.py candidates --file watch/candidates-inbox.json`, then
 delete the inbox file. It counts one sighting per day (matched by name or domain) and prints the
 waiting list, most often seen first, hiding anything already in `watch/targets.yml`. Re-run the
 competitor test on rows marked **consider adding** (seen on 3+ days) and add the ones that now
 pass. Ones that clearly fail (wrong ICP, consumer-only, dead, or the user says no) → run
-`python SKILL_DIR/scripts/tripwire.py candidates --dismiss "<name or URL>" --reason "<why>"` so they
-stop showing in the list and in **Consider adding**. `python SKILL_DIR/scripts/tripwire.py candidates`
+`python3 SKILL_DIR/scripts/tripwire.py candidates --dismiss "<name or URL>" --reason "<why>"` so they
+stop showing in the list and in **Consider adding**. `python3 SKILL_DIR/scripts/tripwire.py candidates`
 alone just prints the list; add `--all` to also see dismissed ones with their reason (check it before
 re-suggesting a company the user already rejected). If the user changes their mind, or a dismissed
 company pivots into your ICP, run `candidates --restore "<name or URL>"` to bring it back.
@@ -138,7 +140,7 @@ Big platforms (ChatGPT, Claude, Gemini, Slack…): only log items relevant to th
 workspaces, group chat, agents, team plans, pricing), not every announcement.
 
 **c. Log findings.** Write them as a JSON list (one object per item) to `watch/intel-inbox.json`
-with the Write tool, then run `python SKILL_DIR/scripts/tripwire.py intel --file watch/intel-inbox.json`
+with the Write tool, then run `python3 SKILL_DIR/scripts/tripwire.py intel --file watch/intel-inbox.json`
 and delete the inbox file:
 
 ```json
@@ -149,7 +151,8 @@ and delete the inbox file:
 
 `type` is one of `launch`, `pricing`, `funding`, `partnership`, `hiring`, `social`, `news`,
 `competitor_added`, `competitor_dropped`. Every item except watch-list changes needs a real source
-URL you actually saw. `date` = when it was published; only log things inside the look-back window above. If you only
+URL you actually saw; when one changelog page lists several updates, link each entry's own anchor
+if it has one and give each its real date (same link + same date counts as a duplicate). `date` = when it was published; only log things inside the look-back window above. If you only
 know the month, use the 1st of that month and say so in the summary. The
 `summary` says what happened and why it matters to us, in one sentence. Nothing found is fine; log
 nothing rather than padding.
@@ -167,6 +170,9 @@ Reply in the user's language. Keep it short and lead with what matters:
 3. **What to do**: 1–3 concrete actions (update the battlecard, answer in our pricing page, tell
    sales, ship a comparison post). Skip if nothing is worth acting on.
 4. **Watch list**: competitors added or dropped, if any, and any **Consider adding** candidates.
+   When you mention candidates, run `python3 SKILL_DIR/scripts/tripwire.py candidates` and use its
+   real count ("11 candidates waiting"). Name the strongest few by fit and how often they were
+   seen (Consider adding first, then the ones you'd judged closest), not the first rows.
 5. **Coverage**: one line on pages that could not be read, if any.
 
 Rules:
