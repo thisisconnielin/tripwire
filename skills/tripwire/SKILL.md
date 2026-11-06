@@ -158,6 +158,8 @@ Reply in the user's language. Keep it short and lead with what matters:
 
 1. **Top moves** (max 5, most important first), across page changes and launches / news / social. For each: competitor, what changed in plain words,
    with the concrete detail (old → new price, new feature name, new headline). Link the page.
+   Price moves are already detected: use the `price_changes` of a change in
+   `watch/data/changes.json` (exact old and new lines) rather than re-reading the diff.
 2. **Why it matters**: one line each. Pricing and packaging > new product / launch > positioning /
    headline > hiring signals > copy tweaks.
 3. **What to do**: 1–3 concrete actions (update the battlecard, answer in our pricing page, tell
