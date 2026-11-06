@@ -203,6 +203,43 @@ class TestCheck(unittest.TestCase):
         self.assertIn("REDIRECTS TO ANOTHER SITE: https://acquirer.example/welcome", text)
 
 
+class TestPriceDetector(unittest.TestCase):
+    def test_pairs_lines_that_differ_only_in_price(self):
+        added, removed = ["Pro $29/mo per seat", "New: SSO"], ["Pro $25/mo per seat", "Old banner"]
+        self.assertEqual(s.price_changes(added, removed),
+                         [{"old": "Pro $25/mo per seat", "new": "Pro $29/mo per seat", "from": ["$25"], "to": ["$29"]}])
+
+    def test_fixture_pages(self):
+        lines = lambda n: s.extract_lines((FX / n).read_text(), s.DEFAULT_IGNORE)[1]
+        added, removed = s.diff_lines(lines("v1.html"), lines("v2.html"))
+        pcs = s.price_changes(added, removed)
+        self.assertEqual([(p["from"], p["to"]) for p in pcs], [(["$25"], ["$29"])])
+        self.assertTrue(s.price_summary(pcs).startswith("Price change: $25 → $29 in"))
+
+    def test_bare_prices_only_pair_one_for_one(self):
+        self.assertEqual(len(s.price_changes(["$45USD"], ["$40USD"])), 1)
+        self.assertEqual(s.price_changes(["$45", "$12"], ["$40", "$10"]), [])
+        self.assertEqual(s.price_changes(["Team plan $12"], ["Pro plan $10"]), [])   # different lines
+        self.assertEqual(s.price_changes(["€1,200 per year"], ["€1,100 per year"])[0]["to"], ["€1,200"])
+
+    def test_scan_records_price_changes_and_report_shows_them(self):
+        import tempfile
+        from unittest import mock
+        t = [{"competitor": "Acme", "group": "direct", "label": "pricing", "url": "https://acme.example/pricing",
+              "slug": "acme-pricing", "ignore": s.DEFAULT_IGNORE, "min_lines": 1}]
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            for day, fx in (("03", "v1.html"), ("04", "v2.html")):
+                with mock.patch.object(s, "fetch", return_value=(FX / fx).read_text()), \
+                        mock.patch.dict(s.os.environ, {"ANTHROPIC_API_KEY": ""}):
+                    real = s.scan(t, f"2026-11-{day}T05:00:00+00:00", wd)
+            ev = real[0]
+            self.assertEqual(ev["tags"][0], "pricing")
+            self.assertTrue(ev["summary"].startswith("Price change: $25 → $29"))
+            report = (wd / "reports" / "latest.md").read_text()
+            self.assertIn("- Price: `$25/mo per seat` → `$29/mo per seat`", report)
+
+
 class TestReport(unittest.TestCase):
     NOW = "2026-11-03T05:00:00+00:00"
 

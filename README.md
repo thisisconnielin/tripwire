@@ -6,6 +6,7 @@ Tell AI your company. Tripwire works out your ICP, finds the companies selling t
 buyers, and tracks them every time you ask:
 
 - **Website changes**: snapshots of home, pricing, changelog pages, diffed against the last scan.
+  Price moves are called out explicitly: "Price change: $25 → $29".
 - **Launches, news, social**: Claude searches the web for each competitor's new features, funding,
   pricing moves and posts (X, LinkedIn, Product Hunt, Hacker News, press).
 - **The competitor list itself**: new entrants with your ICP are added; companies that shut down,

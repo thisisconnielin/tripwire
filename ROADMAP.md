@@ -27,7 +27,8 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [small] Sitemap / feed hint: when a page is 403 or JS-only, look for `<link rel=alternate>` RSS or `/rss.xml` and suggest it in the report
 
 ## Next up
-- [ ] [small] Price detector: pair a removed and an added line that differ only in a price → "Pro: $25 → $29/mo" in the report
+- [x] [small] Price detector: pair a removed and an added line that differ only in a price → "Pro: $25 → $29/mo" in the report
+- [ ] [small] Price detector: name the plan for bare price lines ("$45") by looking at the nearest heading in the snapshot
 - [ ] [small] Headline watcher: flag when the H1 / hero line changes (the clearest messaging signal)
 - [ ] [small] Report: show "first seen / last changed" per page in a coverage table
 - [ ] [small] Top moves: let `company.yml` set per-competitor weight (e.g. direct > indirect group) so a direct rival's messaging change outranks an indirect one's
@@ -43,6 +44,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-05**: Price detector. Lines that differ only in a price are paired into explicit price changes ("$25 → $29"), tagged `pricing`, used as the change summary and listed in the report.
 - **2026-11-05**: `candidates --dismiss <name or URL> [--reason R]` marks a candidate as rejected (matched by name or domain); it stops showing in the candidates list and in **Consider adding**, while later sightings are still counted (0.3.7).
 - **2026-11-05**: Digests (`report`) list **Consider adding**: candidates seen on 3+ days of discovery that aren't on the watch list, with their reason and last sighting, so promotion happens without asking (0.3.6).
 - **2026-11-04**: `tripwire.py candidates`: discovery and the daily refresh log possible competitors they didn't add to `data/candidates.json` (one sighting per day, matched by name or domain); the list hides ones already watched and flags those seen on 3+ days as "consider adding" (0.3.5).

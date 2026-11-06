@@ -192,6 +192,48 @@ def tag_change(added, removed):
     return tags or ["messaging"]
 
 
+PRICE_RX = re.compile(r"[$€£¥]\s?\d[\d,]*(?:\.\d+)?|\b\d[\d,]*(?:\.\d+)?\s?(?:USD|EUR|GBP)\b")
+
+
+def price_changes(added, removed):
+    """Pair removed and added lines that are identical except for their prices.
+
+    "$25/mo per seat" → "$29/mo per seat" becomes {"old": "$25/mo per seat", "new": "$29/mo per seat",
+    "from": ["$25"], "to": ["$29"]}. A line that is only a price ("$45") is paired only when exactly
+    one such line was removed and one added, so unrelated prices are never matched up."""
+    def shape(line):
+        return PRICE_RX.sub("{price}", line).strip()
+
+    pool = {}
+    for line in removed:
+        if PRICE_RX.search(line):
+            pool.setdefault(shape(line), []).append(line)
+    added_by_shape = {}
+    for line in added:
+        if PRICE_RX.search(line):
+            added_by_shape.setdefault(shape(line), []).append(line)
+
+    out = []
+    for key, news in added_by_shape.items():
+        olds = pool.get(key, [])
+        if not re.search(r"[A-Za-z]", PRICE_RX.sub("", key.replace("{price}", ""))) and \
+                (len(olds) != 1 or len(news) != 1):
+            continue  # bare prices: only an unambiguous one-for-one swap counts
+        for old, new in zip(olds, news):
+            before, after = PRICE_RX.findall(old), PRICE_RX.findall(new)
+            if before != after:
+                out.append({"old": old, "new": new, "from": before, "to": after})
+    return out
+
+
+def price_summary(changes):
+    first = changes[0]
+    moves = ", ".join(f"{a} → {b}" for a, b in zip(first["from"], first["to"]) if a != b)
+    more = f" (+{len(changes) - 1} more price change{'s' * (len(changes) > 2)})" if len(changes) > 1 else ""
+    line = first["new"] if len(first["new"]) <= 80 else first["new"][:77] + "…"
+    return f"Price change: {moves} in “{line}”{more}"
+
+
 def heuristic_summary(added, removed):
     bits = []
     if added:
@@ -316,10 +358,17 @@ def scan(targets, now, workdir, only=None):
             if len(added) + len(removed) < t["min_lines"]:
                 ev = None
             else:
-                ev = {"type": "change", "tags": tag_change(added, removed),
-                      "summary": ai_summary(t["competitor"], t["url"], added, removed) or heuristic_summary(added, removed),
+                prices = price_changes(added, removed)
+                tags = tag_change(added, removed)
+                if prices and "pricing" not in tags:
+                    tags.insert(0, "pricing")
+                ev = {"type": "change", "tags": tags,
+                      "summary": ai_summary(t["competitor"], t["url"], added, removed)
+                                 or (price_summary(prices) if prices else heuristic_summary(added, removed)),
                       "added": added[:MAX_LINES_STORED], "removed": removed[:MAX_LINES_STORED],
                       "added_total": len(added), "removed_total": len(removed)}
+                if prices:
+                    ev["price_changes"] = prices
         if ev:
             ev.update(id=f"{now[:10]}-{t['slug']}", date=now, competitor=t["competitor"], group=t["group"],
                       label=t["label"], url=t["url"], slug=t["slug"])
@@ -607,6 +656,10 @@ def render_report(changes, status, now, days=1, intel=None, targets=None, candid
             tags = " ".join(f"`{t}`" for t in e["tags"])
             day = "" if days == 1 else f" ({e['date'][:10]})"
             out += [f"**[{e['label']}]({e['url']})**{day} {tags}", "", e["summary"], ""]
+            for pc in e.get("price_changes") or []:
+                out.append(f"- Price: `{_quote(pc['old'])}` → `{_quote(pc['new'])}`")
+            if e.get("price_changes"):
+                out.append("")
             for sign, key in (("+", "added"), ("-", "removed")):
                 lines = e.get(key, [])
                 if not lines:
