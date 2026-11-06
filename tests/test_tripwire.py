@@ -414,6 +414,33 @@ class TestCandidates(unittest.TestCase):
             s.main(["candidates", "--config", str(cfg), "--dismiss", "Keep"])
             self.assertEqual(s.list_candidates(wd, cfg), [])
 
+    def test_all_shows_dismissed_and_restore_brings_back(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            cfg = wd / "targets.yml"
+            day = lambda n: f"2026-11-0{n}T04:00:00+00:00"
+            for n in (1, 2, 3):
+                s.add_candidates(wd, [{"name": "Strongco", "url": "https://strong.co"}, {"name": "Keep"}], day(n))
+            s.dismiss_candidate(wd, "Strongco", day(4), "consumer | only")
+            s.dismiss_candidate(wd, "Keep", day(3))
+            s.add_candidates(wd, [{"name": "Fresh"}], day(4))
+            rows = s.list_candidates(wd, cfg, include_dismissed=True)
+            self.assertEqual([r["name"] for r in rows], ["Fresh", "Strongco", "Keep"])
+            text = s.render_candidates(rows)
+            self.assertIn("dismissed 2026-11-04: consumer \\| only", text)
+            self.assertIn("| dismissed 2026-11-03 |", text)
+            self.assertNotIn("consider adding", text)
+            self.assertIsNone(s.restore_candidate(wd, "Fresh"))     # not dismissed
+            self.assertIsNone(s.restore_candidate(wd, "Nobody"))    # unknown
+            self.assertEqual(s.restore_candidate(wd, "https://www.strong.co/x"), "Strongco")
+            rows = s.list_candidates(wd, cfg)
+            self.assertEqual([r["name"] for r in rows], ["Strongco", "Fresh"])
+            self.assertNotIn("dismiss_reason", rows[0])
+            self.assertIn("consider adding", s.render_candidates(rows))
+            s.main(["candidates", "--config", str(cfg), "--restore", "Keep", "--all"])
+            self.assertEqual([r["name"] for r in s.list_candidates(wd, cfg)], ["Strongco", "Keep", "Fresh"])
+
     def test_report_lists_candidates_to_consider(self):
         now = "2026-11-05T12:00:00+00:00"
         rows = [{"name": "Strongco", "url": "https://strong.co", "seen": 3, "last_seen": "2026-11-05",

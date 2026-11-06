@@ -18,6 +18,7 @@ Everything lives next to the config file (default watch/targets.yml):
       python tripwire.py check                 (what each competitor's own homepage says it is)
       python tripwire.py candidates [--file c.json]  (possible competitors not added yet, by sightings)
       python tripwire.py candidates --dismiss <name> [--reason R]  (reject one so it stops showing)
+      python tripwire.py candidates --all | --restore <name>  (show dismissed ones / un-dismiss one)
 """
 import argparse, datetime as dt, difflib, json, os, re, sys, time, urllib.error, urllib.request
 from html.parser import HTMLParser
@@ -482,6 +483,13 @@ def add_candidates(workdir, items, now):
     return new
 
 
+def _find_candidate(known, name):
+    """The stored candidate matching a name or URL (by name or domain), or None."""
+    name = name.strip()
+    probe = {"name": name, "url": name if "://" in name else None}
+    return next((c for c in known if isinstance(c, dict) and c.get("name") and _same_candidate(c, probe)), None)
+
+
 def dismiss_candidate(workdir, name, now, reason=None):
     """Mark a candidate as rejected so it stops showing; later sightings still count but stay hidden.
 
@@ -490,8 +498,7 @@ def dismiss_candidate(workdir, name, now, reason=None):
     path = workdir / "data" / "candidates.json"
     known = load_json(path, [])
     name = name.strip()
-    probe = {"name": name, "url": name if "://" in name else None}
-    match = next((c for c in known if isinstance(c, dict) and c.get("name") and _same_candidate(c, probe)), None)
+    match = _find_candidate(known, name)
     if match is None:
         match = {"name": name, "first_seen": now[:10], "last_seen": now[:10], "seen": 0}
         known.append(match)
@@ -502,15 +509,32 @@ def dismiss_candidate(workdir, name, now, reason=None):
     return match["name"]
 
 
-def list_candidates(workdir, config):
-    """Candidates not yet on the watch list or dismissed, most often seen first."""
+def restore_candidate(workdir, name):
+    """Un-dismiss a candidate so it shows again. Returns its stored name, or None if it isn't dismissed."""
+    path = workdir / "data" / "candidates.json"
+    known = load_json(path, [])
+    match = _find_candidate(known, name)
+    if match is None or not match.get("dismissed"):
+        return None
+    match.pop("dismissed")
+    match.pop("dismiss_reason", None)
+    save_json(path, known)
+    return match["name"]
+
+
+def list_candidates(workdir, config, include_dismissed=False):
+    """Candidates not yet on the watch list or dismissed, most often seen first.
+
+    With include_dismissed, dismissed ones follow the waiting ones, most recently dismissed first."""
     names, hosts = _watched(config)
     rows = [c for c in load_json(workdir / "data" / "candidates.json", [])
-            if isinstance(c, dict) and c.get("name") and not c.get("dismissed")
+            if isinstance(c, dict) and c.get("name") and (include_dismissed or not c.get("dismissed"))
             and c["name"].strip().lower() not in names
             and not (c.get("url") and _host(c["url"]) in hosts)]
     rows.sort(key=lambda c: str(c.get("last_seen") or ""), reverse=True)
-    return sorted(rows, key=lambda c: -int(c.get("seen") or 0))
+    rows.sort(key=lambda c: -int(c.get("seen") or 0))
+    rows.sort(key=lambda c: str(c.get("dismissed") or ""), reverse=True)
+    return sorted(rows, key=lambda c: bool(c.get("dismissed")))
 
 
 def render_candidates(rows):
@@ -520,7 +544,11 @@ def render_candidates(rows):
            "|---|---|---|---|---|---|"]
     for c in rows:
         name = f"[{c['name']}]({c['url']})" if c.get("url") else c["name"]
-        hint = "**consider adding**" if int(c.get("seen") or 0) >= PROMOTE_AFTER else ""
+        if c.get("dismissed"):
+            why = c.get("dismiss_reason")
+            hint = f"dismissed {c['dismissed']}" + (f": {_quote(why)}" if why else "")
+        else:
+            hint = "**consider adding**" if int(c.get("seen") or 0) >= PROMOTE_AFTER else ""
         out.append(f"| {_quote(name)} | {c.get('seen', 1)} | {c.get('first_seen', '?')} / "
                    f"{c.get('last_seen', '?')} | {c.get('confidence') or ''} | "
                    f"{_quote(c.get('reason') or '')} | {hint} |")
@@ -827,6 +855,8 @@ def main(argv=None):
     ap.add_argument("--group", help="add: label such as direct / platform / indirect")
     ap.add_argument("--reason", help="add: why this competitor is on the list; candidates --dismiss: why rejected")
     ap.add_argument("--dismiss", metavar="NAME", help="candidates: reject this candidate (name or URL) so it stops showing")
+    ap.add_argument("--restore", metavar="NAME", help="candidates: un-dismiss this candidate so it shows again")
+    ap.add_argument("--all", action="store_true", help="candidates: also list dismissed ones with their reason")
     ap.add_argument("--fit", help="add: their own homepage words that show the ICP overlap")
     ap.add_argument("--only", help="scan / check: only this competitor name")
     ap.add_argument("--days", type=int, default=7, help="report: how many days to cover (default 7)")
@@ -870,11 +900,15 @@ def main(argv=None):
         if args.dismiss:
             print(f"Dismissed {dismiss_candidate(workdir, args.dismiss, now, args.reason)}; "
                   "it won't show in the candidates list or Consider adding.\n")
+        if args.restore:
+            restored = restore_candidate(workdir, args.restore)
+            print(f"Restored {restored}; it shows in the candidates list again.\n" if restored
+                  else f"{args.restore} isn't a dismissed candidate; nothing changed.\n")
         if args.file:
             items = json.loads(Path(args.file).read_text())
             new = add_candidates(workdir, items if isinstance(items, list) else [items], now)
             print(f"Recorded {new} new candidate(s).\n")
-        print(render_candidates(list_candidates(workdir, config)))
+        print(render_candidates(list_candidates(workdir, config, include_dismissed=args.all)))
         return
 
     if args.command == "report":

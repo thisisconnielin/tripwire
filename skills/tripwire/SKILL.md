@@ -125,7 +125,9 @@ competitor test on rows marked **consider adding** (seen on 3+ days) and add the
 pass. Ones that clearly fail (wrong ICP, consumer-only, dead, or the user says no) → run
 `python SKILL_DIR/scripts/tripwire.py candidates --dismiss "<name or URL>" --reason "<why>"` so they
 stop showing in the list and in **Consider adding**. `python SKILL_DIR/scripts/tripwire.py candidates`
-alone just prints the list.
+alone just prints the list; add `--all` to also see dismissed ones with their reason (check it before
+re-suggesting a company the user already rejected). If the user changes their mind, or a dismissed
+company pivots into your ICP, run `candidates --restore "<name or URL>"` to bring it back.
 
 **b. Activity.** Cover **every** enabled competitor: at least one WebSearch each, more for direct
 competitors (news + X / LinkedIn + their blog or changelog). Partial coverage is a failed run.

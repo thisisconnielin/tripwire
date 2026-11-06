@@ -11,7 +11,8 @@ Tick an item when it ships and add a line to the changelog.
 - [x] [small] `tripwire.py candidates`: keep a `data/candidates.json` of possible competitors seen but not added, with how often they show up, so strong ones get promoted
 - [x] [small] Report: list candidates flagged "consider adding" in the weekly digest so promotion happens without asking
 - [x] [small] Candidates: `candidates --dismiss <name>` to mark a candidate as rejected so it stops showing in "Consider adding"
-- [ ] [small] Candidates: `candidates --all` shows dismissed ones with their reason, and `--restore <name>` un-dismisses one
+- [x] [small] Candidates: `candidates --all` shows dismissed ones with their reason, and `--restore <name>` un-dismisses one
+- [ ] [small] Candidates: auto-restore a dismissed candidate whose sightings keep growing (e.g. 5+ new days since dismissal) and flag it "seen again since dismissed"
 - [ ] [big] Free feeds without AI: for each competitor, auto-detect blog / changelog RSS and log new posts as `launch` / `news` intel
 - [ ] [big] Hacker News (Algolia API) + Product Hunt + GitHub releases: log competitor mentions and launches as intel, no API key
 - [ ] [big] Competitor profile pages: `watch/competitors/<slug>.md` with positioning, pricing, latest launches, 30-day timeline
@@ -44,6 +45,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-06**: `candidates --all` also lists dismissed candidates (after the waiting ones) with their dismissal date and reason; `candidates --restore <name or URL>` un-dismisses one so it shows again and can reach **Consider adding** (0.3.9).
 - **2026-11-05**: Price detector. Lines that differ only in a price are paired into explicit price changes ("$25 → $29"), tagged `pricing`, used as the change summary and listed in the report.
 - **2026-11-05**: `candidates --dismiss <name or URL> [--reason R]` marks a candidate as rejected (matched by name or domain); it stops showing in the candidates list and in **Consider adding**, while later sightings are still counted (0.3.7).
 - **2026-11-05**: Digests (`report`) list **Consider adding**: candidates seen on 3+ days of discovery that aren't on the watch list, with their reason and last sighting, so promotion happens without asking (0.3.6).
