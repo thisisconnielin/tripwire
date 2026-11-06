@@ -17,6 +17,7 @@ Everything lives next to the config file (default watch/targets.yml):
       python tripwire.py intel < items.json    (log web findings; duplicates are skipped)
       python tripwire.py check                 (what each competitor's own homepage says it is)
       python tripwire.py candidates [--file c.json]  (possible competitors not added yet, by sightings)
+      python tripwire.py candidates --dismiss <name> [--reason R]  (reject one so it stops showing)
 """
 import argparse, datetime as dt, difflib, json, os, re, sys, time, urllib.error, urllib.request
 from html.parser import HTMLParser
@@ -432,11 +433,31 @@ def add_candidates(workdir, items, now):
     return new
 
 
+def dismiss_candidate(workdir, name, now, reason=None):
+    """Mark a candidate as rejected so it stops showing; later sightings still count but stay hidden.
+
+    Matched by name or domain (a URL works too). An unknown name is recorded as dismissed up front.
+    Returns the candidate's stored name."""
+    path = workdir / "data" / "candidates.json"
+    known = load_json(path, [])
+    name = name.strip()
+    probe = {"name": name, "url": name if "://" in name else None}
+    match = next((c for c in known if isinstance(c, dict) and c.get("name") and _same_candidate(c, probe)), None)
+    if match is None:
+        match = {"name": name, "first_seen": now[:10], "last_seen": now[:10], "seen": 0}
+        known.append(match)
+    match["dismissed"] = now[:10]
+    if reason:
+        match["dismiss_reason"] = reason.strip()
+    save_json(path, known)
+    return match["name"]
+
+
 def list_candidates(workdir, config):
-    """Candidates not yet on the watch list, most often seen first."""
+    """Candidates not yet on the watch list or dismissed, most often seen first."""
     names, hosts = _watched(config)
     rows = [c for c in load_json(workdir / "data" / "candidates.json", [])
-            if isinstance(c, dict) and c.get("name")
+            if isinstance(c, dict) and c.get("name") and not c.get("dismissed")
             and c["name"].strip().lower() not in names
             and not (c.get("url") and _host(c["url"]) in hosts)]
     rows.sort(key=lambda c: str(c.get("last_seen") or ""), reverse=True)
@@ -751,7 +772,8 @@ def main(argv=None):
     ap.add_argument("--url", help="add: home page URL")
     ap.add_argument("--pricing", help="add: pricing page URL")
     ap.add_argument("--group", help="add: label such as direct / platform / indirect")
-    ap.add_argument("--reason", help="add: why this competitor is on the list")
+    ap.add_argument("--reason", help="add: why this competitor is on the list; candidates --dismiss: why rejected")
+    ap.add_argument("--dismiss", metavar="NAME", help="candidates: reject this candidate (name or URL) so it stops showing")
     ap.add_argument("--fit", help="add: their own homepage words that show the ICP overlap")
     ap.add_argument("--only", help="scan / check: only this competitor name")
     ap.add_argument("--days", type=int, default=7, help="report: how many days to cover (default 7)")
@@ -792,6 +814,9 @@ def main(argv=None):
         return
 
     if args.command == "candidates":
+        if args.dismiss:
+            print(f"Dismissed {dismiss_candidate(workdir, args.dismiss, now, args.reason)}; "
+                  "it won't show in the candidates list or Consider adding.\n")
         if args.file:
             items = json.loads(Path(args.file).read_text())
             new = add_candidates(workdir, items if isinstance(items, list) else [items], now)

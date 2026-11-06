@@ -81,6 +81,7 @@ python $S report --days 7      # 7-day digest (+ candidates seen on 3+ days to c
 python $S intel --file x.json  # log launches / news / social items
 python $S check                # what each competitor's own homepage says it is
 python $S candidates [--file c.json]  # possible competitors not added yet, most often seen first
+python $S candidates --dismiss Newco --reason "consumer only"  # reject one so it stops showing
 ```
 
 The first scan of a page saves a baseline; changes show from the next scan.

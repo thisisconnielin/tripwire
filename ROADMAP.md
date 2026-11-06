@@ -10,7 +10,8 @@ Tick an item when it ships and add a line to the changelog.
 - [x] [small] Report: watch-list table (competitor, group, added date, reason, pages OK / broken)
 - [x] [small] `tripwire.py candidates`: keep a `data/candidates.json` of possible competitors seen but not added, with how often they show up, so strong ones get promoted
 - [x] [small] Report: list candidates flagged "consider adding" in the weekly digest so promotion happens without asking
-- [ ] [small] Candidates: `candidates --dismiss <name>` to mark a candidate as rejected so it stops showing in "Consider adding"
+- [x] [small] Candidates: `candidates --dismiss <name>` to mark a candidate as rejected so it stops showing in "Consider adding"
+- [ ] [small] Candidates: `candidates --all` shows dismissed ones with their reason, and `--restore <name>` un-dismisses one
 - [ ] [big] Free feeds without AI: for each competitor, auto-detect blog / changelog RSS and log new posts as `launch` / `news` intel
 - [ ] [big] Hacker News (Algolia API) + Product Hunt + GitHub releases: log competitor mentions and launches as intel, no API key
 - [ ] [big] Competitor profile pages: `watch/competitors/<slug>.md` with positioning, pricing, latest launches, 30-day timeline
@@ -42,6 +43,7 @@ Tick an item when it ships and add a line to the changelog.
 - [ ] [big] Slack / Discord webhook alert when a `pricing` change lands (optional secret)
 
 ## Changelog
+- **2026-11-05**: `candidates --dismiss <name or URL> [--reason R]` marks a candidate as rejected (matched by name or domain); it stops showing in the candidates list and in **Consider adding**, while later sightings are still counted (0.3.7).
 - **2026-11-05**: Digests (`report`) list **Consider adding**: candidates seen on 3+ days of discovery that aren't on the watch list, with their reason and last sighting, so promotion happens without asking (0.3.6).
 - **2026-11-04**: `tripwire.py candidates`: discovery and the daily refresh log possible competitors they didn't add to `data/candidates.json` (one sighting per day, matched by name or domain); the list hides ones already watched and flags those seen on 3+ days as "consider adding" (0.3.5).
 - **2026-11-04**: Reports end with a **Watch list** table: each competitor's group, date added, why it's watched (`reason` or `fit`) and how many of its pages are readable or broken (0.3.4).

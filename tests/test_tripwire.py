@@ -359,6 +359,24 @@ class TestCandidates(unittest.TestCase):
             self.assertIn("No candidates", s.render_candidates([]))
             self.assertEqual(s.list_candidates(wd / "none", wd / "none.yml"), [])
 
+    def test_dismiss_hides_candidate_for_good(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            cfg = wd / "targets.yml"
+            day = lambda n: f"2026-11-0{n}T04:00:00+00:00"
+            s.add_candidates(wd, [{"name": "Strongco", "url": "https://strong.co"}, {"name": "Keep"}], day(1))
+            self.assertEqual(s.dismiss_candidate(wd, "https://www.strong.co/pricing", day(2), " consumer only "), "Strongco")
+            self.assertEqual(s.dismiss_candidate(wd, "Nopeco", day(2)), "Nopeco")  # unknown: dismissed up front
+            for n in (3, 4, 5):
+                s.add_candidates(wd, [{"name": "strongco"}, {"name": "Nopeco"}], day(n))
+            self.assertEqual([r["name"] for r in s.list_candidates(wd, cfg)], ["Keep"])
+            saved = {c["name"]: c for c in s.load_json(wd / "data" / "candidates.json", [])}
+            self.assertEqual((saved["Strongco"]["dismissed"], saved["Strongco"]["dismiss_reason"]), ("2026-11-02", "consumer only"))
+            self.assertEqual(saved["Strongco"]["seen"], 4)  # sightings still counted
+            s.main(["candidates", "--config", str(cfg), "--dismiss", "Keep"])
+            self.assertEqual(s.list_candidates(wd, cfg), [])
+
     def test_report_lists_candidates_to_consider(self):
         now = "2026-11-05T12:00:00+00:00"
         rows = [{"name": "Strongco", "url": "https://strong.co", "seen": 3, "last_seen": "2026-11-05",

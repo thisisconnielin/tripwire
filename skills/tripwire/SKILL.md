@@ -122,7 +122,10 @@ run `python SKILL_DIR/scripts/tripwire.py candidates --file watch/candidates-inb
 delete the inbox file. It counts one sighting per day (matched by name or domain) and prints the
 waiting list, most often seen first, hiding anything already in `watch/targets.yml`. Re-run the
 competitor test on rows marked **consider adding** (seen on 3+ days) and add the ones that now
-pass. `python SKILL_DIR/scripts/tripwire.py candidates` alone just prints the list.
+pass. Ones that clearly fail (wrong ICP, consumer-only, dead, or the user says no) → run
+`python SKILL_DIR/scripts/tripwire.py candidates --dismiss "<name or URL>" --reason "<why>"` so they
+stop showing in the list and in **Consider adding**. `python SKILL_DIR/scripts/tripwire.py candidates`
+alone just prints the list.
 
 **b. Activity.** Cover **every** enabled competitor: at least one WebSearch each, more for direct
 competitors (news + X / LinkedIn + their blog or changelog). Partial coverage is a failed run.
