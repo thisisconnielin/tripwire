@@ -709,5 +709,87 @@ class TestIntelAccuracy(unittest.TestCase):
         self.assertIn("unconfirmed", report)
 
 
+class TestDiscover(unittest.TestCase):
+    def names(self, url, own=("ando",)):
+        return s.compared_names(url, set(own))
+
+    def test_comparison_url_shapes(self):
+        self.assertEqual(self.names("https://www.ando.so/vs/google-chat"), ["google-chat"])
+        self.assertEqual(self.names("https://bloome.im/ja/alternatives/slack-ai", own={"bloome"}), ["slack-ai"])
+        self.assertEqual(self.names("https://cal.com/de/calcom-vs-calendly", own={"cal", "calcom"}), ["calendly"])
+        self.assertEqual(self.names("https://x.com/compare/calendly-vs-acuity", own={"x"}), ["calendly", "acuity"])
+        self.assertEqual(self.names("https://www.ando.so/blog/best-alternatives-to-slack-with-built-in-ai-agents"), ["slack"])
+        self.assertEqual(self.names("https://www.ando.so/slack-alternatives-for-small-teams"), ["slack"])
+        self.assertEqual(self.names("https://cal.com/blog/why-choose-calcom-over-chili-piper", own={"cal", "calcom"}),
+                         ["chili-piper"])
+
+    def test_non_comparisons_and_noise_are_dropped(self):
+        self.assertEqual(self.names("https://www.ando.so/pricing"), [])
+        self.assertEqual(self.names("https://www.ando.so/alternatives"), [])               # index page
+        self.assertEqual(self.names("https://bloome.im/guides/ai-agent-vs-chatbot", own={"bloome"}), [])
+        self.assertEqual(self.names("https://manus.im/blog/openclaw-vs-manus-desktop", own={"manus"}), ["openclaw"])
+
+    def test_counts_distinct_sites_and_skips_watched(self):
+        pages = {"https://a.example": ["https://a.example/vs/zed", "https://a.example/de/vs/zed", "https://a.example/vs/bee"],
+                 "https://b.example": ["https://b.example/alternatives/zed", "https://b.example/vs/cee"],
+                 "https://www.b.example": ["https://b.example/vs/zed"]}                    # same host as b
+        cands, per_site = s.discover_comparisons(
+            [("A", "https://a.example"), ("B", "https://b.example"), ("B2", "https://www.b.example")],
+            watched_names=["Cee"], urls_of=lambda u: pages[u])
+        self.assertEqual([(c["name"], c["sites"]) for c in cands], [("Zed", ["A", "B"]), ("Bee", ["A"])])
+        self.assertEqual(per_site["B2"], "same site as B")
+
+    def test_watched_companies_and_their_products(self):
+        pages = {"https://a.example": ["https://a.example/vs/teams", "https://a.example/vs/slack-ai", "https://a.example/vs/zed"]}
+        cands, _ = s.discover_comparisons([("A", "https://a.example")], watched_names=["Microsoft Teams", "Slack"],
+                                          urls_of=lambda u: pages[u])
+        self.assertEqual([(c["name"], c.get("product_of")) for c in cands], [("Zed", None), ("Slack AI", "Slack")])
+
+    def test_sitemap_index_is_followed(self):
+        files = {"https://a.example/robots.txt": "Sitemap: https://a.example/index.xml",
+                 "https://a.example/index.xml": "<sitemapindex><sitemap><loc>https://a.example/pages</loc></sitemap></sitemapindex>",
+                 "https://a.example/pages": "<urlset><url><loc>https://a.example/vs/zed</loc></url>"
+                                            "<url><loc><![CDATA[https://a.example/about]]></loc></url></urlset>"}
+        def fetcher(u):
+            if u not in files:
+                raise OSError("404")
+            return files[u]
+        self.assertEqual(s.sitemap_urls("a.example", fetcher), ["https://a.example/vs/zed", "https://a.example/about"])
+
+    def test_hn_launches_parse(self):
+        import json
+        payload = json.dumps({"hits": [{"title": "Show HN: Sugabots – Group chats with AI agents", "url": "https://sugabots.ai/",
+                                        "points": 3, "created_at": "2026-10-13T10:00:00Z", "objectID": "1"},
+                                       {"title": "Show HN: No link", "url": None, "objectID": "2", "created_at": "2026-10-12T00:00:00Z"}]})
+        hits = s.hn_launches("group chat agents", fetcher=lambda u: payload)
+        self.assertEqual(hits[0]["url"], "https://sugabots.ai/")
+        self.assertEqual(hits[1]["url"], "https://news.ycombinator.com/item?id=2")
+
+    def test_command_saves_only_multi_site_names_and_skips_platforms(self):
+        import contextlib, io, tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d:
+            w = Path(d) / "watch"
+            w.mkdir()
+            (w / "company.yml").write_text("name: Us\nurl: https://us.example\n")
+            (w / "targets.yml").write_text(
+                "competitors:\n"
+                "  - name: A\n    group: direct\n    pages:\n      - { label: home, url: https://a.example }\n"
+                "  - name: Big\n    group: platform\n    pages:\n      - { label: home, url: https://big.example }\n")
+            pages = {"https://us.example": ["https://us.example/vs/zed"], "https://a.example": ["https://a.example/vs/zed",
+                     "https://a.example/vs/solo"], "https://big.example": ["https://big.example/vs/zed"]}
+            seen = []
+            def urls_of(u):
+                seen.append(u)
+                return pages[u]
+            out = io.StringIO()
+            with mock.patch.object(s, "sitemap_urls", side_effect=urls_of), contextlib.redirect_stdout(out):
+                s.main(["discover", "--save", "--config", str(w / "targets.yml")])
+            self.assertNotIn("https://big.example", seen)
+            self.assertIn("add --all to include them", out.getvalue())
+            saved = s.load_json(w / "data" / "candidates.json", [])
+            self.assertEqual([(c["name"], c["source"]) for c in saved], [("Zed", "comparison pages")])
+
+
 if __name__ == "__main__":
     unittest.main()

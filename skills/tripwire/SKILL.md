@@ -32,10 +32,19 @@ watch/reports/latest.md    Markdown report of the newest scan or digest
 
 If `watch/company.yml` is missing, ask for the company name or URL (one question, nothing else).
 1. Read the company's site. Write `watch/company.yml`: name, url, one_liner, icp (2–4 bullets: who
-   buys, what job), groups (what counts as direct / platform / indirect), signals.
-2. Find candidates. Use WebSearch broadly: "<company> alternatives", "<category> tools",
-   "<top competitor> vs", "<category> startup raises", Product Hunt, G2 / Capterra categories,
-   recent launch posts. Search results only *nominate* candidates; they never qualify one.
+   buys, what job), groups (what counts as direct / platform / indirect), signals, and
+   `hn_queries`: 2–3 short phrases a launch post for this category would contain (e.g.
+   "AI agents group chat", "team chat AI teammates").
+2. Find candidates, strongest signal first:
+   - **Comparison pages.** Once you know 2–3 obvious rivals, put them in `watch/targets.yml`
+     (or pass them as `--site`) and run `python3 SKILL_DIR/scripts/tripwire.py discover`. It reads
+     the sitemaps of us and every direct competitor and lists who they publish "X vs Y",
+     "Y alternatives" and "compare" pages against. A name compared on 2+ different sites is
+     almost certainly in the market; one site alone is a weaker hint (it may be a blog topic).
+     It also lists recent Show HN launches for `hn_queries` / `--hn "phrase"`: new entrants.
+   - **WebSearch** to fill gaps: "<company> alternatives", "<category> tools", "<top competitor>
+     vs", "<category> startup raises", Product Hunt, G2 / Capterra categories, launch posts.
+   Every source only *nominates* candidates; none qualifies one.
 3. **Qualify every candidate** with the competitor test below. Most candidates should fail it.
 4. Show the user a ranked list: name, url, group, confidence, and the `fit` quote. Aim for the
    8–15 strongest, not the most. Wait for approval unless the user said to go ahead.
@@ -105,8 +114,12 @@ Read `watch/company.yml`, `watch/targets.yml` and the last 14 days of `watch/dat
 
 **a. Competitor list.** First run `python3 SKILL_DIR/scripts/tripwire.py check` and audit the
 current list against the competitor test: wrong company, redirects to another site, pivoted away
-from the ICP, or `fit` no longer true → fix the URL or drop it (below). Then run a few WebSearch
-queries for new entrants with the same ICP (launches, funding announcements, "alternative to
+from the ICP, or `fit` no longer true → fix the URL or drop it (below). Then look for new entrants:
+whenever the user asks for new competitors ("any new competitors?", "有没有新的竞品"), and at least
+once a week otherwise, **start with** `python3 SKILL_DIR/scripts/tripwire.py discover --save`: it
+records every company compared against on 2+ sites as a candidate and lists recent Show HN
+launches. Put every discover name you judged in the readout, with its evidence (which sites
+compare against it). Then, every time, run a few WebSearch queries (launches, funding announcements, "alternative to
 <competitor>", Product Hunt). Then:
 - A new company that passes the competitor test with **high** confidence → add it with `add`
   (`--reason`, `--fit`, home + pricing pages that load) and log a `competitor_added` item. Max 2

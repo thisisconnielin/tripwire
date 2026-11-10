@@ -12,6 +12,9 @@ buyers, and tracks them every time you ask:
   first; third-party reports are marked unconfirmed.
 - **The competitor list itself**: new entrants with your ICP are added; companies that shut down,
   pivot or get acquired are dropped, each with a reason.
+- **Competitor search**: `discover` reads the sitemaps of you and your direct competitors and lists
+  who the market compares itself to ("X vs Y", "Y alternatives" pages). A name several
+  competitors compare against is almost certainly a rival. It also surfaces recent Show HN launches.
 
 Then Claude turns it into a short GTM readout: top moves, why they matter, what to do next.
 It runs in your own Claude Code, on your machine. No dashboard, no API key, no per-seat pricing.
@@ -82,6 +85,7 @@ python3 $S scan --only Acme     # one competitor
 python3 $S report --days 7      # 7-day digest (+ candidates seen on 3+ days to consider adding)
 python3 $S intel --file x.json  # log launches / news / social items
 python3 $S check                # what each competitor's own homepage says it is
+python3 $S discover --hn "AI agents group chat" --save  # who competitors compare themselves to + new launches
 python3 $S candidates [--file c.json]  # possible competitors not added yet, most often seen first
 python3 $S candidates --dismiss Newco --reason "consumer only"  # reject one so it stops showing
 python3 $S candidates --all        # also list dismissed ones, with date and reason

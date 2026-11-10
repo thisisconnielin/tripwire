@@ -16,6 +16,7 @@ Everything lives next to the config file (default watch/targets.yml):
 
       python3 tripwire.py intel < items.json    (log web findings; duplicates are skipped)
       python3 tripwire.py check                 (what each competitor's own homepage says it is)
+      python3 tripwire.py discover [--hn "query"] [--save]  (who this market compares itself to)
       python3 tripwire.py candidates [--file c.json]  (possible competitors not added yet, by sightings)
       python3 tripwire.py candidates --dismiss <name> [--reason R]  (reject one so it stops showing)
       python3 tripwire.py candidates --all | --restore <name>  (show dismissed ones / un-dismiss one)
@@ -863,6 +864,192 @@ def write_report(workdir, text, name):
     return rdir / name
 
 
+# ---------------------------------------------------------------- discover
+# Who do companies in this market compare themselves to? Their own "X vs Y", "Y alternatives"
+# and "compare" pages say it outright, and a name that several of them compare against is in
+# the same market. Hacker News "Show HN" posts catch new entrants before they have such pages.
+COMPARE_PATH = re.compile(r"(^|[/-])(vs|versus|alternatives?|compare|comparison|competitors?)([/-]|$)"
+                          r"|why-choose-.+-over-", re.I)
+LOCALE = re.compile(r"^[a-z]{2}(-[a-z]{2,4})?$", re.I)
+# Words in comparison slugs that are not company names.
+SLUG_NOISE = {
+    "best", "top", "free", "open", "source", "opensource", "cheap", "cheaper", "better", "new", "native",
+    "ai-native", "for", "with", "and", "or", "the", "a", "an", "to", "of", "in", "on", "work", "teams-of",
+    "small", "large", "business", "businesses", "startups", "enterprise", "companies", "teams-using",
+    "guide", "review", "reviews", "pricing", "features", "comparison", "compare", "alternative",
+    "alternatives", "vs", "versus", "competitors", "competitor", "why", "choose", "over", "switch", "from",
+}
+CONCEPT_WORDS = {"agent", "agents", "chatbot", "chatbots", "ai", "assistant", "assistants", "tool", "tools",
+                 "app", "apps", "software", "platform", "platforms", "external", "internal", "human", "bot"}
+MAX_SITEMAPS = 25
+UPPER_TOKENS = {"ai", "crm", "hr", "api", "ui", "ux", "seo", "cx", "id"}
+
+
+def sitemap_urls(site, fetcher=None):
+    """Page URLs from a site's sitemap(s): robots.txt Sitemap lines, /sitemap.xml, /sitemap_index.xml.
+    Follows sitemap indexes up to MAX_SITEMAPS files. Returns [] if there is none."""
+    fetcher = fetcher or (lambda u: fetch(u, timeout=20))
+    root = re.match(r"^https?://[^/]+", normalize_url(site)).group(0)
+    queue, seen, pages = [], set(), []
+    try:
+        queue += re.findall(r"(?im)^\s*sitemap:\s*(\S+)", fetcher(root + "/robots.txt"))
+    except Exception:
+        pass
+    queue += [root + "/sitemap.xml", root + "/sitemap_index.xml"]
+    while queue and len(seen) < MAX_SITEMAPS:
+        sm = queue.pop(0)
+        if sm in seen:
+            continue
+        seen.add(sm)
+        try:
+            xml = fetcher(sm)
+        except Exception:
+            continue
+        locs = re.findall(r"<loc>\s*(?:<!\[CDATA\[)?\s*([^<\]]+?)\s*(?:\]\]>)?\s*</loc>", xml)
+        (queue if "<sitemapindex" in xml else pages).extend(locs)  # an index lists sitemaps, not pages
+    return list(dict.fromkeys(pages))
+
+
+def _brand_tokens(name, url):
+    """Slug forms of a company's own name and domain, so its own side of 'x-vs-y' is dropped."""
+    host = _host(url)
+    stem = host.split(".")[0] if host else ""
+    full = slugify(re.sub(r"\(.*?\)", "", name or ""))
+    out = {full, full.replace("-", ""), stem, stem.replace("-", ""), slugify(host.replace(".", " "))}
+    out |= {t for t in full.split("-") if len(t) > 3}
+    return {t for t in out if t}
+
+
+def _clean_slug_name(slug, own):
+    words = [w for w in slug.split("-") if w]
+    # Trim leading adjectives and anything after a "for / with / in / that / 2026" qualifier.
+    while words and (words[0] in SLUG_NOISE or "-".join(words[:2]) in SLUG_NOISE):
+        words = words[2:] if "-".join(words[:2]) in SLUG_NOISE else words[1:]
+    for i, w in enumerate(words):
+        if w in {"for", "with", "in", "that", "to", "of", "and"} or re.fullmatch(r"20\d\d", w):
+            words = words[:i]
+            break
+    words = [w for w in words if w not in {"alternative", "alternatives", "vs", "versus", "compare"}]
+    slug = "-".join(words)
+    if not slug or slug in own or slug.replace("-", "") in own or all(w in CONCEPT_WORDS for w in words):
+        return None
+    if words[0] in own:
+        return None  # the site's own product ("manus-desktop" on manus.im)
+    if len(slug) < 2 or slug.isdigit():
+        return None
+    return slug
+
+
+def compared_names(url, own):
+    """Company slugs a comparison URL names, minus the site's own brand. [] for non-comparison URLs."""
+    from urllib.parse import urlparse
+    parts = [x for x in urlparse(url).path.lower().strip("/").split("/")
+             if x and not (LOCALE.match(x) and x not in {"vs"})]  # drop /de/, /pt-br/; keep /vs/
+    if not parts or not COMPARE_PATH.search("/" + "/".join(parts)):
+        return []
+    last = re.sub(r"\.(html?|php)$", "", parts[-1])
+    prev = parts[-2] if len(parts) > 1 else ""
+    found = []
+    if prev in {"vs", "versus", "alternatives", "alternative", "compare", "competitors"}:
+        found += re.split(r"-(?:vs|versus)-", last)                         # /vs/slack, /compare/a-vs-b
+    elif re.search(r"-(vs|versus)-", last):
+        found += re.split(r"-(?:vs|versus)-", last)                          # calcom-vs-calendly
+    elif m := re.search(r"(?:alternatives?|competitors?)-to-(.+)$", last):
+        found.append(m.group(1))                                            # alternatives-to-slack
+    elif m := re.search(r"^(?:why-choose-.+?-over-)(.+)$", last):
+        found.append(m.group(1))                                            # why-choose-x-over-y
+    elif m := re.search(r"^(.+?)-(?:alternatives?|competitors?)(?:-|$)", last):
+        found.append(m.group(1))                                            # slack-alternatives-for-…
+    elif m := re.search(r"^(?:vs|versus)-(.+)$", last):
+        found.append(m.group(1))
+    names = [_clean_slug_name(f, own) for f in found]
+    return [n for n in dict.fromkeys(names) if n]
+
+
+def display_name(slug):
+    return " ".join(w.upper() if w in UPPER_TOKENS else w.capitalize() for w in slug.split("-"))
+
+
+def discover_comparisons(sites, watched_names=(), watched_hosts=(), urls_of=None):
+    """Mine comparison pages on `sites` [(name, url)] for companies they compare themselves to.
+
+    Returns (candidates, per_site) where candidates are dicts {name, slug, sites, pages} sorted by
+    how many different sites compare against them, and per_site maps site name -> pages scanned or
+    an error."""
+    urls_of = urls_of or sitemap_urls
+    watched_slugs = {slugify(re.sub(r"\(.*?\)", "", n)) for n in watched_names}
+    watched = watched_slugs | {w.replace("-", "") for w in watched_slugs}
+    watched |= {_host(f"https://{h}").split(".")[0] for h in watched_hosts}
+    found, per_site, done = {}, {}, {}
+    for name, url in sites:
+        host = _host(normalize_url(url))
+        if host in done:  # e.g. Microsoft Copilot and Microsoft Teams both live on microsoft.com
+            per_site[name] = f"same site as {done[host]}"
+            continue
+        done[host] = name
+        try:
+            pages = urls_of(url)
+        except Exception as e:
+            per_site[name] = friendly_error(e)
+            continue
+        own = _brand_tokens(name, url)
+        hits = 0
+        for page in pages:
+            for slug in compared_names(page, own):
+                hits += 1
+                c = found.setdefault(slug, {"slug": slug, "name": display_name(slug), "sites": [], "pages": []})
+                if name not in c["sites"]:
+                    c["sites"].append(name)
+                if len(c["pages"]) < 3 and page not in c["pages"]:
+                    c["pages"].append(page)
+        per_site[name] = f"{len(pages)} pages, {hits} comparison mentions" if pages else "no sitemap found"
+    out = []
+    for c in found.values():
+        slug = c["slug"]
+        if slug in watched or slug.replace("-", "") in watched or any(w.endswith("-" + slug) for w in watched_slugs):
+            continue  # already watched ("teams" is Microsoft Teams)
+        parent = next((w for w in sorted(watched_slugs, key=len, reverse=True) if slug.startswith(w + "-")), None)
+        if parent:
+            c["product_of"] = display_name(parent)  # "slack-ai" is Slack's product, not a new company
+        out.append(c)
+    out.sort(key=lambda c: (bool(c.get("product_of")), -len(c["sites"]), -len(c["pages"]), c["slug"]))
+    return out, per_site
+
+
+def hn_launches(query, days=90, limit=15, fetcher=None):
+    """Recent 'Show HN' launches matching `query` from the free Hacker News search API."""
+    from urllib.parse import quote
+    fetcher = fetcher or (lambda u: fetch(u, timeout=20))
+    since = int((dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=days)).timestamp())
+    api = (f"https://hn.algolia.com/api/v1/search?query={quote(query)}&tags=show_hn"
+           f"&numericFilters=created_at_i>{since}&hitsPerPage={limit}")
+    hits = json.loads(fetcher(api)).get("hits", [])
+    return [{"title": h.get("title") or "", "url": h.get("url") or f"https://news.ycombinator.com/item?id={h.get('objectID')}",
+             "hn": f"https://news.ycombinator.com/item?id={h.get('objectID')}", "points": h.get("points") or 0,
+             "date": (h.get("created_at") or "")[:10]} for h in hits]
+
+
+def render_discover(cands, per_site, launches, limit=25):
+    out = ["## Compared against on competitors' own sites", ""]
+    if cands:
+        out += ["| Candidate | Compared by | Example page |", "|---|---|---|"]
+        for c in cands[:limit]:
+            name = c["name"] + (f" (product of watched {c['product_of']})" if c.get("product_of") else "")
+            out.append(f"| {name} | {len(c['sites'])}: {', '.join(c['sites'])} | {c['pages'][0]} |")
+        if len(cands) > limit:
+            out.append(f"\n…and {len(cands) - limit} more named by one page each.")
+    else:
+        out.append("No comparison pages name anyone outside the watch list.")
+    out += ["", "Sites scanned: " + "; ".join(f"{k}: {v}" for k, v in per_site.items()), ""]
+    if launches is not None:
+        out += ["## Recent Show HN launches", ""]
+        out += ([f"- {h['date']} [{_quote(h['title'])}]({h['url']}) ({h['points']} points, [HN]({h['hn']}))"
+                 for h in launches] or ["None found."])
+        out.append("")
+    out.append("These are nominations only. Run each through the competitor test before adding it.")
+    return "\n".join(out) + "\n"
+
+
 # ---------------------------------------------------------------- identity check
 def _host(url):
     from urllib.parse import urlparse
@@ -991,7 +1178,7 @@ def add_competitor(config, name, url, pricing=None, group=None, reason=None, fit
 # ---------------------------------------------------------------- main
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Watch competitor pages and report what changed.")
-    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init", "intel", "add", "check", "candidates"])
+    ap.add_argument("command", nargs="?", default="scan", choices=["scan", "report", "init", "intel", "add", "check", "candidates", "discover"])
     ap.add_argument("--config", default=os.environ.get("TRIPWIRE_CONFIG", str(DEFAULT_CONFIG)),
                     help="watch list (default: watch/targets.yml); data is stored next to it")
     ap.add_argument("name", nargs="?", help="add: competitor name")
@@ -1001,11 +1188,18 @@ def main(argv=None):
     ap.add_argument("--reason", help="add: why this competitor is on the list; candidates --dismiss: why rejected")
     ap.add_argument("--dismiss", metavar="NAME", help="candidates: reject this candidate (name or URL) so it stops showing")
     ap.add_argument("--restore", metavar="NAME", help="candidates: un-dismiss this candidate so it shows again")
-    ap.add_argument("--all", action="store_true", help="candidates: also list dismissed ones with their reason")
+    ap.add_argument("--all", action="store_true",
+                    help="candidates: also list dismissed ones; discover: also mine platform / indirect competitors")
     ap.add_argument("--fit", help="add: their own homepage words that show the ICP overlap")
     ap.add_argument("--only", help="scan / check: only this competitor name")
     ap.add_argument("--days", type=int, default=7, help="report: how many days to cover (default 7)")
     ap.add_argument("--out", help="report: file name inside reports/ (default: printed only)")
+    ap.add_argument("--site", action="append", metavar="URL",
+                    help="discover: also mine this site's comparison pages (repeatable)")
+    ap.add_argument("--hn", action="append", metavar="QUERY",
+                    help="discover: search recent Show HN launches for this (repeatable)")
+    ap.add_argument("--save", action="store_true",
+                    help="discover: record companies compared on 2+ sites as candidates")
     ap.add_argument("--file", help="intel / candidates: JSON file with a list of items (intel default: stdin)")
     args = ap.parse_args(argv)
     config = Path(args.config)
@@ -1067,6 +1261,58 @@ def main(argv=None):
 
     if args.command == "check":
         print(render_check(check_competitors(config, only=args.only)))
+        return
+
+    if args.command == "discover":
+        company = {}
+        try:
+            company = yaml.safe_load((workdir / "company.yml").read_text()) or {}
+        except FileNotFoundError:
+            pass
+        index = watch_index(config) if config.exists() else {}
+        comps = {}
+        if config.exists():
+            for c in (yaml.safe_load(config.read_text()) or {}).get("competitors") or []:
+                if c.get("enabled", True) is not False and c.get("pages"):
+                    home = next((p for p in c["pages"] if p.get("label") == "home"), c["pages"][0])
+                    comps[c["name"]] = home["url"]
+        sites = ([(company["name"], company["url"])] if company.get("url") else []) + list(comps.items())
+        skipped = []
+        if not args.all:
+            # Big platforms and indirect players compare themselves to everything (Discord vs
+            # "Aliens vs Predator"); their pages are noise for finding direct rivals, and slow.
+            groups = {c["name"]: c.get("group") for c in (yaml.safe_load(config.read_text()) or {}).get("competitors") or []} \
+                if config.exists() else {}
+            skipped = [n for n, _ in sites if groups.get(n) in ("platform", "indirect")]
+            sites = [(n, u) for n, u in sites if n not in skipped]
+        sites += [(_host(normalize_url(u)), normalize_url(u)) for u in args.site or []]
+        if not sites:
+            fail(f"nothing to mine. Write {workdir / 'company.yml'} (name, url) or pass --site URL.")
+        names = {n for n, _ in index.values()} | ({company["name"]} if company.get("name") else set())
+        hosts = {h for _, hs in index.values() for h in hs} | ({_host(company["url"])} if company.get("url") else set())
+        cands, per_site = discover_comparisons(sites, names, hosts)
+        queries = (args.hn or []) + [q for q in company.get("hn_queries") or [] if q not in (args.hn or [])]
+        launches = None
+        if queries:
+            launches, seen = [], set()
+            for q in queries:
+                try:
+                    for h in hn_launches(q):
+                        if h["url"] not in seen:
+                            seen.add(h["url"])
+                            launches.append(h)
+                except Exception as e:
+                    print(f"  ! Hacker News search for {q!r} failed: {friendly_error(e)}", file=sys.stderr)
+            launches.sort(key=lambda h: h["date"], reverse=True)
+        print(render_discover(cands, per_site, launches))
+        if skipped:
+            print(f"Skipped platform / indirect competitors ({', '.join(skipped)}); add --all to include them.")
+        if args.save:
+            strong = [c for c in cands if len(c["sites"]) >= 2 and not c.get("product_of")]
+            new = add_candidates(workdir, [{"name": c["name"], "reason": f"compared against on {len(c['sites'])} "
+                                            f"sites: {', '.join(c['sites'])}", "source": "comparison pages"}
+                                           for c in strong], now)
+            print(f"Recorded {new} new candidate(s) from {len(strong)} compared on 2+ sites.")
         return
 
     if args.command == "intel":
