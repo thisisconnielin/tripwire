@@ -139,6 +139,21 @@ Look back 7 days (30 days if `watch/data/intel.json` doesn't exist yet: first ru
 Big platforms (ChatGPT, Claude, Gemini, Slack…): only log items relevant to the ICP (shared
 workspaces, group chat, agents, team plans, pricing), not every announcement.
 
+**Source accuracy.** Prefer the competitor's own announcement (blog, changelog, docs, press page,
+its own X / LinkedIn account) and link that. When a search hit is a third-party article, open it
+and look for the official source it cites; link the official one if it exists. Log a third-party
+report only when no official source exists, it comes from a real publication (not an SEO
+"alternatives" list, aggregator or AI-written roundup), and the page states the fact and its date
+itself. The intel command marks every item `official` or not by checking the link against the
+competitor's own domains; third-party items show as "reported by <site>, unconfirmed" in reports,
+and you say so in the readout. If a competitor publishes on a domain that isn't one of its watched
+pages (e.g. ChatGPT news on openai.com), add `official_domains: [openai.com]` to it in
+`watch/targets.yml`.
+
+Use the competitor's name exactly as in `watch/targets.yml` (short forms like "Cue" for "Cue
+(Manus)" also work). The intel command rejects unknown names, future dates and anything older than
+45 days, so a rejected item means: fix the name or date, or don't log it.
+
 **c. Log findings.** Write them as a JSON list (one object per item) to `watch/intel-inbox.json`
 with the Write tool, then run `python3 SKILL_DIR/scripts/tripwire.py intel --file watch/intel-inbox.json`
 and delete the inbox file:
@@ -188,3 +203,6 @@ Rules:
 - `no readable text (JS-only page?)`: the page renders in the browser. Look for a static alternative
   (`/pricing` instead of `/`, a blog feed, a sitemap page).
 - Wrong or moved URL: find the official page and update `watch/targets.yml`.
+- `Page came back much shorter (… of … lines); kept the previous snapshot`: the site served a
+  consent wall, region picker or error page once. Nothing to do; if the page is still that short
+  on the next scan, Tripwire accepts it as a real redesign and reports the change.

@@ -613,5 +613,101 @@ class TestFixes(unittest.TestCase):
         self.assertIn("## Started watching (last 24 hours)", s.render_report([ev], {}, "2026-11-03T06:00:00+00:00", days=1))
 
 
+class TestShrunkPages(unittest.TestCase):
+    """A one-off consent / region / error page must not wipe the snapshot or log fake mass changes."""
+    FULL = "<h1>Pricing</h1>" + "".join(f"<p>Feature line {i}</p>" for i in range(300))
+    STUB = "<p>Please wait while we check your region</p><p>Continue</p>"
+    T = [{"competitor": "Acme", "group": "direct", "label": "pricing", "url": "https://acme.example",
+          "slug": "acme-pricing", "ignore": s.DEFAULT_IGNORE, "min_lines": 1}]
+
+    def run_days(self, pages):
+        import tempfile
+        from unittest import mock
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        wd, out = Path(d.name), []
+        for day, html in pages:
+            with mock.patch.object(s, "fetch", return_value=html), mock.patch("builtins.print"):
+                real = s.scan(self.T, f"2026-11-{day}T05:00:00+00:00", wd)
+            snap = len((wd / "snapshots" / "acme-pricing.txt").read_text().splitlines())
+            ok = s.load_json(wd / "data" / "status.json", {})["targets"][0]["ok"]
+            out.append(([(e["added_total"], e["removed_total"]) for e in real], snap, ok))
+        return out
+
+    def test_one_off_stub_is_ignored_and_snapshot_kept(self):
+        days = self.run_days([("03", self.FULL), ("04", self.STUB), ("05", self.FULL)])
+        self.assertEqual(days, [([], 301, True), ([], 301, False), ([], 301, True)])
+
+    def test_stub_that_persists_is_accepted_as_a_redesign(self):
+        days = self.run_days([("03", self.FULL), ("04", self.STUB), ("05", self.STUB)])
+        self.assertEqual(days[1], ([], 301, False))
+        self.assertEqual(days[2], ([(2, 301)], 2, True))
+
+    def test_two_changes_on_one_day_are_both_kept(self):
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d:
+            wd = Path(d)
+            for when, html in (("05:00", "<p>Plan A $10/mo</p><p>x</p>"), ("09:00", "<p>Plan A $12/mo</p><p>x</p>"),
+                               ("15:00", "<p>Plan A $15/mo</p><p>x</p>")):
+                with mock.patch.object(s, "fetch", return_value=html), mock.patch("builtins.print"):
+                    s.scan(self.T, f"2026-11-03T{when}:00+00:00", wd)
+            changes = [e for e in s.load_json(wd / "data" / "changes.json", []) if e["type"] == "change"]
+            self.assertEqual([e["price_changes"][0]["to"] for e in changes], [["$15"], ["$12"]])
+
+
+class TestIntelAccuracy(unittest.TestCase):
+    NOW = "2026-11-09T20:00:00+00:00"
+
+    def setUp(self):
+        import tempfile
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        self.wd = Path(d.name)
+        self.cfg = self.wd / "targets.yml"
+        self.cfg.write_text("competitors:\n"
+                            "  - name: Cue (Manus)\n    pages:\n      - { label: home, url: https://cue.im }\n"
+                            "  - name: ChatGPT\n    official_domains: [openai.com]\n    pages:\n"
+                            "      - { label: pricing, url: https://chatgpt.com/pricing }\n")
+
+    def add(self, **kw):
+        item = {"type": "launch", "title": "T", "date": "2026-11-08", **kw}
+        return s.add_intel(self.wd, [item], self.NOW, config=self.cfg)
+
+    def stored(self):
+        return s.load_json(self.wd / "data" / "intel.json", [])
+
+    def test_short_names_map_to_the_watch_list_name(self):
+        self.add(competitor="cue", url="https://cue.im/blog/groups")
+        self.assertEqual(self.stored()[0]["competitor"], "Cue (Manus)")
+
+    def test_unknown_competitor_is_rejected_with_the_known_names(self):
+        with self.assertRaises(ValueError) as e:
+            self.add(competitor="Cuee", url="https://cue.im/x")
+        self.assertIn("known: ChatGPT, Cue (Manus)", str(e.exception))
+        self.assertEqual(self.stored(), [])
+        self.assertEqual(s.add_intel(self.wd, [{"competitor": "Newco", "type": "competitor_added", "title": "Newco"}],
+                                     self.NOW, config=self.cfg), (1, 0))   # new entrants are allowed
+
+    def test_dates_must_be_real_and_recent(self):
+        for date in ("2026-12-01", "2026-08-01", "last week"):
+            with self.assertRaises(ValueError):
+                self.add(competitor="ChatGPT", url=f"https://openai.com/{date}", date=date)
+        self.add(competitor="ChatGPT", url="https://openai.com/index/x", date="2026-11-08T10:00:00Z")
+        self.assertEqual(self.stored()[0]["date"], "2026-11-08")
+
+    def test_official_vs_third_party(self):
+        self.add(competitor="ChatGPT", url="https://help.openai.com/en/articles/1", title="Official")
+        self.add(competitor="ChatGPT", url="https://techgossip.example/chatgpt", title="Rumor")
+        by_title = {i["title"]: i["official"] for i in self.stored()}
+        self.assertEqual(by_title, {"Official": True, "Rumor": False})
+        found = [dict(i, found=self.NOW) for i in self.stored()]
+        moves = s.top_moves([], found)
+        self.assertIn("[Official]", moves[0])                 # official ranks first at the same type
+        self.assertIn("(reported by techgossip.example, unconfirmed)", moves[1])
+        report = s.render_report([], {}, self.NOW, days=1, intel=found)
+        self.assertIn("unconfirmed", report)
+
+
 if __name__ == "__main__":
     unittest.main()

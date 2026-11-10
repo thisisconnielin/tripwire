@@ -8,7 +8,8 @@ buyers, and tracks them every time you ask:
 - **Website changes**: snapshots of home, pricing, changelog pages, diffed against the last scan.
   Price moves are called out explicitly: "Price change: $25 → $29".
 - **Launches, news, social**: Claude searches the web for each competitor's new features, funding,
-  pricing moves and posts (X, LinkedIn, Product Hunt, Hacker News, press).
+  pricing moves and posts (X, LinkedIn, Product Hunt, Hacker News, press). Official sources come
+  first; third-party reports are marked unconfirmed.
 - **The competitor list itself**: new entrants with your ICP are added; companies that shut down,
   pivot or get acquired are dropped, each with a reason.
 

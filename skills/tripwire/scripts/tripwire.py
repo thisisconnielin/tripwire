@@ -221,6 +221,15 @@ def diff_lines(old, new):
     return [x for x in added if x not in r], [x for x in removed if x not in a]
 
 
+SHRINK_RATIO = 0.3   # a page this much shorter than its snapshot is suspicious
+SHRINK_MIN_LINES = 20
+
+
+def shrunk(old, new):
+    """True when a page that had real content came back as a fraction of it."""
+    return len(old) >= SHRINK_MIN_LINES and len(new) < SHRINK_RATIO * len(old)
+
+
 def tag_change(added, removed):
     text = "\n".join(added + removed)
     tags = [name for name, rx in TAG_RULES if re.search(rx, text, re.I)]
@@ -391,14 +400,26 @@ def scan(targets, now, workdir, only=None):
             print(f"  ! {reason}")
             health.append(h)
             continue
+        snap = snap_dir / f"{t['slug']}.txt"
+        old = snap.read_text().splitlines() if snap.exists() else []
+        if shrunk(old, lines) and not h.get("shrunk_since"):
+            # A consent wall, region picker or error page that isn't a known block page. Keep the
+            # good snapshot instead of logging a mass deletion now and a mass re-addition later.
+            # If the page is still this short on the next scan, it's accepted as a real redesign.
+            h.update(ok=False, shrunk_since=now,
+                     error=f"Page came back much shorter ({len(lines)} of {len(old)} lines); "
+                           "kept the previous snapshot. Accepted if it's still short next scan")
+            print(f"  ! {h['error']}")
+            health.append(h)
+            continue
+        h.pop("shrunk_since", None)
         h.update(ok=True, error=None, title=title, lines=len(lines))
 
-        snap = snap_dir / f"{t['slug']}.txt"
         if not snap.exists():
             ev = {"type": "baseline", "summary": f"Started watching. {len(lines)} lines captured.",
                   "tags": ["baseline"], "added": [], "removed": []}
         else:
-            added, removed = diff_lines(snap.read_text().splitlines(), lines)
+            added, removed = diff_lines(old, lines)
             if len(added) + len(removed) < t["min_lines"]:
                 ev = None
             else:
@@ -414,7 +435,7 @@ def scan(targets, now, workdir, only=None):
                 if prices:
                     ev["price_changes"] = prices
         if ev:
-            ev.update(id=f"{local_day(now)}-{t['slug']}", date=now, competitor=t["competitor"], group=t["group"],
+            ev.update(id=f"{now}-{t['slug']}", date=now, competitor=t["competitor"], group=t["group"],
                       label=t["label"], url=t["url"], slug=t["slug"])
             new_events.append(ev)
             h["last_changed"] = now
@@ -425,7 +446,8 @@ def scan(targets, now, workdir, only=None):
         snap.write_text("\n".join(lines) + "\n")
         health.append(h)
 
-    # Re-running on the same day replaces that day's event for the page.
+    # Each run diffs against the snapshot the previous run saved, so two changes on one day are two
+    # different changes: keep both. (Only an identical id, i.e. the same run, is replaced.)
     ids = {e["id"] for e in new_events}
     changes = (new_events + [e for e in changes if e["id"] not in ids])[:MAX_EVENTS]
     save_json(data_dir / "changes.json", changes)
@@ -449,15 +471,51 @@ def _intel_key(item):
     return f"{item['type']}|{item['competitor'].lower()}|{item.get('title', '').strip().lower()}"
 
 
-def add_intel(workdir, items, now):
+MAX_INTEL_AGE_DAYS = 45  # older finds are history, not news
+
+
+def watch_index(config):
+    """{lower-case name or short name: (canonical name, {official hosts})} for the watch list.
+
+    "Cue (Manus)" is also reachable as "cue". A competitor's official hosts are the hosts of its
+    watched pages plus any `official_domains` listed for it."""
+    try:
+        cfg = yaml.safe_load(Path(config).read_text()) or {}
+    except FileNotFoundError:
+        return {}
+    index = {}
+    for c in cfg.get("competitors") or []:
+        name = str(c.get("name", "")).strip()
+        if not name:
+            continue
+        hosts = {_host(p["url"]) for p in c.get("pages") or [] if p.get("url")}
+        hosts |= {_host(d if "://" in d else "https://" + d) for d in c.get("official_domains") or []}
+        entry = (name, hosts - {""})
+        index[name.lower()] = entry
+        short = re.sub(r"\s*\(.*\)\s*$", "", name).strip().lower()
+        index.setdefault(short, entry)
+    return index
+
+
+def _official(url, hosts):
+    h = _host(url)
+    return any(h == o or h.endswith("." + o) for o in hosts)
+
+
+def add_intel(workdir, items, now, config=None):
     """Append web findings to data/intel.json, newest first. Returns (added, skipped) counts.
 
     Each item: {competitor, type, title, url, summary?, source?, date?}. `date` is when it was
     published (defaults to today); `found` is set to `now` and decides which report shows it.
-    """
+    With the watch list (`config`), items are checked before anything is saved: the competitor
+    must be on the list (spelling variants map to its canonical name), the date can't be in the
+    future or older than MAX_INTEL_AGE_DAYS, and each item is marked `official` when the link is
+    on the competitor's own site."""
     path = workdir / "data" / "intel.json"
     existing = load_json(path, [])
     seen = {_intel_key(e) for e in existing}
+    index = watch_index(config) if config else {}
+    today = dt.date.fromisoformat(local_day(now))
     fresh, skipped = [], 0
     for raw in items:
         item = {k: (v.strip() if isinstance(v, str) else v) for k, v in raw.items()}
@@ -468,6 +526,25 @@ def add_intel(workdir, items, now):
         if item["type"] not in WATCHLIST_TYPES and not item.get("url"):
             raise ValueError(f"intel item needs a source url: {raw}")
         item.setdefault("date", local_day(now))
+        try:
+            published = dt.date.fromisoformat(str(item["date"])[:10])
+        except ValueError:
+            raise ValueError(f"intel date must be YYYY-MM-DD: {raw}")
+        item["date"] = published.isoformat()
+        if published > today + dt.timedelta(days=1):
+            raise ValueError(f"intel date {published} is in the future; use the publish date: {raw}")
+        if published < today - dt.timedelta(days=MAX_INTEL_AGE_DAYS) and item["type"] not in WATCHLIST_TYPES:
+            raise ValueError(f"intel date {published} is older than {MAX_INTEL_AGE_DAYS} days; "
+                             f"that's history, not news: {raw}")
+        if index and item["type"] != "competitor_added":
+            entry = index.get(item["competitor"].lower())
+            if entry is None:
+                known = ", ".join(sorted({n for n, _ in index.values()}, key=str.lower))
+                raise ValueError(f"{item['competitor']!r} isn't on the watch list (known: {known}). "
+                                 f"Use its exact name, or add it first: {raw}")
+            item["competitor"] = entry[0]
+            if item.get("url"):
+                item["official"] = _official(item["url"], entry[1])
         key = _intel_key(item)
         if key in seen:
             skipped += 1
@@ -638,9 +715,18 @@ def top_moves(real, found, limit=MAX_TOP_MOVES):
     for i in found:
         title = _quote(i.get("title") or "(untitled)")
         link = f"[{title}]({i['url']})" if i.get("url") else title
-        moves.append((MOVE_RANK.get(i["type"], 5), f"- **{i['competitor']}** `{i['type']}` {link}"))
-    moves.sort(key=lambda m: m[0])  # stable: keeps page changes before intel at equal rank
+        moves.append((MOVE_RANK.get(i["type"], 5) + (0.5 if i.get("official") is False else 0),
+                      f"- **{i['competitor']}** `{i['type']}` {link}{_provenance(i)}"))
+    # Stable: page changes stay before intel at equal rank; third-party reports sort after official news.
+    moves.sort(key=lambda m: m[0])
     return [line for _, line in moves[:limit]]
+
+
+def _provenance(item):
+    """' (reported by techcrunch.com, unconfirmed)' for third-party links; '' for official or old items."""
+    if item.get("official") is False and item.get("url"):
+        return f" (reported by {_host(item['url'])}, unconfirmed)"
+    return ""
 
 
 def watch_table(targets, health):
@@ -710,7 +796,7 @@ def render_report(changes, status, now, days=1, intel=None, targets=None, candid
                 src = f", {i['source']}" if i.get("source") else ""
                 title = _quote(i.get("title") or "(untitled)")
                 link = f"[{title}]({i['url']})" if i.get("url") else title
-                line = f"- `{i['type']}` {link} ({i.get('date') or '?'}{src})"
+                line = f"- `{i['type']}` {link} ({i.get('date') or '?'}{src}){_provenance(i)}"
                 if i.get("summary"):
                     line += f": {_quote(i['summary'])}"
                 out.append(line)
@@ -986,7 +1072,7 @@ def main(argv=None):
     if args.command == "intel":
         raw = Path(args.file).read_text() if args.file else sys.stdin.read()
         try:
-            added, skipped = add_intel(workdir, read_items(raw, "intel input"), now)
+            added, skipped = add_intel(workdir, read_items(raw, "intel input"), now, config=config)
         except ValueError as e:
             fail(f"nothing was logged. {e}")
         print(f"Logged {added} new item(s), skipped {skipped} already known.")
